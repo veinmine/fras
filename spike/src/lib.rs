@@ -9,7 +9,7 @@
 //! - a shaft network (`network.rs`, game-free and unit-tested) that pauses
 //!   when any part is in a chunk that isn't simulated, and comes back at its
 //!   saved speed after an unload or a restart;
-//! - a block menu (the grinder, shown in a vanilla hopper menu with a screen
+//! - a block menu (the grinder, shown in a vanilla 3x3 menu with a screen
 //!   drawn by the mod);
 //! - a mod screen of its own (a handbook page, opened with F9).
 
@@ -99,10 +99,16 @@ fn get_str(nbt: &Compound, key: &str) -> Option<String> {
     }
 }
 
+/// The grinder's output slot, in a 3x3 (dispenser) menu: slot 0 is the input.
+const GRINDER_OUT: usize = 8;
+
 /// Grinding takes this much progress (RPM-ticks / 32 per tick).
 const GRIND_WORK: f32 = 100.0;
 
-/// The one block entity type of every spike part.
+/// The block entity Part of every spike part. Each block has a block entity
+/// type of its own with the block's name: the hooks name the *type*
+/// (`event.entity.id()`, and `event.block` in some), so one shared type
+/// can't tell a shaft from a grinder.
 struct Part;
 
 #[mod_api::horizon_part]
@@ -124,6 +130,29 @@ impl BlockPart for Crank {
     }
 }
 
+/// The grinder's own block part: right-clicking it opens its menu.
+struct Grinder;
+
+#[mod_api::horizon_part]
+impl BlockPart for Grinder {
+    fn use_without_item(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut UseWithoutItemEvent<'_>,
+    ) -> Option<InteractionResult> {
+        let level = host.level(host.dimension())?;
+        let entity = host.block_entity(level, event.click.pos)?;
+        let player = host.player(event.click.player)?;
+        match player.open_menu(host, entity) {
+            Ok(true) => Some(InteractionResult::Success),
+            other => {
+                eprintln!("[{ID}] grinder menu didn't open: {other:?}");
+                None
+            }
+        }
+    }
+}
+
 #[mod_api::horizon_part]
 impl BlockEntityPart for Part {
     fn block_entity_ticks(&self, _: &dyn mod_api::Host, event: &mut BlockEntityTicksEvent<'_>) {
@@ -139,17 +168,18 @@ impl BlockEntityPart for Part {
         };
         let pos = event.pos;
         let id = event.entity.id().to_owned();
-        let (rpm, paused) = with_server(|s| {
+        // No network yet (the first tick after loading): keep the saved
+        // speed, which the network is about to be rebuilt from.
+        let net = with_server(|s| {
             s.ticked.entry(level).or_default().insert(pos);
             let net = s.nets.get(&level).and_then(|n| n.at(pos));
-            (
-                net.map(|n| n.rpm).unwrap_or(0.0),
-                net.is_some_and(|n| n.paused),
-            )
+            net.map(|n| (n.rpm, n.paused))
         });
+        let saved = get_f32(&event.entity.nbt, "rpm").unwrap_or(0.0);
+        let (rpm, paused) = net.unwrap_or((saved, true));
         // Grinder: count it working when its input slot holds cobblestone.
         let mut changed = false;
-        if id == "fras_spike:grinder" {
+        if id.ends_with(":grinder") {
             let keys = KEYS.get().unwrap();
             let has_input = event
                 .entity
@@ -169,7 +199,7 @@ impl BlockEntityPart for Part {
                 if done {
                     let input = event.entity.items[0].take().unwrap();
                     event.entity.items[0] = input.shrink(1);
-                    let out = &mut event.entity.items[4];
+                    let out = &mut event.entity.items[GRINDER_OUT];
                     match out {
                         Some(stack) if stack.item() == keys.gravel => {
                             let _ = stack.grow(1);
@@ -193,9 +223,8 @@ impl BlockEntityPart for Part {
         // Save the speed with the part; resend when it moved by more than
         // 1 RPM or crossed zero, so clients animate between updates.
         let shown = if paused { 0.0 } else { rpm };
-        let saved = get_f32(&event.entity.nbt, "rpm").unwrap_or(0.0);
         let sent = get_f32(&event.entity.nbt, "shown").unwrap_or(0.0);
-        if saved != rpm {
+        if net.is_some() && saved != rpm {
             event
                 .entity
                 .nbt
@@ -210,7 +239,7 @@ impl BlockEntityPart for Part {
                 .insert("shown".into(), Tag::Float(shown.to_bits()));
             resend = true;
         }
-        if id == "fras_spike:shaft" {
+        if id.ends_with(":shaft") {
             let axis = level
                 .block_property(&*host, pos, "axis")
                 .unwrap_or_else(|| "y".into());
@@ -248,7 +277,7 @@ impl BlockEntityPart for Part {
     /// The shaft, drawn once and then turned by the game on the animation
     /// clock: no per-frame call while its speed stays the same.
     fn block_entity_submit(&self, _: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
-        if event.block != "fras_spike:shaft" {
+        if !event.block.ends_with(":shaft") {
             return;
         }
         let rpm = get_f32(&event.entity.nbt, "shown").unwrap_or(0.0);
@@ -308,19 +337,25 @@ impl BlockEntityPart for Part {
         draw.keep();
     }
 
-    /// The grinder's screen: the hopper menu's five slots, three of them hidden.
+    /// The grinder's screen: the 3x3 menu's nine slots, seven of them hidden.
     fn screen(
         &self,
         _: &dyn mod_api::Host,
         event: &mut ScreenEvent<'_>,
     ) -> Option<mod_api::Screen> {
-        if event.block != "fras_spike:grinder" {
+        if !event.block.ends_with(":grinder") {
             return None;
         }
         Some(mod_api::Screen {
             width: 176.0,
             height: 133.0,
-            slots: vec![Some([44.0, 20.0]), None, None, None, Some([116.0, 20.0])],
+            slots: (0..9)
+                .map(|i| match i {
+                    0 => Some([44.0, 20.0]),
+                    GRINDER_OUT => Some([116.0, 20.0]),
+                    _ => None,
+                })
+                .collect(),
             inventory_y: 51.0,
             inventory_x: 8.0,
             own_labels: false,
@@ -332,7 +367,7 @@ impl BlockEntityPart for Part {
 
     /// The progress arrow, from data slot 0.
     fn screen_draw(&self, _: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
-        if event.block != "fras_spike:grinder" {
+        if !event.block.ends_with(":grinder") {
             return;
         }
         let progress = event.data.first().copied().unwrap_or(0) as f32;
@@ -353,9 +388,10 @@ static CLIENT_SPINS: Mutex<Option<HashMap<Pos, (f32, f64)>>> = Mutex::new(None);
 impl Hooks for Mod {
     fn blocks(&self, _: &RegistrationContext, event: &mut BlocksEvent<'_>) {
         // Templates: an iron chain has the `axis` property and a thin shape.
-        event
-            .blocks
-            .push(mod_api::Block::new("fras_spike:shaft", "minecraft:iron_chain"));
+        event.blocks.push(mod_api::Block::new(
+            "fras_spike:shaft",
+            "minecraft:iron_chain",
+        ));
         event.blocks.push(mod_api::Block::new(
             "fras_spike:crank",
             "minecraft:oak_planks",
@@ -367,24 +403,31 @@ impl Hooks for Mod {
     }
 
     fn register(&self, r: &mut dyn Registrar, _: &RegistrationContext) {
-        let kind: BlockEntityTypeKey = r
-            .block_entity_type("part")
-            .blocks(&["shaft", "crank", "grinder"])
-            .build();
-        if let Err(e) = r.block_entity_part(&kind, Part) {
-            eprintln!("[{ID}] block entity part: {e:?}");
+        for block in ["shaft", "crank", "grinder"] {
+            let kind: BlockEntityTypeKey = r.block_entity_type(block).blocks(&[block]).build();
+            if let Err(e) = r.block_entity_part(&kind, Part) {
+                eprintln!("[{ID}] block entity part {block}: {e:?}");
+            }
         }
         let crank = r.block_key("fras_spike:crank");
         r.block_part(crank, Crank);
         let grinder = r.block_key("fras_spike:grinder");
+        r.block_part(grinder, Grinder);
         r.block_container(
             &grinder,
             ModContainer {
-                slots: 5,
-                faces: [vec![4], vec![0], vec![0], vec![0], vec![0], vec![0]],
+                slots: 9,
+                faces: [
+                    vec![GRINDER_OUT],
+                    vec![0],
+                    vec![0],
+                    vec![0],
+                    vec![0],
+                    vec![0],
+                ],
                 inputs: vec![0],
-                outputs: vec![4],
-                menu: Some("minecraft:hopper".into()),
+                outputs: vec![GRINDER_OUT],
+                menu: Some("minecraft:generic_3x3".into()),
             },
         );
         let _ = KEYS.set(Keys {
