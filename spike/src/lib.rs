@@ -277,6 +277,14 @@ impl BlockEntityPart for Part {
     /// The shaft, drawn once and then turned by the game on the animation
     /// clock: no per-frame call while its speed stays the same.
     fn block_entity_submit(&self, _: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
+        // Diagnostics: the first calls say whether the hook runs at all, and for what.
+        let calls = SUBMIT_CALLS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        if calls < 5 {
+            eprintln!(
+                "[{ID}] block_entity_submit #{calls}: block={} pos={:?} nbt={:?}",
+                event.block, event.pos, event.entity.nbt
+            );
+        }
         if !event.block.ends_with(":shaft") {
             return;
         }
@@ -331,10 +339,31 @@ impl BlockEntityPart for Part {
                 Some(log),
             ],
         };
-        draw.spin(v, [0.5, 0.5, 0.5], speed, phase);
-        draw.cube(from, to, faces, 0xFFFFFF);
-        draw.still();
-        draw.keep();
+        // FRAS_SPIKE_PLAIN=1: no spin, no keep, a plain box every frame.
+        let plain = std::env::var_os("FRAS_SPIKE_PLAIN").is_some();
+        if !plain {
+            draw.spin(v, [0.5, 0.5, 0.5], speed, phase);
+        }
+        let drew = draw.cube(from, to, faces, 0xFFFFFF);
+        // A flat stone quad just above the block, as a second way to draw.
+        let quad = draw.quad(
+            "block/stone",
+            [
+                [0.0, 1.01, 0.0],
+                [0.0, 1.01, 1.0],
+                [1.0, 1.01, 1.0],
+                [1.0, 1.01, 0.0],
+            ],
+            [0.0, 0.0, 16.0, 16.0],
+            0xFFFFFF,
+        );
+        if calls < 5 {
+            eprintln!("[{ID}] cube drew: {drew}, quad drew: {quad}, plain: {plain}");
+        }
+        if !plain {
+            draw.still();
+            draw.keep();
+        }
     }
 
     /// The grinder's screen: the 3x3 menu's nine slots, seven of them hidden.
@@ -380,6 +409,9 @@ impl BlockEntityPart for Part {
             .fill([x + 72.0, y + 26.0, progress, 4.0], 0xFFFF_AA00);
     }
 }
+
+/// How often `block_entity_submit` ran (for the diagnostics).
+static SUBMIT_CALLS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 /// The client's memory of each shaft's spin: degrees per tick and phase.
 static CLIENT_SPINS: Mutex<Option<HashMap<Pos, (f32, f64)>>> = Mutex::new(None);
