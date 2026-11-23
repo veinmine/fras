@@ -448,6 +448,8 @@ Each subsystem gets its own detailed spec, written and agreed before it is imple
 4. **Multiblocks:** formation and validation, chunk-border handling, rendering as one object.
 5. **Rust:** triggers, stage timing, effects, paint and repair.
 6. **Items and machines:** recipes, processing times, speed ranges and loads per machine, belts.
+   **Grinder written:** [`specs/grinder.md`](specs/grinder.md) (2026-11-23), the one machine 0.1 needs; it
+   refines section 6 (see its section 13). The other machines follow with their milestones.
 7. **Progression:** full tier-1 recipe tree and balance targets.
 8. **UX:** gauges, inspection overlay, GUIs, sounds, tooltips.
 9. **Engineer's Handbook:** text layout, pages, images, cross-links, content per subsystem (for 1.0).
