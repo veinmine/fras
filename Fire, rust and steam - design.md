@@ -439,7 +439,8 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
 Each subsystem gets its own detailed spec, written and agreed before it is implemented:
 
 1. **Rotational network:** graph building, the push/pull solver and its curves, inertia, gear
-   ratios, conflicts, supports, overspeed timing, client sync.
+   ratios, conflicts, supports, overspeed timing, client sync. **Written:** [`specs/rotational-network.md`](specs/rotational-network.md)
+   (2026-11-23); it refines sections 3 and 9 (see its section 15).
 2. **Steam and heat:** boiler state, heat rates per fuel, boiling, pressure, throughput, engine
    steam draw, governor and damper control loops (with hunting), failure ladder.
 3. **Fluids and pipes:** pump flow, pipe throughput per material, tanks, hot water, condensers,
