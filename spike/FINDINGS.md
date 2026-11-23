@@ -19,6 +19,11 @@ Horizon's mod API covers everything tier 1 needs, and two things turned out bett
    level can be asked whether a position is loaded and simulated, and block entities have `on_load` and
    `on_chunk_unloaded` hooks. The "whole network pauses" rule needs no mixin.
 
+**Tested in the game** (offscreen, driven through the Horizon MCP server on archmage, see "In-game results"):
+shafts draw and turn smoothly, cranking spins a line up and load sags it, the grinder's menu and grinding work,
+the network pauses at the simulation edge and resumes at the same speed, speed survives save and reload, and the
+mod screen opens. 440 turning shafts cost about a quarter of a millisecond a frame.
+
 One item is blocked upstream: **the official Recipes viewer** (see below). One is unproven: **the copper golem
 crank**.
 
@@ -69,26 +74,54 @@ No milestone has to move. Suggested changes to the design doc:
 
 - Section 9: shafts don't tick; the pause boundary is the simulation distance.
 - Section 7.2 / 8: Recipes viewer depends on an upstream port; not before it lands.
-- Section 11, milestone 0: the in-game part of this spike (below) closes it.
+- Section 11, milestone 0: done; this report closes it.
 
-## Still to do in the game
+## In-game results
 
-The code compiles against the pinned SDK, passes clippy with `-D warnings`, and the network tests pass. It has
-**not run in the game yet**: that needs the Horizon launcher on your machine.
+Horizon build `0b14f8a`, its own launcher instance ("FRAS spike"), a creative world, offscreen client driven
+through the Horizon MCP server. Each `horizon-launcher native-build` took about 1 second (the prebuilt game is
+reused; only the mod compiles).
+
+| Check | Result |
+| --- | --- |
+| Shafts render and turn | **Pass.** Shaft bars join end to end between crank and grinder and visibly rotate (screenshots three ticks apart). |
+| Crank spins up the line, it slows when you stop | **Pass.** 8 shafts settle near 17.8 RPM, 40 shafts near 7.2 RPM (more friction); a 40-shaft line stops in about 3 s. |
+| Grinder: menu, grinding, load | **Pass.** Right-click opens a 3x3 menu with input and output slots; cobblestone becomes gravel (2 per 15 s at speed); the line sags from 17.4 to about 10.6 RPM while it grinds. |
+| Pause at the simulation edge, resume | **Pass.** With the far end outside simulation distance, the rest held its speed (no slow-down) and showed as stopped; on return it carried on from that speed. |
+| Save, quit, reload keeps the speed | **Pass** (after a fix): it comes back at the saved speed, then slows as nobody cranks. |
+| Mod screen (F9 handbook page) | **Pass.** Opens, Escape closes. |
+| Frame rate, 440 shafts, same camera | No shafts 2631 FPS (CPU 0.35 ms, GPU 0.135 ms); 440 idle 1612 FPS (0.58 / 0.193 ms); 440 with a line turning 1436 FPS (0.66 / 0.218 ms). About +0.25 ms CPU and +0.06 ms GPU a frame for 440 shafts, measured with an extra diagnostic quad per shaft. Only one or two lines were turning: a cranked line stops faster than all eleven can be cranked. |
+| Server cost | 440 ticking parts added about 0.11 ms of CPU per frame in single player. |
+| Mod errors in the log | None. |
+
+### Bugs the game found (all fixed in the spike)
+
+These are lessons for the real code, which is why they're listed:
+
+1. **Hooks name the block entity type, not the block.** One shared type for every part meant a shaft and a grinder
+   looked the same to `block_entity_tick` (and to the renderer's check): shafts never drew and the grinder never
+   ground. Give each block its own type, or read the block from the level.
+2. **Sprites in block entity drawing are named without a namespace.** `"block/stripped_oak_log"` draws;
+   `"minecraft:block/stripped_oak_log"` makes `cube` return false and draw nothing, silently. Always check the
+   returned bool.
+3. **The first tick after a load runs before the network exists.** Writing the network's speed then overwrote the
+   saved speed with zero. A part with no network yet keeps what it saved.
+4. **The vanilla `minecraft:chain` is `minecraft:iron_chain` in 26.3.** An unknown template stops the game at
+   startup.
+5. **A container menu didn't open by itself** when the block was used (vanilla's hopper menu named in
+   `ModContainer`); the block's part opens it with `player.open_menu`. Worth a closer look in the GUI spec.
+
+Testing notes: an MCP-started client doesn't pass on the mod's stderr (start it with `horizon-launcher play` to
+read `[fras_spike]` lines), and the MCP interact call didn't trigger block use; a real look-at plus mouse click did.
+Screenshots are on archmage in `~/git/fras-spike/spike/screenshots/` (not committed).
+
+## Running it yourself
 
 ```sh
 cd spike
-horizon-launcher native-build . --trust-native-code
+horizon-launcher native-build . --instance fras-spike --trust-native-code
 ```
 
-Then, in a creative world (`/give @s fras_spike:shaft 64`, likewise `crank` and `grinder`):
-
-1. Place a crank, a line of shafts (sideways shafts take the axis you place them along) and a grinder at the end.
-   Right-click the crank a few times: the shafts should turn smoothly, faster with each click, and slow down
-   when you stop.
-2. Put cobblestone in the grinder (right-click it): gravel comes out, and the line turns slower while it works.
-3. Lay a line of shafts longer than 32 blocks, crank it, then walk away until its far end leaves the simulation
-   distance: the line should stop. Walk back: it turns again at the speed it stopped at.
-4. Crank, save and quit, reload: the line comes back at the speed it had, then slows down as nobody cranks.
-5. Press F9: the handbook page opens; Escape closes it.
-6. With F3, check the frame rate with a few hundred turning shafts in view.
+In a creative world (`/give @s fras_spike:shaft 64`, likewise `crank` and `grinder`): place a crank, a line of
+shafts against it (placed against a block's side they lie along that axis) and a grinder at the end, right-click
+the crank a few times, and put cobblestone in the grinder. F9 opens the handbook page.
