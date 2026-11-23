@@ -1,0 +1,12 @@
+[package]
+name = "fras_spike"
+version = "0.0.1"
+edition = "2024"
+license = "GPL-3.0-or-later"
+publish = false
+authors = ["veinmine"]
+description = "FRAS milestone 0: a throwaway Horizon technical spike. Not released."
+build = false
+
+[dependencies]
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }

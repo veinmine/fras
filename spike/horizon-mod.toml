@@ -1,0 +1,15 @@
+id = "fras_spike"
+name = "FRAS spike (throwaway)"
+version = "0.0.1"
+description = "Milestone 0 of Fire, Rust and Steam: a throwaway technical spike. Not for release."
+authors = ["veinmine"]
+license = "GPL-3.0-or-later"
+api = "0.2"
+side = "both"
+capabilities = ["registries"]
+
+# Pinned to the same build as Kid Mode, so the launcher already has its SDK.
+[native]
+game = "26.3"
+horizon = "0b14f8acfd97fa2c750e42795249dcc981178ca4"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"
