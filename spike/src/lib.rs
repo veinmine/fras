@@ -311,8 +311,8 @@ impl BlockEntityPart for Part {
             }
             (entry.1 % 360.0) as f32
         };
-        let log = CubeFace::new("minecraft:block/stripped_oak_log");
-        let end = CubeFace::new("minecraft:block/stripped_oak_log_top");
+        let log = CubeFace::new("block/stripped_oak_log");
+        let end = CubeFace::new("block/stripped_oak_log_top");
         let faces = match axis.as_str() {
             "x" => [
                 Some(log),
@@ -357,8 +357,17 @@ impl BlockEntityPart for Part {
             [0.0, 0.0, 16.0, 16.0],
             0xFFFFFF,
         );
+        // If a face's sprite is unknown, compare with a plain stone box.
+        let stone = if drew {
+            None
+        } else {
+            let f = Some(CubeFace::new("block/stone"));
+            Some(draw.cube(from, to, [f, f, f, f, f, f], 0xFFFFFF))
+        };
         if calls < 5 {
-            eprintln!("[{ID}] cube drew: {drew}, quad drew: {quad}, plain: {plain}");
+            eprintln!(
+                "[{ID}] cube drew: {drew}, stone cube drew: {stone:?}, quad drew: {quad}, plain: {plain}"
+            );
         }
         if !plain {
             draw.still();
