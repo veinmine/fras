@@ -1,0 +1,11 @@
+# What the Horizon watch looks for in each new mod API (.github/workflows/horizon-watch.yml).
+# One rule per line: a case-insensitive regular expression matched against the id of every
+# item added, changed or removed since the pin (hook:…, type:…, handle:…, fn:…), then `#` and
+# the FRAS feature it's for. A match opens the horizon-api issue; other API changes don't.
+# The rules are the things FRAS waits for upstream (docs/watch.md): drop a rule once it lands.
+
+recipe_?viewer|recipes?_(page|category|categories)|jei|emi   # the Recipes viewer port (horizon-mods #1214): grinding pages
+panel_recipes|recipe_page                                    # FRAS's own recipe pages in the item panel (fallback)
+block_entity_(submit|render|spin|keep)|spin|keep             # rotating parts drawn on the animation clock
+on_chunk_unloaded|block_entity_on_load|should_tick_blocks    # network membership without ticking, pausing
+copper_golem|golem                                           # the crank's copper golem (0.4, optional)
