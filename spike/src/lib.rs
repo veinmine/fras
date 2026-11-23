@@ -352,10 +352,10 @@ static CLIENT_SPINS: Mutex<Option<HashMap<Pos, (f32, f64)>>> = Mutex::new(None);
 #[mod_api::horizon_mod]
 impl Hooks for Mod {
     fn blocks(&self, _: &RegistrationContext, event: &mut BlocksEvent<'_>) {
-        // Templates: a chain has the `axis` property and a thin shape.
+        // Templates: an iron chain has the `axis` property and a thin shape.
         event
             .blocks
-            .push(mod_api::Block::new("fras_spike:shaft", "minecraft:chain"));
+            .push(mod_api::Block::new("fras_spike:shaft", "minecraft:iron_chain"));
         event.blocks.push(mod_api::Block::new(
             "fras_spike:crank",
             "minecraft:oak_planks",
