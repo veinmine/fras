@@ -1,0 +1,15 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:raw_gold",
+  "results": [
+    {
+      "id": "fras:crushed_gold"
+    },
+    {
+      "id": "fras:crushed_gold",
+      "chance": 0.5
+    }
+  ],
+  "revolutions": 4.0,
+  "load": 6.0
+}

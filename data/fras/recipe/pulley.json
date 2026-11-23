@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " P ",
+    "PSP",
+    " P "
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "fras:wooden_shaft"
+  },
+  "result": {
+    "id": "fras:pulley",
+    "count": 1
+  }
+}

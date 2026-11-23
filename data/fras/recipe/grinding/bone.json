@@ -1,0 +1,16 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:bone",
+  "results": [
+    {
+      "id": "minecraft:bone_meal",
+      "count": 4
+    },
+    {
+      "id": "minecraft:bone_meal",
+      "chance": 0.5
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 3.0
+}

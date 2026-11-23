@@ -1,0 +1,50 @@
+{
+  "template": "minecraft:iron_block",
+  "properties": {
+    "hardness": 3.0,
+    "push_reaction": "IMMOVEABLE"
+  },
+  "state_properties": {
+    "input": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "output": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "tee": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "input": "west",
+    "output": "south"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.125,
+        0.125,
+        0.125,
+        0.875,
+        0.875,
+        0.875
+      ]
+    ]
+  }
+}

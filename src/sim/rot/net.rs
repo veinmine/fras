@@ -453,6 +453,20 @@ impl Mechanics {
         })
     }
 
+    /// Parts whose warning timers are filling: position, whether it is
+    /// overspeed (else overload), and the warning level (1 to 3).
+    pub fn warned(&self) -> Vec<(Pos, bool, u8)> {
+        self.parts
+            .iter()
+            .filter(|(_, p)| p.loaded && p.jam.is_none())
+            .filter_map(|(pos, p)| {
+                let over = p.over_t >= p.shear_t;
+                let level = p.warning();
+                (level > 0).then_some((*pos, over, level))
+            })
+            .collect()
+    }
+
     pub fn take_events(&mut self) -> Vec<Event> {
         std::mem::take(&mut self.events)
     }

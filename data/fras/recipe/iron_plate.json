@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:hand_hammer",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "fras:iron_plate",
+    "count": 1
+  }
+}

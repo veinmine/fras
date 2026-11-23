@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SRS"
+  ],
+  "key": {
+    "S": "fras:iron_shaft",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "fras:clutch",
+    "count": 1
+  }
+}

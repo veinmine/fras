@@ -1,0 +1,11 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:cobblestone",
+  "results": [
+    {
+      "id": "minecraft:gravel"
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 6.0
+}

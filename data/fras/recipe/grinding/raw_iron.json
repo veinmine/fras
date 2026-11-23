@@ -1,0 +1,15 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:raw_iron",
+  "results": [
+    {
+      "id": "fras:crushed_iron"
+    },
+    {
+      "id": "fras:crushed_iron",
+      "chance": 0.5
+    }
+  ],
+  "revolutions": 4.0,
+  "load": 6.0
+}

@@ -1,0 +1,17 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:max_stack_size": 1,
+    "minecraft:tool": {
+      "rules": [
+        {
+          "blocks": "#fras:parts",
+          "speed": 12.0,
+          "correct_for_drops": true
+        }
+      ],
+      "default_mining_speed": 1.0,
+      "damage_per_block": 0
+    }
+  }
+}

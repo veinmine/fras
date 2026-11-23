@@ -1,0 +1,7 @@
+{
+  "template": "minecraft:stick",
+  "components": {
+    "minecraft:max_stack_size": 1
+  },
+  "crafting_remainder": "fras:hand_hammer"
+}

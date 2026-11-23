@@ -1,0 +1,46 @@
+{
+  "template": "minecraft:iron_chain",
+  "properties": {
+    "hardness": 3.0,
+    "render_shape": "ENTITYBLOCK_ANIMATED",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE"
+  },
+  "shapes": {
+    "properties": [
+      "axis"
+    ],
+    "values": {
+      "x": [
+        [
+          0.0,
+          0.40625,
+          0.40625,
+          1.0,
+          0.59375,
+          0.59375
+        ]
+      ],
+      "y": [
+        [
+          0.40625,
+          0.0,
+          0.40625,
+          0.59375,
+          1.0,
+          0.59375
+        ]
+      ],
+      "z": [
+        [
+          0.40625,
+          0.40625,
+          0.0,
+          0.59375,
+          0.59375,
+          1.0
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "template": "minecraft:oak_planks",
+  "properties": {
+    "hardness": 1.0,
+    "render_shape": "ENTITYBLOCK_ANIMATED",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE"
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "north"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.1875,
+        0.1875,
+        0.1875,
+        0.8125,
+        0.8125,
+        0.8125
+      ]
+    ]
+  }
+}

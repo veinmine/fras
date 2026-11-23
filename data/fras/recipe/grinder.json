@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PFP",
+    "IFI",
+    "PCP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "F": "minecraft:flint",
+    "I": "minecraft:iron_ingot",
+    "C": "minecraft:cobblestone"
+  },
+  "result": {
+    "id": "fras:grinder",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "fras:wooden_shaft",
+    "fras:pulley",
+    "fras:large_pulley",
+    "fras:wooden_bevel_gear",
+    "fras:crank",
+    "fras:water_wheel",
+    "fras:grinder"
+  ]
+}

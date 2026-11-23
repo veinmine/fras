@@ -1,0 +1,15 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:raw_copper",
+  "results": [
+    {
+      "id": "fras:crushed_copper"
+    },
+    {
+      "id": "fras:crushed_copper",
+      "chance": 0.5
+    }
+  ],
+  "revolutions": 4.0,
+  "load": 6.0
+}
