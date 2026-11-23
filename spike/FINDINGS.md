@@ -76,6 +76,8 @@ No milestone has to move. Suggested changes to the design doc:
 - Section 7.2 / 8: Recipes viewer depends on an upstream port; not before it lands.
 - Section 11, milestone 0: done; this report closes it.
 
+These changes are applied in design doc version 2.1.
+
 ## In-game results
 
 Horizon build `0b14f8a`, its own launcher instance ("FRAS spike"), a creative world, offscreen client driven

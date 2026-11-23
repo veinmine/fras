@@ -1,7 +1,8 @@
 # Fire, Rust and Steam
 ## A Horizon native technology mod
 
-Design document, version 2 (2026-11-23). Supersedes the first draft, refined in a design interview.
+Design document, version 2.1 (2026-11-23). Supersedes the first draft, refined in a design interview;
+2.1 adds what the technical spike found (`spike/FINDINGS.md`).
 Numbers marked *(tune)* are starting
 values for balancing, not commitments.
 
@@ -126,7 +127,8 @@ It adds no power: heavy load still sags the speed. It also saves steam when idle
 
 | Source | Notes |
 | --- | --- |
-| **Crank** | Right-click to turn; small torque, very slow. A copper golem can be **assigned** to it (lead or right-click the golem onto the crank): the crank holds it in place, animates its arm and produces the torque. A golem in the rain oxidises into a statue and stops unless waxed. *Optional: only if feasible with Horizon's API; drop it if the work is too complex.* |
+| **Crank** | Right-click to turn; small torque, very slow. A copper golem can be **assigned** to it (lead or right-click the golem onto the crank): the crank holds it in place, animates its arm and produces the torque. A golem in the rain oxidises into a statue and stops unless waxed. *Optional: the spike found the hooks plausible (brain behaviours, goals, entity interaction) but
+the arm animation unproven. Prototype it in 0.4 for a day; drop it if it needs a mixin.* |
 | **Water wheel** | Placed in flowing water; torque depends on how much flow touches it. Steady and **deliberately weak**: enough for a grinder or two, not a factory. Makes milestone 0.1 playable. No windmill for now. |
 | **Steam engine** | Steam cylinder + flywheel (section 4.4). The real power of tier 1. |
 
@@ -348,9 +350,13 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
 - From 0.1: **tooltips** (one line; Shift for details such as "Max torque 64. Needs support every
   8 blocks"), **wrench diagnostics**, and **written docs** in the repository, one page per
   subsystem.
-- **Recipes viewer:** FRAS recipes in Horizon's official Recipes viewer, if its API allows.
+- **Recipes viewer:** blocked upstream. Horizon's official Recipes viewer can't load on current launchers,
+  and its port (horizon-mods #1214) hasn't landed; no API for other mods to add pages to it is known.
+  Not planned before it lands; the Horizon watch flags it. Fallback: FRAS's own recipe pages in the
+  engine's item panel (`panel_recipes`).
 - 1.0 goal: an in-game **Engineer's Handbook** with chapters per subsystem and example builds,
-  depending on what Horizon offers for custom screens.
+  as a mod screen. Horizon supports one, but everything on it is hand-drawn (text layout, pages,
+  images, links), so the handbook is a subsystem with its own spec.
 
 ### 7.3 Look and sound
 
@@ -373,7 +379,7 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
   Quarry) once electricity exists.
 - **Vanilla inventories:** machines accept items from hoppers and droppers and push into chests;
   mods using the same hooks work for free.
-- **Recipes viewer** support if feasible (checked in the spike).
+- **Recipes viewer** support once Horizon's port of it lands (section 7.2).
 - **Kid Mode:** nothing needed.
 
 ---
@@ -383,10 +389,17 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
 - **Server-authoritative.** The server simulates; clients only render.
 - **Cheap rotation sync:** the server sends a network's speed only when it changes noticeably;
   clients animate locally. No per-tick packets per shaft.
-- **Cached networks:** rebuilt only when a block is placed or broken.
+- **Cached networks:** rebuilt only when a block is placed or broken, or a chunk it touches loads or
+  unloads.
+- **Shafts don't tick.** Shafts, bearings and gears have no per-tick work: network membership comes from
+  block entity load/unload and block changes. Only sources and machines tick (each tick is a hook call
+  with a data snapshot, too costly for hundreds of shafts).
 - **Tick budget:** mechanical networks solved per tick; steam/heat every few ticks.
 - **Unloaded chunks:** if any part of a network is unloaded, **the whole network pauses**.
-  This avoids half-loaded exploits; nothing explodes or rusts while nobody is around.
+  This avoids half-loaded exploits; nothing explodes or rusts while nobody is around. "Unloaded" means
+  **not simulated**: block entities stop ticking at the simulation distance, usually nearer than the view
+  distance, so a network crossing it pauses where players can still see it. Whether a paused network
+  keeps turning visually is decided in the rotational network spec (the spike shows it stopped).
 - **No chunk loader in tier 1**; possibly later behind a server setting.
 
 ---
@@ -399,7 +412,7 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
   **game-free modules with unit tests**, like Kid Mode's `logic.rs`; blocks, hooks and rendering a
   thin layer on top.
 - **CI:** `cargo fmt --check`, clippy, tests on every push; weekly Horizon-watch workflow (from
-  Kid Mode) for API changes.
+  Kid Mode) for API changes, with a rule for the Recipes viewer port.
 - **Licence:** GPL-3.0-or-later.
 - **Languages:** English and Polish from the start (with a terminology dictionary, as in Kid Mode).
 - **Settings page** (Options > Mods > FRAS): explosion mode, rust on/off and speed, possibly a
@@ -412,7 +425,7 @@ Bronze or brass (needing tin or zinc ores and world generation) possibly in tier
 
 | Milestone | Content | Exit criteria |
 | --- | --- | --- |
-| **0 — Technical spike** (not released) | One ticking block entity, a smoothly rotating shaft render, a network that survives chunk unload/reload, a simple GUI. Check API support for: block entity renderers at scale, menus, fluids/inventories, chunk events, entity hooks for the golem, Recipes viewer integration, custom book screens. | A written feasibility report; risks resolved or redesigned. |
+| **0 — Technical spike** (not released) — **done** | One ticking block entity, a smoothly rotating shaft render, a network that survives chunk unload/reload, a simple GUI. Check API support for: block entity renderers at scale, menus, fluids/inventories, chunk events, entity hooks for the golem, Recipes viewer integration, custom book screens. | A written feasibility report; risks resolved or redesigned. Done 2026-11-23: `spike/FINDINGS.md`, all checks passed in game. |
 | **0.1 — Mechanical** | Crank, water wheel, wooden/iron shaft, bearing, bevel gear, gearbox, clutch, pulley + belt drive, wrench (incl. inspection), tachometer, **grinder**, hand hammer. | Push-vs-pull speed model, overspeed/jam/repair, supports, conflicts working in game. |
 | **0.2 — Steam** | Firebox, boiler, steam dome, pipes (copper, iron), valves (manual, redstone, release, emergency), pressure gauge, sight glass, pump, steam cylinder, flywheel, twin engine, storage tank. | Boilers warm up, build pressure, feed engines; escalation ladder and explosion modes work. |
 | **0.3 — Regulation and cooling** | Governor, furnace damper, bellows, heat exchanger, radiators, condenser, hot water, drain, machine water cooling; rust, paint, scraping. | Hunting/tuning playable; closed loop saves fuel; rust stages and leaks work. |
@@ -436,6 +449,7 @@ Each subsystem gets its own detailed spec, written and agreed before it is imple
 6. **Items and machines:** recipes, processing times, speed ranges and loads per machine, belts.
 7. **Progression:** full tier-1 recipe tree and balance targets.
 8. **UX:** gauges, inspection overlay, GUIs, sounds, tooltips.
+9. **Engineer's Handbook:** text layout, pages, images, cross-links, content per subsystem (for 1.0).
 
 ---
 
