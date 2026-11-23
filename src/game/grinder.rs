@@ -54,9 +54,9 @@ pub fn clear() {
 }
 
 /// Read one recipe file's JSON.
-pub fn parse(id: &str, json: &serde_json::Value) -> Result<Recipe, String> {
+pub fn parse(id: &str, json: &mod_api::serde_json::Value) -> Result<Recipe, String> {
     let ingredient = match &json["ingredient"] {
-        serde_json::Value::String(s) => match s.strip_prefix('#') {
+        mod_api::serde_json::Value::String(s) => match s.strip_prefix('#') {
             Some(tag) => grind::Ingredient::Tag(tag.into()),
             None => grind::Ingredient::Item(s.clone()),
         },
@@ -100,8 +100,9 @@ pub fn load(host: &dyn Host) {
             Ok(recipe) => {
                 if let grind::Ingredient::Tag(tag) = &recipe.ingredient
                     && !book.tags.contains_key(tag)
-                    && let Ok(Some(ing)) =
-                        host.recipe_ingredient(&serde_json::json!(format!("#{tag}")).to_string())
+                    && let Ok(Some(ing)) = host.recipe_ingredient(
+                        &mod_api::serde_json::json!(format!("#{tag}")).to_string(),
+                    )
                 {
                     book.tags.insert(tag.clone(), ing);
                 }
@@ -420,7 +421,7 @@ mod tests {
 
     #[test]
     fn recipe_files_parse() {
-        let json = serde_json::json!({
+        let json = mod_api::serde_json::json!({
             "type": "fras:grinding",
             "ingredient": "minecraft:raw_iron",
             "results": [{"id": "fras:crushed_iron"}, {"id": "fras:crushed_iron", "chance": 0.5}],
@@ -433,12 +434,12 @@ mod tests {
         );
         assert_eq!(r.results.len(), 2);
         assert_eq!(r.load, grind::DEFAULT_LOAD);
-        let tag = serde_json::json!({"ingredient": "#minecraft:wool", "results": [{"id": "minecraft:string", "count": 4}], "revolutions": 2, "load": 3});
+        let tag = mod_api::serde_json::json!({"ingredient": "#minecraft:wool", "results": [{"id": "minecraft:string", "count": 4}], "revolutions": 2, "load": 3});
         assert_eq!(
             parse("x", &tag).unwrap().ingredient,
             grind::Ingredient::Tag("minecraft:wool".into())
         );
-        assert!(parse("x", &serde_json::json!({"results": []})).is_err());
+        assert!(parse("x", &mod_api::serde_json::json!({"results": []})).is_err());
     }
 
     #[test]
@@ -447,8 +448,8 @@ mod tests {
         let mut found = Vec::new();
         for entry in std::fs::read_dir(dir).unwrap() {
             let path = entry.unwrap().path();
-            let json: serde_json::Value =
-                serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+            let json: mod_api::serde_json::Value =
+                mod_api::serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
             let id = format!(
                 "fras:grinding/{}",
                 path.file_stem().unwrap().to_str().unwrap()

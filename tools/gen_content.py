@@ -289,11 +289,10 @@ def blockstate(name):
 
 
 ITEMS = {
-    "wrench": {"template": "minecraft:stick", "components": {
-        "minecraft:max_stack_size": 1,
+    "wrench": {"template": "minecraft:stick", "max_stack_size": 1, "components": {
         "minecraft:tool": {"rules": [{"blocks": f"#{NS}:parts", "speed": 12.0, "correct_for_drops": True}], "default_mining_speed": 1.0, "damage_per_block": 0},
     }},
-    "hand_hammer": {"template": "minecraft:stick", "components": {"minecraft:max_stack_size": 1}, "crafting_remainder": f"{NS}:hand_hammer"},
+    "hand_hammer": {"template": "minecraft:stick", "max_stack_size": 1, "crafting_remainder": f"{NS}:hand_hammer"},
     "leather_belt": {"template": "minecraft:leather"},
     "crushed_iron": {"template": "minecraft:raw_iron"},
     "crushed_copper": {"template": "minecraft:raw_copper"},

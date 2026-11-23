@@ -41,6 +41,10 @@ pub struct Wrench;
 
 #[mod_api::horizon_part]
 impl ItemPart for Wrench {
+    fn tooltip(&self, host: &dyn mod_api::ClientHost, event: &mut mod_api::TooltipEvent<'_>) {
+        Tooltip("wrench").tooltip(host, event);
+    }
+
     fn use_on(&self, host: HostSide, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
         let HostSide::Server(host) = host else {
             return None;
@@ -500,6 +504,10 @@ pub struct LeatherBelt;
 
 #[mod_api::horizon_part]
 impl ItemPart for LeatherBelt {
+    fn tooltip(&self, host: &dyn mod_api::ClientHost, event: &mut mod_api::TooltipEvent<'_>) {
+        Tooltip("leather_belt").tooltip(host, event);
+    }
+
     fn use_on(&self, host: HostSide, event: &mut UseOnEvent<'_>) -> Option<InteractionResult> {
         let HostSide::Server(host) = host else {
             return None;

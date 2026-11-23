@@ -46,7 +46,10 @@ impl Hooks for Fras {
                 r.block_container(&key, game::grinder::container());
             }
         }
-        r.register_recipe_type("grinding");
+        // The recipe files' `type` is the serializer; it publishes them, JSON
+        // intact, under the recipe type of the same id.
+        r.register_recipe_type("fras:grinding");
+        r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
         let wrench = r.item_key("fras:wrench");
         let leather_belt = r.item_key("fras:leather_belt");
         r.item_part(wrench, game::tools::Wrench);
@@ -55,6 +58,8 @@ impl Hooks for Fras {
             .map(Block::name)
             .into_iter()
             .chain(ITEMS)
+            // An item has one part: these two draw their tooltip themselves.
+            .filter(|item| !matches!(*item, "wrench" | "leather_belt"))
         {
             let key = r.item_key(&format!("{ID}:{item}"));
             r.item_part(key, game::tools::Tooltip(item));

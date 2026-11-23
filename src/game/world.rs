@@ -259,7 +259,7 @@ pub fn wheel_torque(host: &dyn Host, level: LevelRef, pos: Pos, axis: Axis) -> f
     let a = axis.unit();
     let mut sum = 0.0;
     for q in ring(pos, axis) {
-        let Some(flow) = level.fluid_flow(host, q.to_array()) else {
+        let Some(f) = water_flow(host, level, q) else {
             continue;
         };
         let o = [
@@ -267,13 +267,28 @@ pub fn wheel_torque(host: &dyn Host, level: LevelRef, pos: Pos, axis: Axis) -> f
             (q.y - pos.y) as f64,
             (q.z - pos.z) as f64,
         ];
-        sum += paddle(
-            o,
-            [flow.x, flow.y, flow.z],
-            [a[0] as f64, a[1] as f64, a[2] as f64],
-        );
+        sum += paddle(o, f, [a[0] as f64, a[1] as f64, a[2] as f64]);
     }
     sum.clamp(-WHEEL_MAX, WHEEL_MAX)
+}
+
+/// The flow of the water at `q`, if it moves. Vanilla gives falling water in
+/// open air no flow vector (only beside a wall does it point down), so a
+/// falling block counts as flowing straight down. Sources and still water
+/// give nothing (spec 8.2).
+fn water_flow(host: &dyn Host, level: LevelRef, q: Pos) -> Option<[f64; 3]> {
+    let state = level.fluid_state(host, q.to_array())?;
+    if state.amount == 0 || state.source {
+        return None;
+    }
+    if !state.fluid.id(host).ends_with("water") {
+        return None;
+    }
+    if state.falling {
+        return Some([0.0, -1.0, 0.0]);
+    }
+    let flow = level.fluid_flow(host, q.to_array())?;
+    Some([flow.x, flow.y, flow.z])
 }
 
 /// One paddle's push: its offset from the hub `o`, the water's flow `f`,

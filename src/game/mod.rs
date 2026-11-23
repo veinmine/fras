@@ -115,13 +115,13 @@ mod tests {
         assert_eq!(num(0.55), "0.6");
     }
 
-    fn lang(code: &str) -> serde_json::Map<String, serde_json::Value> {
+    fn lang(code: &str) -> mod_api::serde_json::Map<String, mod_api::serde_json::Value> {
         let path = format!(
             "{}/assets/fras/lang/{code}.json",
             env!("CARGO_MANIFEST_DIR")
         );
         let text = std::fs::read_to_string(path).unwrap();
-        serde_json::from_str::<serde_json::Value>(&text)
+        mod_api::serde_json::from_str::<mod_api::serde_json::Value>(&text)
             .unwrap()
             .as_object()
             .unwrap()
