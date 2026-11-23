@@ -42,7 +42,7 @@
   "tooltip.fras.crank": "Hold right-click to turn it. Sneak to turn it the other way.",
   "tooltip.fras.crank.details": "16 Nm at a standstill, up to 32 RPM. Cranking makes you hungry.",
   "tooltip.fras.water_wheel": "Turns in flowing water. Up to 32 Nm, 24 RPM.",
-  "tooltip.fras.water_wheel.details": "4 Nm for each flowing water block among its paddles; falling water on top counts double.",
+  "tooltip.fras.water_wheel.details": "8 Nm for each flowing water block among its paddles; falling water on top counts double.",
   "tooltip.fras.grinder": "Works between 12 and 96 RPM, with a 6 Nm load.",
   "tooltip.fras.grinder.details": "Grinds: raw ores (×1.5), raw ore blocks, cobblestone, gravel, wool, bones. Raw ore only: mine ore blocks first.",
   "tooltip.fras.tachometer": "Shows the speed of the part it is on.",

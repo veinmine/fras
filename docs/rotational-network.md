@@ -7,6 +7,9 @@ version.
 
 - **Sources push.** A crank gives 16 Nm at a standstill and nothing at 32 RPM; a water wheel up to 32 Nm,
   nothing at 24 RPM. The faster they turn, the less they push.
+  A water wheel takes 8 Nm from each flowing or falling water block among its 8 paddles, signed by which way
+  the water passes the hub: water falling down one side (an overshot wheel, the source walled in so it can't
+  spill over the top) or a stream under it works best.
 - **Machines and friction pull.** A grinder with work pulls 6 Nm; every part adds a little friction.
 - The network settles where push and pull balance. Add a second grinder and everything slows down. Let go of
   the crank and the line coasts to a stop.

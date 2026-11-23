@@ -12,7 +12,7 @@ jam; the wrench repairs them.
 | Block / item | What it does |
 | --- | --- |
 | Crank | Hold right-click to turn it (sneak for the other way). 16 Nm, up to 32 RPM. |
-| Water wheel | Turns in flowing water: 4 Nm per flowing block among its paddles, up to 32 Nm, 24 RPM. |
+| Water wheel | Turns in flowing water: 8 Nm per flowing block among its paddles, up to 32 Nm, 24 RPM. |
 | Wooden / iron shaft | Carries power. Torque limit 32 / 128 Nm; needs a support every 8 / 16 blocks. |
 | Bearing | A shaft segment that supports the line. Hangs on a sturdy face, fence, wall, bars or a chain above. |
 | Wooden / iron bevel gear | Turns the line 90°; the wrench toggles a T. Max 64 / 192 RPM. |

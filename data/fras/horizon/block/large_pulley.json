@@ -5,7 +5,8 @@
     "sounds": "minecraft:oak_planks",
     "render_shape": "ENTITYBLOCK_ANIMATED",
     "occludes": false,
-    "push_reaction": "IMMOVEABLE"
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
   },
   "shapes": {
     "properties": [

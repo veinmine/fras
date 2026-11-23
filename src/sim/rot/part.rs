@@ -245,7 +245,7 @@ pub const GRINDER_MAX_RPM: f64 = 96.0;
 pub const CRANK_STALL: f64 = 16.0;
 pub const CRANK_TOP: f64 = 32.0;
 /// Water wheel: torque per flowing block, its cap, top speed.
-pub const WHEEL_PER_BLOCK: f64 = 4.0;
+pub const WHEEL_PER_BLOCK: f64 = 8.0;
 pub const WHEEL_MAX: f64 = 32.0;
 pub const WHEEL_TOP: f64 = 24.0;
 /// A belt carries at most this torque at its smaller pulley.

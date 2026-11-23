@@ -4,7 +4,8 @@
     "hardness": 3.0,
     "render_shape": "ENTITYBLOCK_ANIMATED",
     "occludes": false,
-    "push_reaction": "IMMOVEABLE"
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
   },
   "state_properties": {
     "mount": {

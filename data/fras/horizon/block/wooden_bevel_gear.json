@@ -2,7 +2,8 @@
   "template": "minecraft:oak_planks",
   "properties": {
     "hardness": 2.0,
-    "push_reaction": "IMMOVEABLE"
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
   },
   "state_properties": {
     "input": {

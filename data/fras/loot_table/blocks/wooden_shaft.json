@@ -9,11 +9,10 @@
           "name": "fras:wooden_shaft"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
-  ]
+  ],
+  "random_sequence": "fras:blocks/wooden_shaft"
 }

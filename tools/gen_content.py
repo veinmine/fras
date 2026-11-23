@@ -375,12 +375,20 @@ def main():
     for name, recipe in grinding().items():
         write(f"data/{NS}/recipe/grinding/{name}.json", recipe)
     for name, (decl, tool, _) in BLOCKS.items():
+        # Every part drops by hand (a bearing whose mount goes drops too);
+        # the tool tags only make mining faster.
+        decl["properties"]["requires_tool"] = False
         write(f"data/{NS}/horizon/block/{name}.json", decl)
         write(f"assets/{NS}/blockstates/{name}.json", blockstate(name))
         write(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/{name}"}})
         write(
             f"data/{NS}/loot_table/blocks/{name}.json",
-            {"type": "minecraft:block", "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{name}"}], "conditions": [{"condition": "minecraft:survives_explosion"}]}]},
+            # The 26.3 loot format: one `condition` object with a `type`.
+            {
+                "type": "minecraft:block",
+                "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{name}"}], "condition": {"type": "minecraft:survives_explosion"}}],
+                "random_sequence": f"{NS}:blocks/{name}",
+            },
         )
     for name, decl in ITEMS.items():
         write(f"data/{NS}/horizon/item/{name}.json", decl)

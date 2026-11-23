@@ -3,7 +3,8 @@
   "properties": {
     "hardness": 2.5,
     "occludes": false,
-    "push_reaction": "IMMOVEABLE"
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
   },
   "state_properties": {
     "facing": {

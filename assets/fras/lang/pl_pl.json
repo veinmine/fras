@@ -42,7 +42,7 @@
   "tooltip.fras.crank": "Przytrzymaj prawy przycisk, aby kręcić. Skradaj się, aby kręcić w drugą stronę.",
   "tooltip.fras.crank.details": "16 Nm w miejscu, do 32 obr./min. Kręcenie wywołuje głód.",
   "tooltip.fras.water_wheel": "Obraca się w płynącej wodzie. Do 32 Nm, 24 obr./min.",
-  "tooltip.fras.water_wheel.details": "4 Nm za każdy blok płynącej wody między łopatkami; spadająca woda u góry liczy się podwójnie.",
+  "tooltip.fras.water_wheel.details": "8 Nm za każdy blok płynącej wody między łopatkami; spadająca woda u góry liczy się podwójnie.",
   "tooltip.fras.grinder": "Pracuje od 12 do 96 obr./min, obciążenie 6 Nm.",
   "tooltip.fras.grinder.details": "Kruszy: surowe rudy (×1,5), bloki surowych rud, bruk, żwir, wełnę, kości. Tylko surowe rudy: najpierw wydobądź bloki rud.",
   "tooltip.fras.tachometer": "Pokazuje prędkość części, na której jest.",
