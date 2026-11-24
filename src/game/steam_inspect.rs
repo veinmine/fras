@@ -19,8 +19,11 @@ fn tr(key: &str, args: Vec<String>) -> Text {
 }
 
 fn red(t: Text) -> Text {
-    // Text styles can't be built from a mod: a § colour code does it.
-    Text::literal("§c").append(t)
+    // A § code in a parent component doesn't carry into its children: the
+    // colour goes on the component's style.
+    let mut style = mod_api::text::TextStyle::default();
+    style.color = Some("red".into());
+    Text::literal("").append(t).with_style(style)
 }
 
 fn kind_name(kind: Kind) -> Text {
