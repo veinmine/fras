@@ -46,7 +46,7 @@ Tuned in a game so the exit criteria hold; reported to veinmine:
 | Viscous friction as written | Quartered, `CONST_FRICTION` raised to 0.15 | With the spec's numbers a water wheel geared up 4× stalled well below the 64 RPM of exit criterion 3; in the sim test now ~73 RPM at the bevel. |
 | Wooden bevel gear max 64 RPM | 56 RPM | In game, with more parts on the line than the sim test, a 32 Nm wheel through two gearboxes levelled off at 63.9 RPM, just under 64, and never jammed. 56 makes it jam; a crank through two gearboxes (~61 RPM) now overspeeds wood too. |
 | Water wheel 4 Nm per flowing block | 8 Nm per block, still capped at 32 Nm | Tested in game: a clean overshot side gives 4 blocks' worth and the far side's flow pushes the other way, so 4 Nm per block topped out at 16 to 24 Nm and a wheel couldn't run one grinder well (criterion 2) or overspeed a wooden bevel through two gearboxes (criterion 3). With 8 a clean overshot side reaches the 32 Nm cap the spec's balance assumes. Open water spilling over the hub cancels the push: wall the source in. |
-| A rebuild of 2000 parts in 2 ms | ~6 ms (release build, measured in a test) | Rebuilds happen only when the network changes, not every tick. |
+| A rebuild of 2000 parts in 2 ms | ~4 to 6 ms (release build, measured in a test); a steady tick costs ~3 µs, well under the 0.1 ms target | Rebuilds happen only when the network changes, not every tick. |
 
 Not in 0.1 (no hook yet, or left for later):
 
