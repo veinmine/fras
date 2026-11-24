@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:manual_valve",
+    "minecraft:iron_bars"
+  ],
+  "result": {
+    "id": "fras:steam_release",
+    "count": 1
+  }
+}

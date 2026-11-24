@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "BFB",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:brick",
+    "F": "minecraft:furnace"
+  },
+  "result": {
+    "id": "fras:firebox",
+    "count": 1
+  }
+}

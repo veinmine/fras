@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NRN",
+    "NGN"
+  ],
+  "key": {
+    "N": "minecraft:copper_nugget",
+    "R": "minecraft:redstone",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "fras:pressure_gauge",
+    "count": 1
+  }
+}

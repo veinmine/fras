@@ -1,0 +1,71 @@
+{
+  "template": "minecraft:stone",
+  "properties": {
+    "hardness": 1.0,
+    "sounds": "minecraft:glass",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "north"
+  },
+  "shapes": {
+    "properties": [
+      "facing"
+    ],
+    "values": {
+      "north": [
+        [
+          0.3125,
+          0.0,
+          0.84375,
+          0.6875,
+          1.0,
+          1.0
+        ]
+      ],
+      "south": [
+        [
+          0.3125,
+          0.0,
+          0.0,
+          0.6875,
+          1.0,
+          0.15625
+        ]
+      ],
+      "west": [
+        [
+          0.84375,
+          0.0,
+          0.3125,
+          1.0,
+          1.0,
+          0.6875
+        ]
+      ],
+      "east": [
+        [
+          0.0,
+          0.0,
+          0.3125,
+          0.15625,
+          1.0,
+          0.6875
+        ]
+      ]
+    }
+  }
+}

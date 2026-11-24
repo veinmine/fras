@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "axis=y,damaged=false": {
+      "model": "fras:block/manual_valve"
+    },
+    "axis=y,damaged=true": {
+      "model": "fras:block/manual_valve_damaged"
+    },
+    "axis=z,damaged=false": {
+      "model": "fras:block/manual_valve",
+      "x": 90
+    },
+    "axis=z,damaged=true": {
+      "model": "fras:block/manual_valve_damaged",
+      "x": 90
+    },
+    "axis=x,damaged=false": {
+      "model": "fras:block/manual_valve",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true": {
+      "model": "fras:block/manual_valve_damaged",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

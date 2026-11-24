@@ -129,6 +129,78 @@ impl BlockPart for BlockHooks {
                 }
                 state = set(state, "axis", axis.name());
             }
+            // ---- 0.2 ----
+            Block::CopperBoiler
+            | Block::IronBoiler
+            | Block::StorageTank
+            | Block::SteamDome
+            | Block::CopperPipe
+            | Block::IronPipe => {}
+            // A furnace's front faces the player.
+            Block::Firebox => state = set(state, "facing", facing.opposite().name()),
+            Block::ManualValve | Block::RedstoneValve => {
+                state = set(state, "axis", face.axis().name());
+            }
+            // A vent's pipe face is the face it was placed against.
+            Block::SteamRelease | Block::EmergencyValve => {
+                state = set(state, "facing", face.opposite().name());
+            }
+            Block::Pump => state = set(state, "facing", face.opposite().name()),
+            Block::PressureGauge => state = set(state, "facing", face.name()),
+            Block::SightGlass => {
+                let f = if face.axis() != Axis::Y {
+                    face
+                } else {
+                    facing.opposite()
+                };
+                state = set(state, "facing", f.name());
+            }
+            Block::SteamCylinder => {
+                // Beside a flywheel's hub (two blocks off, in its plane), it
+                // faces the hub by itself (multiblocks spec 4.2).
+                let pos = pos_of(ctx.pos);
+                let toward = Dir::HORIZONTAL
+                    .into_iter()
+                    .find(|d| {
+                        let Some(s) = level.block_state(pos.offset_by(*d, 2).to_array()) else {
+                            return false;
+                        };
+                        let (name, props) = state_props(level, s);
+                        name == "fras:flywheel"
+                            && props
+                                .iter()
+                                .any(|(k, v)| k == "axis" && v != d.axis().name())
+                    })
+                    .unwrap_or(facing);
+                state = set(state, "facing", toward.name());
+            }
+            Block::Flywheel => {
+                let axis = if face.axis() != Axis::Y {
+                    face.axis()
+                } else {
+                    facing.axis()
+                };
+                // Its plane must be clear (multiblocks spec 4.1).
+                let pos = pos_of(ctx.pos);
+                let clear = crate::sim::multi::engine::rim(pos, axis)
+                    .into_iter()
+                    .all(|q| {
+                        level.block_state(q.to_array()).is_some_and(|s| {
+                            let (name, _) = state_props(level, s);
+                            matches!(
+                                name.as_str(),
+                                "minecraft:air"
+                                    | "minecraft:cave_air"
+                                    | "minecraft:short_grass"
+                                    | "minecraft:snow"
+                            )
+                        })
+                    });
+                if !clear {
+                    return Some(None);
+                }
+                state = set(state, "axis", axis.name());
+            }
         }
         Some(Some(state))
     }
@@ -141,6 +213,16 @@ impl BlockPart for BlockHooks {
         let pos = pos_of(event.pos);
         let same_block = event.old.block() == event.new.block();
         let mine_new = event.state.block() == event.new.block();
+        if self.0.is_plant() {
+            if mine_new {
+                super::steam::queue(dim, pos, !same_block);
+            } else if !same_block {
+                super::steam::forget(dim, pos);
+            }
+        }
+        if matches!(self.0, Block::PressureGauge | Block::SightGlass) && !mine_new && !same_block {
+            super::steam::forget(dim, pos);
+        }
         with_level(dim, |l| {
             if mine_new {
                 // Placed, or one of its properties changed.
@@ -188,6 +270,15 @@ impl BlockPart for BlockHooks {
             Block::WaterWheel => {
                 l.wheels.insert(pos);
             }
+            Block::RedstoneValve => {
+                l.steam.redstone.insert(pos);
+            }
+            Block::Pump => {
+                l.steam.pumps.insert(pos);
+            }
+            Block::Flywheel => {
+                l.steam.flywheels.insert(pos);
+            }
             _ => {}
         });
     }
@@ -214,7 +305,10 @@ impl BlockPart for BlockHooks {
                 super::tools::swap_bearing(host, event.click)
             }
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder => Some(super::grinder::open(host, event.click)),
+            Block::Grinder | Block::Firebox => Some(super::grinder::open(host, event.click)),
+            Block::CopperBoiler | Block::IronBoiler | Block::StorageTank => {
+                super::pipes::bucket(host, event.click)
+            }
             _ => None,
         }
     }
@@ -226,7 +320,15 @@ impl BlockPart for BlockHooks {
     ) -> Option<InteractionResult> {
         match self.0 {
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder => Some(super::grinder::open(host, event.click)),
+            Block::Grinder | Block::Firebox => Some(super::grinder::open(host, event.click)),
+            Block::ManualValve => {
+                let close = host
+                    .player(event.click.player)
+                    .and_then(|p| p.is_secondary_use_active(&*host))
+                    == Some(true);
+                Some(super::pipes::manual_valve(host, event.click, close))
+            }
+            Block::SteamRelease => Some(super::pipes::steam_release(host, event.click)),
             _ => None,
         }
     }
@@ -244,7 +346,10 @@ impl BlockPart for BlockHooks {
     }
 
     fn has_analog_output(&self, _: &dyn LevelHost, event: &mut HasAnalogOutputEvent) {
-        if matches!(self.0, Block::Tachometer | Block::Grinder) {
+        if matches!(
+            self.0,
+            Block::Tachometer | Block::Grinder | Block::PressureGauge | Block::SightGlass
+        ) {
             event.output = true;
         }
     }
@@ -259,6 +364,9 @@ impl BlockPart for BlockHooks {
             Block::Grinder => {
                 event.output =
                     with_level(dim, |l| l.grinder_signal.get(&pos).copied().unwrap_or(0));
+            }
+            Block::PressureGauge | Block::SightGlass => {
+                event.output = with_level(dim, |l| l.steam.signals.get(&pos).copied().unwrap_or(0));
             }
             _ => {}
         }
@@ -282,7 +390,10 @@ pub fn takes_item(host: &dyn mod_api::Host, click: &mod_api::BlockClick<'_>) -> 
         return false;
     };
     match super::server::block_at(host, level, pos_of_array(click.pos)) {
-        Some(Block::Grinder | Block::Crank) => true,
+        Some(Block::Grinder | Block::Crank | Block::Firebox) => true,
+        Some(Block::CopperBoiler | Block::IronBoiler | Block::StorageTank) => {
+            item == keys.wrench || item == keys.water_bucket || item == keys.bucket
+        }
         Some(Block::ShaftWood | Block::ShaftIron) => item == keys.bearing,
         Some(_) => item == keys.wrench,
         None => false,
@@ -361,6 +472,8 @@ impl BlockEntityPart for EntityHooks {
         match self.0 {
             Block::Grinder => super::grinder::tick(host, event),
             Block::Tachometer => tachometer_tick(host, event),
+            Block::Firebox => super::firebox::tick(host, event),
+            Block::PressureGauge | Block::SightGlass => gauge_tick(self.0, host, event),
             _ => *event.reply = BlockEntityTickReply::Unchanged,
         }
     }
@@ -383,6 +496,9 @@ impl BlockEntityPart for EntityHooks {
                 l.pending.entry(Pos::from_array(pos)).or_insert(false);
             });
         }
+        if self.0.is_plant() {
+            super::steam::queue(dim, Pos::from_array(pos), false);
+        }
     }
 
     fn on_chunk_unloaded(&self, host: HostSide, event: &mut OnChunkUnloadedEvent<'_>) {
@@ -395,7 +511,11 @@ impl BlockEntityPart for EntityHooks {
         let levels: Vec<server::Dim> = with(|s| {
             s.levels
                 .iter()
-                .filter(|(_, l)| l.mech.contains(pos) || l.cranks.contains_key(&pos))
+                .filter(|(_, l)| {
+                    l.mech.contains(pos)
+                        || l.cranks.contains_key(&pos)
+                        || l.steam.works.contains(pos)
+                })
                 .map(|(d, _)| *d)
                 .collect()
         });
@@ -408,6 +528,8 @@ impl BlockEntityPart for EntityHooks {
                     l.mech.unload(pos);
                     l.cranks.remove(&pos);
                     l.wheel_torque.remove(&pos);
+                    l.steam.works.unload(pos);
+                    l.steam.signals.remove(&pos);
                 });
             }
         }
@@ -468,19 +590,29 @@ impl BlockEntityPart for EntityHooks {
     ) {
         if matches!(
             self.0,
-            Block::WaterWheel | Block::LargePulley | Block::Pulley
+            Block::WaterWheel
+                | Block::LargePulley
+                | Block::Pulley
+                | Block::Flywheel
+                | Block::SteamCylinder
         ) {
             event.distance = event.distance.max(96.0);
         }
     }
 
     fn screen(&self, _: &dyn Host, event: &mut ScreenEvent<'_>) -> Option<mod_api::Screen> {
-        (self.0 == Block::Grinder).then(|| super::grinder::screen(event))?
+        match self.0 {
+            Block::Grinder => super::grinder::screen(event),
+            Block::Firebox => super::firebox::screen(event),
+            _ => None,
+        }
     }
 
     fn screen_draw(&self, host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
-        if self.0 == Block::Grinder {
-            super::grinder::screen_draw(host, event);
+        match self.0 {
+            Block::Grinder => super::grinder::screen_draw(host, event),
+            Block::Firebox => super::firebox::screen_draw(host, event),
+            _ => {}
         }
     }
 }
@@ -531,6 +663,63 @@ fn tachometer_tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'
         *event.reply = BlockEntityTickReply::Unchanged;
     }
     // A changed signal is written back (Changed), which updates comparators.
+}
+
+/// A pressure gauge or sight glass reads the part it is on (spec 2, 10):
+/// sent to clients when the reading moves by 0.1 bar or 3% (or 2% of the
+/// glass), the comparator kept up to date.
+fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
+    let dim = host.dimension();
+    let pos = Pos::from_array(event.pos);
+    let Some(level) = host.level(dim) else {
+        *event.reply = BlockEntityTickReply::Unchanged;
+        return;
+    };
+    let default = if block == Block::PressureGauge {
+        Dir::Up
+    } else {
+        Dir::North
+    };
+    let facing = server::property(&*host, level, pos, "facing")
+        .as_deref()
+        .and_then(Dir::from_name)
+        .unwrap_or(default);
+    let part = pos.offset(facing.opposite());
+    let nbt = &event.entity.nbt;
+    let (signal, changed) = if block == Block::PressureGauge {
+        let g = with_level(dim, |l| l.steam.works.gauge(part));
+        let shown = blocks::get_f64(nbt, "bar").unwrap_or(-1.0);
+        let changed = (shown - g.bar).abs() > (0.1f64).max(g.bar * 0.03)
+            || blocks::get_f64(nbt, "red").unwrap_or(-1.0) != g.red;
+        if changed {
+            let nbt = &mut event.entity.nbt;
+            blocks::put_f64(nbt, "bar", g.bar);
+            blocks::put_f64(nbt, "red", g.red);
+        }
+        (g.signal() as i32, changed)
+    } else {
+        let (level_, warn) = with_level(dim, |l| l.steam.works.sight(part)).unwrap_or((0.0, 0));
+        let shown = blocks::get_f64(nbt, "level").unwrap_or(-1.0);
+        let changed = (shown - level_).abs() > 0.02
+            || blocks::get_i32(nbt, "lwarn").unwrap_or(-1) != warn as i32;
+        if changed {
+            let nbt = &mut event.entity.nbt;
+            blocks::put_f64(nbt, "level", level_);
+            blocks::put_i32(nbt, "lwarn", warn as i32);
+        }
+        let signal = if level_ <= 0.0 {
+            0
+        } else {
+            ((level_ * 15.0).ceil() as i32).clamp(1, 15)
+        };
+        (signal, changed)
+    };
+    let old = with_level(dim, |l| l.steam.signals.insert(pos, signal));
+    if changed {
+        host.block_entity_sync(event.pos);
+    } else if old == Some(signal) {
+        *event.reply = BlockEntityTickReply::Unchanged;
+    }
 }
 
 /// The comparator signal for a speed against the red line.

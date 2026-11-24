@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/iron_boiler/shell",
+  "loader": "fras:shell",
+  "mask": 43,
+  "axis": "y"
+}

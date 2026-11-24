@@ -1,0 +1,35 @@
+{
+  "template": "minecraft:bricks",
+  "properties": {
+    "hardness": 3.5,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "lit": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "lit": "false"
+  },
+  "state_light": {
+    "properties": [
+      "lit"
+    ],
+    "values": {
+      "true": 13,
+      "false": 0
+    }
+  }
+}

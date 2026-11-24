@@ -1,0 +1,146 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "rod": "minecraft:block/copper_block",
+    "back": "minecraft:block/white_concrete",
+    "particle": "minecraft:block/copper_block"
+  },
+  "elements": [
+    {
+      "from": [
+        5.5,
+        0,
+        13.5
+      ],
+      "to": [
+        10.5,
+        1,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        },
+        "up": {
+          "texture": "#rod"
+        },
+        "down": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        15,
+        13.5
+      ],
+      "to": [
+        10.5,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        },
+        "up": {
+          "texture": "#rod"
+        },
+        "down": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        1,
+        14
+      ],
+      "to": [
+        6.5,
+        15,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        9.5,
+        1,
+        14
+      ],
+      "to": [
+        10.5,
+        15,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rod"
+        },
+        "south": {
+          "texture": "#rod"
+        },
+        "east": {
+          "texture": "#rod"
+        },
+        "west": {
+          "texture": "#rod"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        1,
+        15
+      ],
+      "to": [
+        9.5,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#back"
+        },
+        "south": {
+          "texture": "#back"
+        }
+      }
+    }
+  ]
+}

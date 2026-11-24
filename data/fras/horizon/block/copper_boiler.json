@@ -1,0 +1,53 @@
+{
+  "template": "minecraft:copper_block",
+  "properties": {
+    "hardness": 3.0,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "formed": {
+      "type": "boolean"
+    },
+    "axis": {
+      "type": "enum",
+      "values": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "damaged": {
+      "type": "boolean"
+    },
+    "joined_down": {
+      "type": "boolean"
+    },
+    "joined_up": {
+      "type": "boolean"
+    },
+    "joined_north": {
+      "type": "boolean"
+    },
+    "joined_south": {
+      "type": "boolean"
+    },
+    "joined_west": {
+      "type": "boolean"
+    },
+    "joined_east": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "formed": "false",
+    "axis": "y",
+    "damaged": "false",
+    "joined_down": "false",
+    "joined_up": "false",
+    "joined_north": "false",
+    "joined_south": "false",
+    "joined_west": "false",
+    "joined_east": "false"
+  }
+}

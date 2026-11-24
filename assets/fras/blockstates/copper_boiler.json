@@ -1,0 +1,586 @@
+{
+  "variants": {
+    "formed=false,damaged=false": {
+      "model": "fras:block/copper_boiler/unformed"
+    },
+    "formed=false,damaged=true": {
+      "model": "fras:block/copper_boiler/damaged"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_0_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_1_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_2_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_3_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_4_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_5_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_6_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_7_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_8_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_9_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_10_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_11_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_12_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_13_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_14_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_15_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_16_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_17_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_18_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_19_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_20_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_21_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_22_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_23_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_24_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_25_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_26_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_27_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_28_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_29_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_30_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_31_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_32_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_33_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_34_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_35_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_36_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_37_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_38_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_39_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_40_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_41_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_42_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_43_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_44_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_45_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_46_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_47_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_48_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_49_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_50_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_51_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_52_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_53_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_54_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_55_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_56_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_57_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_58_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_59_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_60_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_61_x"
+    },
+    "formed=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_62_x"
+    },
+    "formed=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_63_x"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_0_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_1_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_2_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_3_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_4_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_5_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_6_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_7_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_8_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_9_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_10_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_11_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_12_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_13_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_14_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_15_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_16_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_17_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_18_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_19_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_20_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_21_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_22_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_23_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_24_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_25_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_26_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_27_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_28_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_29_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_30_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_31_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_32_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_33_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_34_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_35_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_36_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_37_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_38_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_39_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_40_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_41_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_42_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_43_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_44_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_45_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_46_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_47_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_48_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_49_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_50_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_51_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_52_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_53_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_54_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_55_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_56_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_57_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_58_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_59_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_60_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_61_y"
+    },
+    "formed=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_62_y"
+    },
+    "formed=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_63_y"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_0_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_1_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_2_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_3_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_4_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_5_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_6_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_7_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_8_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_9_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_10_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_11_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_12_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_13_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_14_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_15_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_16_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_17_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_18_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_19_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_20_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_21_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_22_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_23_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_24_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_25_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_26_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_27_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_28_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_29_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_30_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/copper_boiler/f_31_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_32_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_33_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_34_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_35_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_36_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_37_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_38_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_39_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_40_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_41_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_42_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_43_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_44_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_45_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_46_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_47_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_48_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_49_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_50_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_51_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_52_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_53_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_54_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_55_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_56_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_57_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_58_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_59_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_60_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_61_z"
+    },
+    "formed=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_62_z"
+    },
+    "formed=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/copper_boiler/f_63_z"
+    }
+  }
+}

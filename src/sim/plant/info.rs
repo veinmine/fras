@@ -246,4 +246,127 @@ impl Works {
         }
         Some(out)
     }
+
+    /// A repaired multiblock block restarts cold and empty (spec 2, 12).
+    pub fn reset(&mut self, pos: Pos) {
+        self.dissolve();
+        if let Some(p) = self.parts.get_mut(&pos) {
+            let formation = p.saved.formation;
+            p.saved = Saved {
+                formation,
+                ..Saved::default()
+            };
+        }
+        self.dirty = true;
+    }
+
+    /// Pipe parts that burn on touch now, grouped by network.
+    pub fn hot_pipes(&self) -> Vec<Vec<Pos>> {
+        self.steam
+            .iter()
+            .filter(|n| {
+                n.pool.pressure() > HOT_PIPE_BAR
+                    && !self.plants.get(n.plant).is_none_or(|p| p.paused)
+            })
+            .map(|n| {
+                n.nets
+                    .iter()
+                    .flat_map(|&ni| self.nets[ni].pipes.iter().copied())
+                    .collect()
+            })
+            .filter(|v: &Vec<Pos>| !v.is_empty())
+            .collect()
+    }
+
+    /// Cylinders exhausting now (their engine turning on steam).
+    pub fn exhausts(&self) -> Vec<Pos> {
+        let mut out = Vec::new();
+        for e in &self.engines {
+            if self.plants.get(e.plant).is_none_or(|p| p.paused) {
+                continue;
+            }
+            for (i, c) in e.cylinders.iter().enumerate() {
+                if e.demand[i] > 0.5 && e.fill[i] > 0.0 {
+                    out.push(*c);
+                }
+            }
+        }
+        out
+    }
+
+    /// The engine a flywheel or cylinder belongs to: the flywheel and its cylinders.
+    pub fn engine_parts(&self, pos: Pos) -> Option<(Pos, Vec<Pos>)> {
+        let &ei = self.engine_of.get(&pos)?;
+        let e = &self.engines[ei];
+        Some((e.flywheel, e.cylinders.clone()))
+    }
+
+    /// Every loaded block of a formed multiblock.
+    pub fn shell_positions(&self) -> Vec<Pos> {
+        let mut out: Vec<Pos> = self.shell_of.keys().copied().collect();
+        out.sort();
+        out
+    }
+
+    /// Pour water into a boiler or water tank (a bucket): true if it had room.
+    pub fn pour(&mut self, pos: Pos, mb: f64) -> bool {
+        let Some(&si) = self.shell_of.get(&pos) else {
+            return false;
+        };
+        let s = &self.shells[si];
+        if !s.works() || s.partial || s.content == Some(Content::Steam) {
+            return false;
+        }
+        if s.water_capacity() - s.water < mb - 1e-9 {
+            return false;
+        }
+        let was_empty = !s.is_boiler() && s.content.is_none();
+        if was_empty {
+            self.shells[si].content = Some(Content::Water);
+        }
+        self.fill(si, mb);
+        if was_empty {
+            // Its networks take its content now.
+            self.dissolve();
+            self.dirty = true;
+        }
+        true
+    }
+
+    /// Take water from a water tank (an empty bucket): true if it held enough.
+    pub fn draw_water(&mut self, pos: Pos, mb: f64) -> bool {
+        let Some(&si) = self.shell_of.get(&pos) else {
+            return false;
+        };
+        let s = &mut self.shells[si];
+        if s.is_boiler()
+            || !s.works()
+            || s.partial
+            || s.content != Some(Content::Water)
+            || s.water < mb - 1e-9
+        {
+            return false;
+        }
+        s.water -= mb;
+        true
+    }
+
+    /// The flow through a pipe part last step and its throughput now, mB/s.
+    pub fn flow_at(&self, pos: Pos) -> Option<(f64, f64)> {
+        let &ni = self.net_of.get(&pos)?;
+        let net = &self.nets[ni];
+        let &node = net.node_of.get(&pos)?;
+        let part = self.parts.get(&pos)?;
+        Some((
+            net.flow.get(node).copied().unwrap_or(0.0),
+            part.spec.throughput_now(),
+        ))
+    }
+
+    /// Whether a part's plant is waiting on part of it outside the loaded area.
+    pub fn partial(&self, pos: Pos) -> bool {
+        self.plant_of(pos)
+            .and_then(|p| self.plants.get(p))
+            .is_some_and(|p| p.partial)
+    }
 }

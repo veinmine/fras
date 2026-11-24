@@ -13,6 +13,22 @@
     "fras:crank",
     "fras:water_wheel",
     "fras:grinder",
-    "fras:tachometer"
+    "fras:tachometer",
+    "fras:firebox",
+    "fras:copper_boiler",
+    "fras:iron_boiler",
+    "fras:steam_dome",
+    "fras:storage_tank",
+    "fras:copper_pipe",
+    "fras:iron_pipe",
+    "fras:manual_valve",
+    "fras:redstone_valve",
+    "fras:steam_release",
+    "fras:emergency_valve",
+    "fras:pump",
+    "fras:steam_cylinder",
+    "fras:flywheel",
+    "fras:pressure_gauge",
+    "fras:sight_glass"
   ]
 }

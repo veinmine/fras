@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:copper_pipe",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "fras:manual_valve",
+    "count": 1
+  }
+}

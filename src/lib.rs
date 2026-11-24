@@ -46,10 +46,14 @@ impl Hooks for Fras {
             if block == Block::Grinder {
                 r.block_container(&key, game::grinder::container());
             }
+            if block == Block::Firebox {
+                r.block_container(&key, game::firebox::container());
+            }
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.
         r.menu_part("fras:grinder", game::grinder::InputSlot);
+        r.menu_part("fras:firebox", game::firebox::FuelSlot);
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
         let wrench = r.item_key("fras:wrench");
@@ -66,6 +70,16 @@ impl Hooks for Fras {
             let key = r.item_key(&format!("{ID}:{item}"));
             r.item_part(key, game::tools::Tooltip(item));
         }
+        let setting = mod_api::SettingSpec::choice(
+            game::steam::SETTING,
+            "fras.settings.explosion",
+            game::steam::MODES,
+            0,
+        )
+        .tooltip("fras.settings.explosion.tooltip");
+        if let Err(e) = r.register_setting(setting) {
+            eprintln!("[{ID}] setting: {e}");
+        }
         let _ = game::KEYS.set(game::Keys {
             wrench,
             leather_belt,
@@ -76,6 +90,11 @@ impl Hooks for Fras {
             stick: r.item_key("minecraft:stick"),
             iron_nugget: r.item_key("minecraft:iron_nugget"),
             flint: r.item_key("minecraft:flint"),
+            water_bucket: r.item_key("minecraft:water_bucket"),
+            bucket: r.item_key("minecraft:bucket"),
+            copper_ingot: r.item_key("minecraft:copper_ingot"),
+            copper_nugget: r.item_key("minecraft:copper_nugget"),
+            iron_plate: r.item_key("fras:iron_plate"),
             smoke: r.particle_key("minecraft:smoke"),
             crit: r.particle_key("minecraft:crit"),
             cloud: r.particle_key("minecraft:poof"),
@@ -85,17 +104,56 @@ impl Hooks for Fras {
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::firebox::clear();
     }
 
     fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::firebox::clear();
+    }
+
+    /// The boiler and tank shells' model loader (multiblocks spec 6.1).
+    fn register_model_loaders(
+        &self,
+        _: &RegistrationContext,
+        event: &mut mod_api::RegisterModelLoadersEvent<'_>,
+    ) {
+        event.loaders.push(game::shell_model::LOADER.to_string());
+    }
+
+    fn bake_model_loader(
+        &self,
+        _: &RegistrationContext,
+        event: &mut mod_api::BakeModelLoaderEvent<'_>,
+    ) {
+        if event.loader != game::shell_model::LOADER {
+            return;
+        }
+        if let Some((mask, axis)) = game::shell_model::config(event.config) {
+            event
+                .quads
+                .extend(game::shell_model::quads(mask, axis, "side", "end"));
+        }
+    }
+
+    /// The explosion mode is a client setting: copy it where the
+    /// integrated server reads it.
+    fn client_tick_post(
+        &self,
+        host: &mut dyn mod_api::ClientHost,
+        _: &mut mod_api::ClientTickPostEvent,
+    ) {
+        if let Some(mode) = host.setting_choice(game::steam::SETTING) {
+            game::steam::set_explosion_mode(mode as u8);
+        }
     }
 
     /// Recipes and tags are final: read the grinding recipes.
     fn tags_updated(&self, host: HostSide<'_>, _: &mut TagsUpdatedEvent) {
         if let HostSide::Server(host) = host {
             game::grinder::load(&*host);
+            game::firebox::load(&*host);
         }
     }
 

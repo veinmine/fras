@@ -23,7 +23,7 @@ const OAK: &str = "block/oak_planks";
 const HOUSING: &str = "block/polished_andesite";
 const BELT: &str = "block/brown_wool";
 
-fn prop(host: &dyn ClientHost, state: BlockState, key: &str) -> Option<String> {
+pub fn prop(host: &dyn ClientHost, state: BlockState, key: &str) -> Option<String> {
     let states = host.block_states();
     state
         .property(&states, key)
@@ -37,7 +37,7 @@ fn prop(host: &dyn ClientHost, state: BlockState, key: &str) -> Option<String> {
 type Spins = HashMap<(Pos, u8), (f32, f64)>;
 static SPINS: Mutex<Option<Spins>> = Mutex::new(None);
 
-fn spin(
+pub fn spin(
     draw: &mut dyn BlockEntityDrawContext,
     pos: Pos,
     layer: u8,
@@ -70,10 +70,18 @@ fn spin(
     );
 }
 
-const CENTER: [f32; 3] = [0.5, 0.5, 0.5];
+/// The angle (degrees) a spinning layer has turned to at animation time
+/// `now`, if it has been drawn.
+pub fn angle(pos: Pos, layer: u8, now: f64) -> Option<f64> {
+    let guard = SPINS.lock().unwrap_or_else(|e| e.into_inner());
+    let (speed, phase) = guard.as_ref()?.get(&(pos, layer)).copied()?;
+    Some(now * speed as f64 + phase)
+}
+
+pub const CENTER: [f32; 3] = [0.5, 0.5, 0.5];
 
 /// A box given along `axis` and across it (the other two axes in order).
-fn span(axis: Axis, along: [f32; 2], u: [f32; 2], v: [f32; 2]) -> ([f32; 3], [f32; 3]) {
+pub fn span(axis: Axis, along: [f32; 2], u: [f32; 2], v: [f32; 2]) -> ([f32; 3], [f32; 3]) {
     match axis {
         Axis::X => ([along[0], u[0], v[0]], [along[1], u[1], v[1]]),
         Axis::Y => ([u[0], along[0], v[0]], [u[1], along[1], v[1]]),
@@ -82,7 +90,7 @@ fn span(axis: Axis, along: [f32; 2], u: [f32; 2], v: [f32; 2]) -> ([f32; 3], [f3
 }
 
 /// Faces of a box along `axis`: `end` on its two ends, `side` around.
-fn faces<'a>(axis: Axis, side: &'a str, end: &'a str) -> [Option<CubeFace<'a>>; 6] {
+pub fn faces<'a>(axis: Axis, side: &'a str, end: &'a str) -> [Option<CubeFace<'a>>; 6] {
     let s = Some(CubeFace::new(side));
     let e = Some(CubeFace::new(end));
     match axis {
@@ -113,7 +121,7 @@ fn uvs(from: [f32; 3], to: [f32; 3]) -> [[f32; 4]; 6] {
     ]
 }
 
-fn boxed(
+pub fn boxed(
     draw: &mut dyn BlockEntityDrawContext,
     b: ([f32; 3], [f32; 3]),
     faces: [Option<CubeFace<'_>>; 6],
@@ -133,7 +141,7 @@ fn boxed(
 }
 
 /// An axle along `axis` through the block's centre, half width `w` texels.
-fn axle(
+pub fn axle(
     draw: &mut dyn BlockEntityDrawContext,
     axis: Axis,
     along: [f32; 2],
@@ -169,6 +177,10 @@ fn stubs(draw: &mut dyn BlockEntityDrawContext, pos: Pos, spec: &Spec, rpm: f64,
 }
 
 pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
+    if block.is_plant() || matches!(block, Block::PressureGauge | Block::SightGlass) {
+        super::steam_draw::submit(block, host, event);
+        return;
+    }
     let nbt = &event.entity.nbt;
     let pos = Pos::from_array(event.pos);
     let state = event.state;
@@ -413,6 +425,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             boxed(draw, ([7.5, 2.0, 3.5], [8.5, 2.6, 8.5]), [n, n, n, n, n, n]);
             draw.pop();
         }
+        _ => {}
     }
     draw.keep();
 }
@@ -646,7 +659,7 @@ pub fn bounds(block: Block, event: &mut BlockEntityRenderBoundingBoxEvent<'_>) {
                 b[5].max(2.5),
             ];
         }
-        _ => {}
+        _ => super::steam_draw::bounds(block, b),
     }
     if matches!(block, Block::Pulley | Block::LargePulley)
         && let Some(belt) = blocks::belt(&event.entity.nbt)

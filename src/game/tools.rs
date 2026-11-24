@@ -10,7 +10,8 @@ use mod_api::{
 use super::blocks::{self, Block};
 use super::server::{self, Dim, block_at, read_part, with, with_level};
 use super::world::{self, set_property};
-use super::{effects, keys, num};
+use super::{effects, keys, num, pipes, steam, steam_inspect};
+use crate::sim::fluid::valve;
 use crate::sim::geom::{Axis, Dir, Pos};
 use crate::sim::rot::part::{BELT_MAX_DISTANCE, CRANK_STALL, CRANK_TOP, WHEEL_TOP};
 use crate::sim::rot::{BeltEnd, Jam, Kind, Material, Shape};
@@ -64,11 +65,18 @@ pub fn wrench(
     let (player, level, dim) = context(&*host, player)?;
     let mut pos = Pos::from_array(pos);
     let mut block = block_at(&*host, level, pos)?;
-    // A tachometer stands for the part it is on.
-    if block == Block::Tachometer {
+    // A tachometer or gauge stands for the part it is on.
+    let gauge_default = match block {
+        Block::Tachometer => Some(Dir::North),
+        Block::PressureGauge => Some(Dir::Up),
+        Block::SightGlass => Some(Dir::North),
+        _ => None,
+    };
+    if let Some(default) = gauge_default {
         let facing = server::property(&*host, level, pos, "facing")
             .as_deref()
-            .and_then(Dir::from_name)?;
+            .and_then(Dir::from_name)
+            .unwrap_or(default);
         pos = pos.offset(facing.opposite());
         block = block_at(&*host, level, pos)?;
     }
@@ -78,12 +86,22 @@ pub fn wrench(
         }
         return Some(InteractionResult::Success);
     }
+    if block.is_plant()
+        && server::property(&*host, level, pos, "damaged").as_deref() == Some("true")
+    {
+        return Some(repair_plant(host, player, level, dim, pos, block));
+    }
     let jammed = with_level(dim, |l| l.mech.part(pos).and_then(|p| p.jam));
     if let Some(jam) = jammed {
+        // A flywheel is only freed once its rim is clear (multiblocks spec 4.1).
+        if jam == Jam::Blocked && steam::flywheel_blocker(&*host, level, pos).is_some() {
+            bar(host, player, tr("fras.wrench.still_blocked", vec![]));
+            return Some(InteractionResult::Fail);
+        }
         return Some(repair(host, player, level, dim, pos, block, jam));
     }
     let clicked = super::dir_of_vec(face);
-    if configure(host, player, level, pos, block, clicked) {
+    if configure(host, player, level, dim, pos, block, clicked) {
         effects::sound(host, level, pos, "minecraft:block.chain.place", 0.6, 1.4);
         Some(InteractionResult::Success)
     } else {
@@ -107,7 +125,23 @@ pub fn repair_cost(block: Block) -> Vec<(&'static str, u32)> {
         }
         Block::Gearbox => vec![("minecraft:iron_nugget", 2)],
         Block::Grinder => vec![("minecraft:iron_nugget", 2), ("minecraft:flint", 1)],
-        Block::Tachometer => vec![],
+        // 0.2 (steam spec 12, fluids spec 4.4 and 7.1)
+        Block::CopperBoiler => vec![("minecraft:copper_ingot", 1)],
+        Block::IronBoiler | Block::StorageTank => vec![("fras:iron_plate", 1)],
+        Block::CopperPipe => vec![("minecraft:copper_nugget", 1)],
+        Block::IronPipe
+        | Block::ManualValve
+        | Block::RedstoneValve
+        | Block::SteamRelease
+        | Block::EmergencyValve => vec![("minecraft:iron_nugget", 1)],
+        Block::SteamCylinder => vec![("minecraft:iron_nugget", 2)],
+        Block::Flywheel => vec![("minecraft:iron_nugget", 4)],
+        Block::Pump => vec![("minecraft:iron_nugget", 2), ("minecraft:copper_ingot", 1)],
+        Block::Tachometer
+        | Block::SteamDome
+        | Block::Firebox
+        | Block::PressureGauge
+        | Block::SightGlass => vec![],
     }
 }
 
@@ -117,11 +151,14 @@ fn cost_key(id: &str) -> Option<ItemKey> {
         "minecraft:stick" => k.stick,
         "minecraft:iron_nugget" => k.iron_nugget,
         "minecraft:flint" => k.flint,
+        "minecraft:copper_ingot" => k.copper_ingot,
+        "minecraft:copper_nugget" => k.copper_nugget,
+        "fras:iron_plate" => k.iron_plate,
         _ => return None,
     })
 }
 
-fn cost_text(cost: &[(&str, u32)]) -> Text {
+pub fn cost_text(cost: &[(&str, u32)]) -> Text {
     let mut t = Text::literal("");
     for (i, (id, n)) in cost.iter().enumerate() {
         if i > 0 {
@@ -177,6 +214,45 @@ fn repair(
     block: Block,
     jam: Jam,
 ) -> InteractionResult {
+    if !pay(host, player, block) {
+        return InteractionResult::Fail;
+    }
+    with_level(dim, |l| l.mech.repair(pos));
+    effects::sound(host, level, pos, "minecraft:block.anvil.use", 0.5, 1.5);
+    let line = Text::translate(
+        "fras.repair.done",
+        vec![Text::translate(format!("fras.jam.{}", jam.name()), vec![])],
+    );
+    bar(host, player, line);
+    InteractionResult::Success
+}
+
+/// Mend a damaged steam part: a burst pipe or vessel is whole again, a
+/// vessel starts empty and cold (steam spec 12, fluids spec 4.4).
+fn repair_plant(
+    host: &mut dyn ServerHost,
+    player: PlayerRef,
+    level: LevelRef,
+    dim: Dim,
+    pos: Pos,
+    block: Block,
+) -> InteractionResult {
+    if !pay(host, player, block) {
+        return InteractionResult::Fail;
+    }
+    set_property(host, level, pos, "damaged", "false");
+    if block.is_shell() {
+        with_level(dim, |l| l.steam.works.reset(pos));
+    }
+    steam::queue(dim, pos, false);
+    effects::sound(host, level, pos, "minecraft:block.anvil.use", 0.5, 1.5);
+    bar(host, player, tr("fras.repair.mended", vec![]));
+    InteractionResult::Success
+}
+
+/// Take a part's repair cost from the player (nothing in creative). False,
+/// with a message, if they don't carry it.
+fn pay(host: &mut dyn ServerHost, player: PlayerRef, block: Block) -> bool {
     let cost = repair_cost(block);
     if !creative(&*host, player) {
         let missing = cost.iter().any(|(id, n)| {
@@ -191,7 +267,7 @@ fn repair(
         if missing {
             let line = Text::translate("fras.repair.missing", vec![cost_text(&cost)]);
             bar(host, player, line);
-            return InteractionResult::Fail;
+            return false;
         }
         for (id, n) in &cost {
             if let Some(k) = cost_key(id) {
@@ -199,14 +275,7 @@ fn repair(
             }
         }
     }
-    with_level(dim, |l| l.mech.repair(pos));
-    effects::sound(host, level, pos, "minecraft:block.anvil.use", 0.5, 1.5);
-    let line = Text::translate(
-        "fras.repair.done",
-        vec![Text::translate(format!("fras.jam.{}", jam.name()), vec![])],
-    );
-    bar(host, player, line);
-    InteractionResult::Success
+    true
 }
 
 /// Right-click with the wrench: rotate, cycle, toggle or flip.
@@ -214,6 +283,7 @@ fn configure(
     host: &mut dyn ServerHost,
     player: PlayerRef,
     level: LevelRef,
+    dim: Dim,
     pos: Pos,
     block: Block,
     clicked: Option<Dir>,
@@ -293,13 +363,10 @@ fn configure(
                 let _ = b;
                 server::merge(host, level, a, c);
             }
-            let dim = server::dim_of(&*host, level);
-            if let Some(dim) = dim {
-                with_level(dim, |l| {
-                    l.pending.insert(pos, true);
-                    l.pending.insert(belt.partner, true);
-                });
-            }
+            with_level(dim, |l| {
+                l.pending.insert(pos, true);
+                l.pending.insert(belt.partner, true);
+            });
             let key = if crossed {
                 "fras.wrench.crossed"
             } else {
@@ -307,6 +374,82 @@ fn configure(
             };
             bar(host, player, tr(key, vec![]));
             true
+        }
+        Block::CopperPipe | Block::IronPipe => {
+            let Some(face) = clicked else {
+                return false;
+            };
+            let key = pipes::toggle(host, level, dim, pos, face);
+            bar(host, player, tr(key, vec![]));
+            key == "fras.wrench.pipe_on" || key == "fras.wrench.pipe_off"
+        }
+        Block::ManualValve | Block::RedstoneValve => {
+            let axis = prop(&*host, "axis")
+                .as_deref()
+                .and_then(Axis::from_name)
+                .unwrap_or(Axis::X);
+            // The pipes on the old ends let go; the new ends connect.
+            for d in [axis.positive(), axis.positive().opposite()] {
+                let q = pos.offset(d);
+                if block_at(&*host, level, q).is_some_and(Block::is_pipe) {
+                    set_property(host, level, q, d.opposite().name(), "false");
+                }
+            }
+            let next = match axis {
+                Axis::X => Axis::Y,
+                Axis::Y => Axis::Z,
+                Axis::Z => Axis::X,
+            };
+            let done = set_property(host, level, pos, "axis", next.name());
+            pipes::connect_around(host, level, dim, pos);
+            steam::queue(dim, pos, false);
+            done
+        }
+        Block::EmergencyValve => {
+            let nbt = host
+                .block_entity(level, pos.to_array())
+                .and_then(|e| e.data(&*host))
+                .unwrap_or_default();
+            let set = blocks::get_f64(&nbt, "set").unwrap_or(valve::DEFAULT_SET);
+            let next = valve::next_set(set);
+            let mut c = mod_api::Compound::new();
+            blocks::put_f64(&mut c, "set", next);
+            server::merge(host, level, pos, c);
+            steam::queue(dim, pos, false);
+            bar(
+                host,
+                player,
+                tr("fras.wrench.set_pressure", vec![format!("{next:.1}")]),
+            );
+            true
+        }
+        Block::Flywheel => {
+            let nbt = host
+                .block_entity(level, pos.to_array())
+                .and_then(|e| e.data(&*host))
+                .unwrap_or_default();
+            let reverse = !blocks::get_bool(&nbt, "reverse");
+            let mut c = mod_api::Compound::new();
+            blocks::put_bool(&mut c, "reverse", reverse);
+            server::merge(host, level, pos, c);
+            steam::queue(dim, pos, false);
+            let key = if reverse {
+                "fras.wrench.reverse"
+            } else {
+                "fras.wrench.forward"
+            };
+            bar(host, player, tr(key, vec![]));
+            true
+        }
+        Block::Pump => {
+            let socket = prop(&*host, "facing")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::North);
+            let next = Dir::from_index((socket.index() + 1) % 6).unwrap_or(Dir::Down);
+            let done = set_property(host, level, pos, "facing", next.name());
+            pipes::connect_around(host, level, dim, pos);
+            done
         }
         _ => false,
     }
@@ -339,7 +482,11 @@ pub fn inspect(
         )
     });
     let Some(part) = part else {
-        lines.push(tr("fras.inspect.not_connected", vec![]));
+        if block.is_plant() {
+            steam_inspect::lines(host, level, dim, pos, block, &mut lines);
+        } else {
+            lines.push(tr("fras.inspect.not_connected", vec![]));
+        }
         return lines;
     };
     if let Some(jam) = part.jam {
@@ -350,6 +497,14 @@ pub fn inspect(
                 cost_text(&repair_cost(block)),
             ],
         ));
+        if jam == Jam::Blocked
+            && let Some(q) = steam::flywheel_blocker(host, level, pos)
+        {
+            lines.push(tr(
+                "fras.inspect.blocked_at",
+                vec![q.x.to_string(), q.y.to_string(), q.z.to_string()],
+            ));
+        }
         return lines;
     }
     let Some(r) = reading else {
@@ -449,6 +604,9 @@ pub fn inspect(
         ));
     }
     lines.push(tr("fras.inspect.parts", vec![r.parts.to_string()]));
+    if block.is_plant() {
+        steam_inspect::lines(host, level, dim, pos, block, &mut lines);
+    }
     let _ = (host, level, Material::Wood, Shape::Socket(Dir::Up));
     lines
 }
@@ -688,7 +846,15 @@ mod tests {
     #[test]
     fn every_part_has_a_repair_cost() {
         for b in Block::ALL {
-            assert_eq!(repair_cost(b).is_empty(), b == Block::Tachometer);
+            let never_damaged = matches!(
+                b,
+                Block::Tachometer
+                    | Block::SteamDome
+                    | Block::Firebox
+                    | Block::PressureGauge
+                    | Block::SightGlass
+            );
+            assert_eq!(repair_cost(b).is_empty(), never_damaged);
         }
     }
 }

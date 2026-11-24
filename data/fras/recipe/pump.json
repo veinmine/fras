@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I I",
+    "PSP",
+    "III"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "P": "fras:copper_pipe",
+    "S": "fras:iron_shaft"
+  },
+  "result": {
+    "id": "fras:pump",
+    "count": 1
+  }
+}

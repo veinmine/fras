@@ -60,6 +60,8 @@ pub struct Level {
     pub tachometers: HashMap<Pos, i32>,
     /// Comparator values of grinders.
     pub grinder_signal: HashMap<Pos, i32>,
+    /// The steam plant (0.2).
+    pub steam: super::steam::Steam,
 }
 
 #[derive(Default)]
@@ -172,6 +174,26 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         });
     }
     super::world::wheels(host, level, dim);
+    super::steam::queued(host, level, dim);
+    if ticks % 40 == 0 {
+        // Flywheels check their plane every 2 s (a block placed diagonally
+        // gives them no neighbour update).
+        with_level(dim, |l| {
+            let fly: Vec<Pos> = l
+                .steam
+                .works
+                .rot_parts()
+                .into_iter()
+                .filter(|q| {
+                    l.mech
+                        .part(*q)
+                        .is_some_and(|p| p.spec.kind == crate::sim::rot::Kind::Flywheel)
+                })
+                .collect();
+            l.steam.flywheels.extend(fly);
+        });
+    }
+    super::steam::before_rot(dim);
 
     let (events, sync) = {
         let view = GameView {
@@ -221,6 +243,7 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
     for event in events {
         super::effects::event(host, level, &event);
     }
+    super::steam::after_rot(host, level, dim, ticks);
     if ticks % 10 == 0 {
         super::effects::warnings(host, level, dim);
     }

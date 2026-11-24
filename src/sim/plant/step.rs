@@ -257,6 +257,10 @@ impl Works {
 
     /// Water into a boiler (mixing its temperature, flashing on a hot dry
     /// shell) or a water tank.
+    pub(crate) fn fill(&mut self, si: usize, mb: f64) {
+        self.fill_shell(si, mb);
+    }
+
     fn fill_shell(&mut self, si: usize, mb: f64) {
         let s = &mut self.shells[si];
         let mb = mb.min((s.water_capacity() - s.water).max(0.0));

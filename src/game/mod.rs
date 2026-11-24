@@ -5,9 +5,15 @@
 pub mod blocks;
 pub mod draw;
 pub mod effects;
+pub mod firebox;
 pub mod grinder;
 pub mod parts;
+pub mod pipes;
 pub mod server;
+pub mod shell_model;
+pub mod steam;
+pub mod steam_draw;
+pub mod steam_inspect;
 pub mod tools;
 pub mod world;
 
@@ -28,6 +34,11 @@ pub struct Keys {
     pub stick: ItemKey,
     pub iron_nugget: ItemKey,
     pub flint: ItemKey,
+    pub water_bucket: ItemKey,
+    pub bucket: ItemKey,
+    pub copper_ingot: ItemKey,
+    pub copper_nugget: ItemKey,
+    pub iron_plate: ItemKey,
     pub smoke: ParticleKey,
     pub crit: ParticleKey,
     pub cloud: ParticleKey,
@@ -155,6 +166,7 @@ mod tests {
             crate::sim::rot::Jam::Shear,
             crate::sim::rot::Jam::Shock,
             crate::sim::rot::Jam::Conflict,
+            crate::sim::rot::Jam::Blocked,
         ] {
             keys.push(format!("fras.jam.{}", j.name()));
         }
@@ -165,7 +177,18 @@ mod tests {
             ));
         }
         // Literal keys in the sources.
-        for file in ["tools.rs", "parts.rs", "grinder.rs"] {
+        for m in steam::MODES {
+            keys.push(m.to_string());
+        }
+        for file in [
+            "tools.rs",
+            "parts.rs",
+            "grinder.rs",
+            "steam.rs",
+            "steam_inspect.rs",
+            "pipes.rs",
+            "firebox.rs",
+        ] {
             let src =
                 std::fs::read_to_string(format!("{}/src/game/{file}", env!("CARGO_MANIFEST_DIR")))
                     .unwrap();

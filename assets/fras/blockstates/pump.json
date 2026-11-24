@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "fras:block/pump"
+    },
+    "facing=down": {
+      "model": "fras:block/pump",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "fras:block/pump",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "fras:block/pump",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "fras:block/pump",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "fras:block/pump",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
