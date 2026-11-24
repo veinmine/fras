@@ -1,14 +1,14 @@
 # Steam and heat: subsystem spec
 
-Spec 2 of the design doc's section 12. Version 1.0 (2026-11-24), scope: **milestone 0.2 (Steam)**.
+Spec 2 of the design doc's section 12. Version 1.1 (2026-11-24), scope: **milestone 0.2 (Steam)**.
 Builds on `Fire, rust and steam - design.md` v2.1 (sections 4, 7 and 9), `specs/rotational-network.md`
 (section 9.3, the interface the engine plugs into) and `spike/FINDINGS.md`. Written together with
 `specs/fluids-and-pipes.md` (spec 3) and `specs/multiblocks.md` (spec 4), which cover the rest of 0.2. Where
 this spec is more precise than the design doc, this spec wins; section 18 lists what changes in the design doc.
 
-**Written without an interview.** Earlier specs were settled question by question with Marcin. This one was
-written in one go on his request, so every decision here is a proposal. Section 19 lists the assumptions and
-open questions for review.
+**Reviewed with Marcin** (2026-11-24). This spec was written in one go without an interview, then its open
+questions were put to Marcin together with those of specs 3 and 4. Section 19 records the decisions; all of
+this spec's were taken as proposed.
 
 Numbers marked *(tune)* are starting values for balancing, not commitments. Section 17 collects them, with the recipes.
 
@@ -145,7 +145,8 @@ is purely how much steam is packed into the network.
 
 - A **steam network** is every boiler steam space, steam pipe, steam tank, cylinder inlet, valve and vent
   connected by open pipes (spec 3 defines connections; a closed valve is a boundary). Boilers connect to it
-  through their **steam domes**.
+  through their **steam domes**. A boiler with no dome is a **sealed** network of its own: nothing draws or
+  vents its steam, so heated it climbs the failure ladder and ruptures (spec 4, 3.2).
 - **One pressure per network** (design doc 4.1): `P = steam / C`, where `steam` is the mB of steam held in
   the network and `C` its **steam capacity** in mB per bar: the sum of its boilers' steam spaces (100 per
   boiler block), steam tanks (400 per tank block) and pipes (5 per pipe block) *(tune)*.
@@ -479,7 +480,7 @@ For the whole milestone, across the three specs. Driven through the Horizon laun
 5. **Throughput:** a twin engine fed through copper pipe runs starved (overlay); iron pipe fixes it; a big
    boiler with one dome starves its engines, a second dome fixes it.
 6. **Ladder:** a copper boiler overfired with no emergency valve hisses, shakes and ruptures; with each
-   explosion mode the result matches 7.5. An emergency valve set at 3.5 bar holds one coal firebox; one valve
+   explosion mode the result matches 7.5. A boiler with no dome, heated, does the same. An emergency valve set at 3.5 bar holds one coal firebox; one valve
    can't hold four, two can.
 7. **Dry firing:** a boiler left to boil dry with its fire burning glows, creaks and ruptures.
 8. **Burst:** copper pipe on an iron boiler bursts above 4 bar, scalds, vents; the wrench repairs it.
@@ -487,8 +488,9 @@ For the whole milestone, across the three specs. Driven through the Horizon laun
    engine; a steam release vents with a scalding jet; fire resistance prevents the scald.
 10. **Accumulator:** a steam tank on the network makes a sudden load sag the pressure visibly less.
 11. **Multiblocks:** seams vanish on formation; the wrench names what's wrong for a non-cuboid boiler, an
-    oversized one, a missing dome and a blocked flywheel; breaking a pressurised boiler block vents a puff and
-    splits it.
+    oversized one and a blocked flywheel, and warns on a sealed boiler (no dome); a copper and an iron boiler
+    and a tank stand face to face and each forms on its own; breaking a pressurised boiler block vents a puff
+    and splits it.
 12. **Gauges:** pressure gauge needle, red line and comparator; sight glass level and comparator (a low-water
     lamp).
 13. **Pause and reload:** a plant crossing the simulation distance pauses as a whole and nothing fails while
@@ -550,35 +552,30 @@ threshold 0.1 bar or 3%.
 
 ---
 
-## 19. Assumptions and open questions
+## 19. Decisions
 
-Decisions taken without asking. Each is a proposal; comment on any of them.
+Reviewed with Marcin on 2026-11-24; all of this spec's points were taken as proposed.
 
-1. **Units:** bar, mB, °C, and kW as a game unit (not real physics: real ratios make warm-up take half an
-   hour). Alternative: hide heat numbers and show only "weak / steady / hot" fuel.
-2. **Fixed 100 °C boiling point.** Real boilers boil hotter at higher pressure; modelling it would slow
-   pressure build-up and add a number nobody reads. Revisit with superheating in tier 2?
-3. **Two boiler materials** in tier 1: entry copper (4 blocks, 4 bar, hand-crafted from ingots) and iron
-   (8 blocks, 6 bar, from hand-hammered plates). The design doc names a "small copper boiler" and "bigger
-   boilers" from plates; this is my reading. The iron boiler will rust in 0.3.
-4. **The firebox has no off switch** (no redstone control) so that the damper in 0.3 matters and the safety
-   valve is needed. If that feels too harsh in play, a redstone-closed air door is easy to add.
-5. **Engine draw ∝ speed × pressure,** not "speed and load" literally. It reproduces everything the design doc
-   asks for (idle wastes steam, governor saves it, a stall raises pressure). A side effect: the worked
-   example's 4.8 bar under normal load would be over a copper boiler's 4 bar rating with the same two
-   fireboxes, so the emergency valve is essential from the first engine. Intended, or should loaded running
-   sit safely under the rating?
-6. **Top speed scales with pressure** (32 RPM per bar). At 6 bar an iron boiler's idle engine reaches 192 RPM,
-   the flywheel's limit. Should the top speed be capped at 128 regardless?
-7. **Dry firing ruptures** (design doc 4.1 says it is a failure, and 4.3 makes failures ruptures). A gentler
-   alternative is a burnt-out (damaged) boiler with no explosion.
-8. **Explosion modes:** contained still hurts entities; "off" still leaves the scalding steam cloud. Destroyed
+1. **S1. Units:** bar, mB, °C, and kW as a game unit (not real physics, which would make warm-up take half an
+   hour).
+2. **S2. Fixed 100 °C boiling point.** Pressure-dependent boiling may come with superheating in tier 2.
+3. **S3. Two tier-1 boiler materials:** copper (4 blocks, 4 bar, from ingots) and iron (8 blocks, 6 bar, from
+   hand-hammered plates; rusts from 0.3).
+4. **S4. The firebox has no off switch** in 0.2, so the 0.3 damper matters and the safety valve is needed. A
+   redstone-closed air door stays the easy fix if it plays too harsh.
+5. **S5. Loaded running may exceed a copper boiler's rating.** Engine draw ∝ speed × pressure; the worked
+   example's 4.8 bar under normal load is over copper's 4 bar with two fireboxes, so the emergency valve is
+   needed from the first engine. Intended: it teaches the safety valve early.
+6. **S6. Top speed scales with pressure** (32 RPM per bar), with no separate cap. An idle engine on 6 bar
+   reaches the flywheel's 192 RPM limit, so overspeed stays a real risk that throttling, gearing or the 0.3
+   governor deals with.
+7. **S7. Dry firing ruptures** (7.4).
+8. **S8. Explosion modes:** contained still hurts entities; "off" still leaves the scalding cloud. Destroyed
    blocks drop with the vanilla explosion chance in full and contained modes.
-9. **Burns:** 1 heart per second for jets, clouds and bursts, half that for touching a hot pipe; fire
+9. **S9. Burns:** 1 heart per second for jets, clouds and bursts, half that for touching a hot pipe; fire
    resistance protects. Boilers, domes and cylinders don't burn on touch.
-10. **Plant-wide pause** (section 14.2) is new and is the safe reading of "nothing explodes while nobody is
-    around". It means a long line shaft from an engine pauses the boiler too if its far end leaves the
+10. **S10. A plant pauses as a whole** (14.2), including a boiler whose engine's line shaft runs out of the
     simulated area.
-11. **Exhaust can't be piped in 0.2.** It vents at the cylinder and scalds the block above it.
-12. **Single-cylinder engines self-start** from any position (no dead centre) and run as smoothly as twins in
-    the simulation; the twin only doubles torque (smoothness is visual and sound only).
+11. **S11. Exhaust can't be piped in 0.2.** It vents at the cylinder and scalds the block above it.
+12. **S12. Single-cylinder engines self-start** from any position and run as smoothly as twins in the
+    simulation; the twin only doubles torque.

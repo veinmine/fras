@@ -1,12 +1,13 @@
 # Fluids and pipes: subsystem spec
 
-Spec 3 of the design doc's section 12. Version 1.0 (2026-11-24), scope: **milestone 0.2 (Steam)**.
+Spec 3 of the design doc's section 12. Version 1.1 (2026-11-24), scope: **milestone 0.2 (Steam)**.
 Builds on `Fire, rust and steam - design.md` v2.1 (sections 4.5, 4.6 and 9), `specs/steam-and-heat.md`
 (spec 2: pressure, ratings, burns), `specs/multiblocks.md` (spec 4: how tanks form) and `spike/FINDINGS.md`.
 Where this spec is more precise than the design doc, this spec wins; section 14 lists what changes in the
 design doc.
 
-**Written without an interview,** like specs 2 and 4. Section 15 lists the assumptions and open questions.
+**Reviewed with Marcin** (2026-11-24) after being written without an interview, like specs 2 and 4. Section 15
+records the decisions; all of this spec's were taken as proposed.
 
 Numbers marked *(tune)* are starting values for balancing, not commitments. Section 13 collects them.
 
@@ -327,25 +328,20 @@ from the hand hammer. Each unlocks in the recipe book on picking up one of its i
 
 ---
 
-## 15. Assumptions and open questions
+## 15. Decisions
 
-1. **Contents by endpoints** rather than by what's inside: stable and easy to explain, but a pipe run that
-   later gains a steam endpoint can't be reused for water without disconnecting it first.
-2. **Routing ignores loops** (one widest route per consumer). Parallel pipes don't add capacity; to feed more,
-   use iron pipe or separate lines. Simple and predictable; is it acceptable that a second parallel pipe
-   "does nothing"?
-3. **Throughputs:** copper 80, iron 200, dome 100 mB/s. Copper pipe starves a twin engine; a single cylinder at
-   normal load runs close to its limit.
-4. **Manual valve control:** right-click opens, sneak-right-click closes, 10% steps, empty hand. The wrench
-   stays for connecting faces and inspection.
-5. **Redstone valve polarity:** open while powered (like a door), the opposite of the clutch (disengaged while
-   powered). Binary on purpose: an analogue valve driven by a tachometer would make the 0.3 governor
-   redundant.
-6. **Pump intake:** source blocks only, never removed (infinite), on four faces plus waterlogged. Should it
-   need the vanilla infinite-source rule (two adjacent sources) instead, or drain finite sources?
-7. **Valves are iron-bodied** even though the manual valve is made from a copper pipe, so they never set the
-   red line; they will rust in 0.3 unless painted.
-8. **Bursts don't break the pipe** or split the network; they vent until repaired. Pipes on an overfired boiler
-   therefore act as a crude extra safety valve.
-9. **Other mods' fluids** aren't carried in 0.2; tanks and boilers accept vanilla water through the fluid
-   capability.
+Reviewed with Marcin on 2026-11-24; all of this spec's points were taken as proposed.
+
+1. **F1. Contents by endpoints** rather than by what's inside (3.2). A run that gains a steam endpoint must be
+   disconnected before it can carry water.
+2. **F2. Routing ignores loops** (one widest route per consumer). A second parallel pipe adds no capacity; use
+   iron pipe or a separate line.
+3. **F3. Throughputs:** copper 80, iron 200, dome 100 mB/s *(tune)*. Copper pipe starves a twin engine.
+4. **F4. Manual valve:** right-click opens, sneak-right-click closes, 10% steps, empty hand. The wrench stays
+   for connecting faces and inspection.
+5. **F5. Redstone valve:** open while powered (like a door, the opposite of the clutch) and binary, so it
+   can't replace the 0.3 governor.
+6. **F6. Pump intake:** source blocks only, never removed (infinite), on four faces plus waterlogged.
+7. **F7. Valves are iron-bodied,** never set the red line, and rust in 0.3 unless painted.
+8. **F8. Bursts don't break the pipe** or split the network; they vent until repaired.
+9. **F9. No other mods' fluids** in 0.2; tanks and boilers accept vanilla water through the fluid capability.
