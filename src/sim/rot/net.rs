@@ -231,6 +231,10 @@ pub struct Mechanics {
     /// Speeds of systems dissolved since the last build, by member.
     old: HashMap<Pos, (usize, f64)>,
     old_ids: usize,
+    /// Parts a steam plant holds paused (its whole plant pauses together,
+    /// steam and heat spec 14.2), and the networks holding them.
+    held: BTreeSet<Pos>,
+    held_nets: HashSet<usize>,
     /// Rebuilds done (for tests and the profiler).
     pub rebuilds: u64,
 }
@@ -390,7 +394,7 @@ impl Mechanics {
         match p.sys {
             Some(s) => {
                 let sys = self.sys(s);
-                let paused = self.nets[sys.net].as_ref().is_none_or(|n| n.paused);
+                let paused = self.net_paused(sys.net);
                 Some((sys.members[p.member].r * sys.omega, paused))
             }
             None => Some((p.omega, true)),
@@ -435,15 +439,17 @@ impl Mechanics {
             let m = &sys.members[i];
             let part = &self.parts[&m.pos];
             drawn += part.load * m.r.abs();
-            if part.load > 0.0 {
-                let need = GRINDER_MIN_RPM / m.r.abs().max(1e-9);
+            if part.load > 0.0
+                && let Some(min) = part.spec.min_working()
+            {
+                let need = min / m.r.abs().max(1e-9);
                 min_ref = Some(min_ref.map_or(need, |v: f64| v.max(need)));
             }
         }
         let parts = net.systems.iter().map(|s| self.sys(*s).members.len()).sum();
         Some(Reading {
             rpm: sys.members[p.member].r * w,
-            paused: net.paused,
+            paused: self.net_paused(sys.net),
             red_line: sys.red_ref.is_finite().then_some(sys.red_ref * r),
             min_working: min_ref.map(|v| v * r),
             drawn: drawn / r,
@@ -492,7 +498,7 @@ impl Mechanics {
             let Some(sys) = self.systems[s].as_ref() else {
                 continue;
             };
-            let paused = self.nets[sys.net].as_ref().is_none_or(|n| n.paused);
+            let paused = self.net_paused(sys.net);
             let moved = !paused && changed_enough(sys.sent_omega, sys.omega);
             let w = sys.omega;
             let check_warn = sys.warn_active || sys.shear_active;
@@ -551,8 +557,9 @@ impl Mechanics {
         if self.ticks.is_multiple_of(10) {
             self.refresh_pause(view);
         }
+        self.refresh_held();
         for n in 0..self.nets.len() {
-            if self.nets[n].as_ref().is_some_and(|n| !n.paused) {
+            if !self.net_paused(n) {
                 self.tick_net(n);
             }
         }
@@ -834,6 +841,39 @@ impl Mechanics {
             at_b * belt.da / belt.db
         };
         at_small < BELT_LIMIT
+    }
+
+    /// The parts a steam plant holds paused: their networks don't run.
+    pub fn set_held(&mut self, held: BTreeSet<Pos>) {
+        self.held = held;
+        self.refresh_held();
+    }
+
+    fn refresh_held(&mut self) {
+        self.held_nets.clear();
+        for q in &self.held {
+            if let Some(s) = self.parts.get(q).and_then(|p| p.sys) {
+                self.held_nets.insert(self.sys(s).net);
+            }
+        }
+    }
+
+    /// Whether network `n` is paused, by its own rules or held by a plant.
+    fn net_paused(&self, n: usize) -> bool {
+        self.nets[n].as_ref().is_none_or(|net| net.paused) || self.held_nets.contains(&n)
+    }
+
+    /// A part's network (an index that holds until the next rebuild) and
+    /// whether it is paused by its own rules, not counting a plant's hold.
+    pub fn own_pause(&self, pos: Pos) -> Option<(usize, bool)> {
+        let s = self.parts.get(&pos)?.sys?;
+        let n = self.sys(s).net;
+        Some((n, self.nets[n].as_ref().is_none_or(|net| net.paused)))
+    }
+
+    /// Jam a part from outside (a blocked flywheel).
+    pub fn jam_part(&mut self, pos: Pos, jam: Jam) {
+        self.jam(pos, jam);
     }
 
     fn jam(&mut self, pos: Pos, jam: Jam) {

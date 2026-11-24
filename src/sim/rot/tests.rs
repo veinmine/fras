@@ -913,3 +913,90 @@ fn two_thousand_parts_tick_and_rebuild_quickly() {
     assert!(per_tick.as_micros() < 2000, "{per_tick:?}");
     assert!(rebuild.as_millis() < 200, "{rebuild:?}");
 }
+
+#[test]
+fn a_plant_holds_its_rotational_network_paused() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    crank_line(&mut m, 2, Material::Wood, false);
+    m.set_drive(p(0, 64, 0), CRANKING);
+    run(&mut m, &w, 100);
+    let before = rpm(&m, p(2, 64, 0));
+    assert!(before > 10.0);
+    m.set_held([p(0, 64, 0)].into_iter().collect());
+    run(&mut m, &w, 100);
+    assert_eq!(rpm(&m, p(2, 64, 0)), before);
+    assert!(m.speed(p(2, 64, 0)).unwrap().1);
+    // Its own pause doesn't count the hold, so the plant can let go.
+    let (_, own) = m.own_pause(p(2, 64, 0)).unwrap();
+    assert!(!own);
+    m.set_held(Default::default());
+    m.set_drive(p(0, 64, 0), Drive::default());
+    run(&mut m, &w, 400);
+    assert_eq!(rpm(&m, p(2, 64, 0)), 0.0);
+}
+
+#[test]
+fn a_flywheel_spins_up_in_about_ten_seconds() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    let fly = p(0, 64, 0);
+    m.insert(
+        fly,
+        Spec::new(Kind::Flywheel, Shape::Inline(Axis::Z)),
+        None,
+        true,
+    );
+    // 4 bar, idle: 64 Nm stall, 128 RPM top.
+    m.set_drive(
+        fly,
+        Drive {
+            stall: 64.0,
+            top: 128.0,
+            dir: 1.0,
+        },
+    );
+    run(&mut m, &w, 2000);
+    let settled = rpm(&m, fly);
+    assert!(settled > 110.0, "{settled}");
+    let mut m = Mechanics::new();
+    m.insert(
+        fly,
+        Spec::new(Kind::Flywheel, Shape::Inline(Axis::Z)),
+        None,
+        true,
+    );
+    m.set_drive(
+        fly,
+        Drive {
+            stall: 64.0,
+            top: 128.0,
+            dir: 1.0,
+        },
+    );
+    let mut ticks = 0;
+    while rpm(&m, fly) < 0.9 * settled {
+        m.tick(&w);
+        ticks += 1;
+    }
+    let secs = ticks as f64 / 20.0;
+    assert!((5.0..=15.0).contains(&secs), "{secs} s to 90% of {settled}");
+}
+
+#[test]
+fn a_pump_counts_its_own_working_minimum() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    m.insert(p(0, 64, 0), crank(Dir::East), None, true);
+    m.insert(
+        p(1, 64, 0),
+        Spec::new(Kind::Pump, Shape::Socket(Dir::West)),
+        None,
+        true,
+    );
+    m.set_drive(p(0, 64, 0), CRANKING);
+    m.set_load(p(1, 64, 0), 4.0);
+    run(&mut m, &w, 50);
+    let r = m.reading(p(0, 64, 0)).unwrap();
+    assert_eq!(r.min_working, Some(crate::sim::fluid::pump::MIN_RPM));
+}
