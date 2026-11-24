@@ -1,0 +1,81 @@
+{
+  "default": 750,
+  "fuels": [
+    {
+      "fuel": "minecraft:coal",
+      "heat": 1000
+    },
+    {
+      "fuel": "minecraft:charcoal",
+      "heat": 1000
+    },
+    {
+      "fuel": "minecraft:coal_block",
+      "heat": 1000
+    },
+    {
+      "fuel": "minecraft:blaze_rod",
+      "heat": 2000
+    },
+    {
+      "fuel": "minecraft:lava_bucket",
+      "heat": 2000
+    },
+    {
+      "fuel": "minecraft:dried_kelp_block",
+      "heat": 750
+    },
+    {
+      "fuel": "minecraft:stick",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:logs_that_burn",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:planks",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_slabs",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_stairs",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_fences",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:fence_gates",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_doors",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_trapdoors",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_pressure_plates",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:wooden_buttons",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:saplings",
+      "heat": 500
+    },
+    {
+      "fuel": "#minecraft:bamboo_blocks",
+      "heat": 500
+    }
+  ]
+}
