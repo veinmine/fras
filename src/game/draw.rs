@@ -255,7 +255,8 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
             axle(draw, axis, [0.0, 16.0], 2.0, LOG, LOG_END);
             draw.still();
-            disc(draw, pos, axis, rpm, r, [5.0, 11.0]);
+            let sides = if block == Block::LargePulley { 12 } else { 8 };
+            disc(draw, pos, axis, rpm, r, sides, [5.0, 11.0]);
             if let Some(belt) = blocks::belt(nbt)
                 && (belt.partner.x, belt.partner.y, belt.partner.z) > (pos.x, pos.y, pos.z)
             {
@@ -420,32 +421,88 @@ fn pulley_radius(large: bool) -> f32 {
     if large { 22.0 } else { 7.0 }
 }
 
-/// A pulley's disc, round enough: three square plates turned 30° apart
-/// (a twelve-sided rim), each a hair thinner than the last so their faces
-/// never share a plane.
+/// A pulley's disc: a regular polygon (`sides`) whose flat sides sit at
+/// radius `r` texels, `along` the axle, drawn as quads so its rim is a true
+/// polygon rather than overlapping squares.
 fn disc(
     draw: &mut dyn BlockEntityDrawContext,
     pos: Pos,
     axis: Axis,
     rpm: f64,
     r: f32,
+    sides: usize,
     along: [f32; 2],
 ) {
-    for i in 0..3u8 {
-        let t = 0.1 * i as f32;
-        spin(draw, pos, 20 + i, axis, CENTER, rpm, 30.0 * i as f32);
-        boxed(
-            draw,
-            span(
-                axis,
-                [along[0] + t, along[1] - t],
-                [8.0 - r, 8.0 + r],
-                [8.0 - r, 8.0 + r],
-            ),
-            faces(axis, PLANKS, PLANKS),
+    // The two axes across the axle, ordered so e1 × e2 = the axle.
+    let (e1, e2) = match axis {
+        Axis::X => (Axis::Y, Axis::Z),
+        Axis::Y => (Axis::Z, Axis::X),
+        Axis::Z => (Axis::X, Axis::Y),
+    };
+    let point = |u: f32, v: f32, w: f32| {
+        let mut p = [0.5f32; 3];
+        p[e1 as usize] += u / 16.0;
+        p[e2 as usize] += v / 16.0;
+        p[axis as usize] = w / 16.0;
+        p
+    };
+    let corner = r / (std::f32::consts::PI / sides as f32).cos();
+    // Start half a side round, so a flat side faces each axis.
+    let ring: Vec<(f32, f32)> = (0..sides)
+        .map(|k| {
+            let a = std::f32::consts::TAU * (k as f32 + 0.5) / sides as f32;
+            (corner * a.cos(), corner * a.sin())
+        })
+        .collect();
+    let face_uv = [0.0, 0.0, (2.0 * r).min(16.0), (2.0 * r).min(16.0)];
+    let edge = 2.0 * corner * (std::f32::consts::PI / sides as f32).sin();
+    let rim_uv = [0.0, 0.0, edge.min(16.0), (along[1] - along[0]).min(16.0)];
+    spin(draw, pos, 20, axis, CENTER, rpm, 0.0);
+    // The two faces, as fans of quads round the centre (each over three
+    // corners of the polygon); counterclockwise seen from the front.
+    for k in (0..sides).step_by(2) {
+        let (a, b, c) = (ring[k], ring[(k + 1) % sides], ring[(k + 2) % sides]);
+        let w = along[1];
+        draw.quad(
+            PLANKS,
+            [
+                point(0.0, 0.0, w),
+                point(a.0, a.1, w),
+                point(b.0, b.1, w),
+                point(c.0, c.1, w),
+            ],
+            face_uv,
+            0xFFFFFF,
         );
-        draw.still();
+        let w = along[0];
+        draw.quad(
+            PLANKS,
+            [
+                point(0.0, 0.0, w),
+                point(c.0, c.1, w),
+                point(b.0, b.1, w),
+                point(a.0, a.1, w),
+            ],
+            face_uv,
+            0xFFFFFF,
+        );
     }
+    // The rim.
+    for k in 0..sides {
+        let (a, b) = (ring[k], ring[(k + 1) % sides]);
+        draw.quad(
+            PLANKS,
+            [
+                point(a.0, a.1, along[1]),
+                point(a.0, a.1, along[0]),
+                point(b.0, b.1, along[0]),
+                point(b.0, b.1, along[1]),
+            ],
+            rim_uv,
+            0xFFFFFF,
+        );
+    }
+    draw.still();
 }
 
 /// Four arms of the wheel: a spoke from the hub out into each paddle (it
@@ -524,7 +581,7 @@ fn draw_belt(
         ]
     };
     // The belt rides just outside the rims, so it never meets their faces.
-    let lift = 0.6 / 16.0;
+    let lift = 1.0 / 16.0;
     let (r1, r2) = (r1 + lift, r2 + lift);
     let runs = if crossed {
         [
