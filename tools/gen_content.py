@@ -449,9 +449,9 @@ GAUGE_UP = [[2, 0, 2, 14, 2, 14]]
 GLASS_UP = [[5, 0, 0, 11, 2.5, 16]]
 
 STEAM_BLOCKS = {
-    "copper_boiler": ({"template": COPPER, "properties": {"hardness": 3.0}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["copper_boiler"][0]),
-    "iron_boiler": ({"template": IRON, "properties": {"hardness": 4.0}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["iron_boiler"][0]),
-    "storage_tank": ({"template": IRON, "properties": {"hardness": 4.0}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["storage_tank"][0]),
+    "copper_boiler": ({"template": COPPER, "properties": {"hardness": 3.0, "occludes": False}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["copper_boiler"][0]),
+    "iron_boiler": ({"template": IRON, "properties": {"hardness": 4.0, "occludes": False}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["iron_boiler"][0]),
+    "storage_tank": ({"template": IRON, "properties": {"hardness": 4.0, "occludes": False}, "state_properties": SHELL_PROPS, "default_state": SHELL_DEFAULT}, "pickaxe", SHELLS["storage_tank"][0]),
     "steam_dome": (
         {"template": COPPER, "properties": {"hardness": 3.0, "occludes": False}, "shapes": {"default": [box([2, 0, 2], [14, 16, 14])]}},
         "pickaxe",
@@ -602,9 +602,11 @@ def steam_models():
         m[f"block/{name}/unformed"] = cube(side)
         m[f"block/{name}/damaged"] = cube(broken)
         m[f"block/{name}/shell"] = {"textures": {"side": side, "end": end, "particle": side}}
+        m[f"block/{name}/shell_damaged"] = {"textures": {"side": broken, "end": broken, "particle": broken}}
         for axis in "xyz":
             for mask in range(64):
-                m[f"block/{name}/f_{mask}_{axis}"] = {"parent": f"{NS}:block/{name}/shell", "loader": f"{NS}:shell", "mask": mask, "axis": axis}
+                for suffix in ["", "_damaged"]:
+                    m[f"block/{name}/f_{mask}_{axis}{suffix}"] = {"parent": f"{NS}:block/{name}/shell{suffix}", "loader": f"{NS}:shell", "mask": mask, "axis": axis}
     # Pipes: a core and a flanged arm per connected face (drawn as north,
     # turned by the multipart).
     for name, (mat, flange, broken) in PIPES.items():
@@ -743,7 +745,8 @@ def steam_blockstate(name):
         for axis in "xyz":
             for mask in range(64):
                 joined = ",".join(f"joined_{d}={'true' if mask >> i & 1 else 'false'}" for i, d in enumerate(DIRS))
-                v[f"formed=true,axis={axis},{joined}"] = {"model": f"{NS}:block/{name}/f_{mask}_{axis}"}
+                for dmg, suffix in [("false", ""), ("true", "_damaged")]:
+                    v[f"formed=true,damaged={dmg},axis={axis},{joined}"] = {"model": f"{NS}:block/{name}/f_{mask}_{axis}{suffix}"}
         return {"variants": v}
     if name in PIPES:
         # The arm model points north; turn it to each face.

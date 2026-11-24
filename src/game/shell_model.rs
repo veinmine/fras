@@ -90,6 +90,55 @@ fn fan(out: &mut Vec<ModelLoaderQuad>, poly: &[V3], face: Dir, texture: &str, cu
     }
 }
 
+/// A convex end cap cut into full-width strips across `va` (a fan from one
+/// corner leaves thin wedges that shade unevenly and show seams).
+fn strips(
+    out: &mut Vec<ModelLoaderQuad>,
+    poly: &[V3],
+    ua: Axis,
+    va: Axis,
+    point: &dyn Fn(f32, f32) -> V3,
+    face: Dir,
+    texture: &str,
+) {
+    let uv: Vec<(f32, f32)> = poly
+        .iter()
+        .map(|p| (p[ua as usize], p[va as usize]))
+        .collect();
+    let mut levels: Vec<f32> = uv.iter().map(|&(_, v)| v).collect();
+    levels.sort_by(f32::total_cmp);
+    levels.dedup_by(|a, b| (*a - *b).abs() < 1e-5);
+    // The cap's extent in u at height v.
+    let span = |v: f32| {
+        let (mut lo, mut hi) = (f32::INFINITY, f32::NEG_INFINITY);
+        for i in 0..uv.len() {
+            let (a, b) = (uv[i], uv[(i + 1) % uv.len()]);
+            let (vmin, vmax) = (a.1.min(b.1), a.1.max(b.1));
+            if v < vmin - 1e-5 || v > vmax + 1e-5 {
+                continue;
+            }
+            let us: Vec<f32> = if (b.1 - a.1).abs() < 1e-6 {
+                vec![a.0, b.0]
+            } else {
+                let t = ((v - a.1) / (b.1 - a.1)).clamp(0.0, 1.0);
+                vec![a.0 + t * (b.0 - a.0)]
+            };
+            for u in us {
+                lo = lo.min(u);
+                hi = hi.max(u);
+            }
+        }
+        (lo, hi)
+    };
+    for w in levels.windows(2) {
+        let (v0, v1) = (w[0], w[1]);
+        let (a0, b0) = span(v0);
+        let (a1, b1) = span(v1);
+        let pts = [point(a0, v0), point(b0, v0), point(b1, v1), point(a1, v1)];
+        out.push(quad(pts, pts.map(|p| tex(p, face)), texture, Some(face)));
+    }
+}
+
 /// Whether the block edge between faces `a` and `b` is rounded: both outer,
 /// and the edge runs along the long axis.
 fn rounded(mask: u8, long: Axis, a: Dir, b: Dir) -> bool {
@@ -175,7 +224,7 @@ pub fn quads(mask: u8, long: Axis, side: &str, end: &str) -> Vec<ModelLoaderQuad
                     poly.push(point(u, v));
                 }
             }
-            fan(&mut out, &poly, d, end, Some(d));
+            strips(&mut out, &poly, ua, va, &point, d, end);
         } else {
             // A side: shrunk away from its rounded edges.
             let cut = |f: Dir| if rounded(mask, long, d, f) { R } else { 0.0 };
@@ -333,6 +382,28 @@ mod tests {
                 centres.sort();
                 centres.dedup();
                 assert_eq!(centres.len(), n, "mask {mask} {axis:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn end_caps_are_strips_not_wedges() {
+        for axis in Axis::ALL {
+            for mask in 0..64u8 {
+                for q in quads(mask, axis, "side", "end") {
+                    if q.texture != "end" {
+                        continue;
+                    }
+                    let p = q.positions;
+                    for k in 0..4 {
+                        let d = sub(p[(k + 1) % 4], p[k]);
+                        let l = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).sqrt();
+                        assert!(
+                            l > 1e-4,
+                            "a cap quad has a corner twice (mask {mask}, {axis:?})"
+                        );
+                    }
+                }
             }
         }
     }

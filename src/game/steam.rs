@@ -463,7 +463,26 @@ fn apply_event(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, event: Even
             } else {
                 // The multiblock's own blocks go, dropping with the
                 // vanilla explosion chance.
+                // Its domes, gauges and sight glasses count as the boiler's
+                // (multiblocks spec 3.2): they go with it.
+                let mut parts = shell.clone();
                 for q in &shell {
+                    for d in Dir::ALL {
+                        let r = q.offset(d);
+                        let attached = match block_at(&*host, level, r) {
+                            Some(Block::SteamDome) => d == Dir::Up,
+                            Some(Block::PressureGauge | Block::SightGlass) => {
+                                server::property(&*host, level, r, "facing").as_deref()
+                                    == Some(d.name())
+                            }
+                            _ => false,
+                        };
+                        if attached && !parts.contains(&r) {
+                            parts.push(r);
+                        }
+                    }
+                }
+                for q in &parts {
                     let drop = random() < 1.0 / power.max(1.0);
                     let _ = level.destroy_block(host, q.to_array(), drop, None, false);
                 }

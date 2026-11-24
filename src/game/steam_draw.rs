@@ -202,7 +202,9 @@ fn facing(host: &dyn ClientHost, state: mod_api::BlockState, default: Dir) -> Di
 /// The flywheel's radius to its crank pin, block units, and the rod's plane
 /// offset along the axle.
 pub const PIN_R: f32 = 0.5;
-const ROD_W: f32 = 11.0 / 16.0;
+// The rod's plane, 4.5 texels off the wheel's centre: clear of the rim
+// (2 texels deep) with the crosshead's half-width to spare.
+const ROD_W: f32 = 12.5 / 16.0;
 
 pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
     let nbt = &event.entity.nbt;
@@ -309,12 +311,12 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
         2.0,
         2.0,
     );
-    // The crank web from the hub's face out to the pin.
+    // The crank web, just off the hub's face, out to the pin.
     beam(
         draw,
         IRON,
-        add(CENTER, scale(a, 2.5 / 16.0)),
-        add(pin, scale(a, 2.5 / 16.0)),
+        add(CENTER, scale(a, 3.6 / 16.0)),
+        add(pin, scale(a, 3.6 / 16.0)),
         e2,
         3.0,
         1.0,

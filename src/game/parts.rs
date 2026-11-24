@@ -309,6 +309,13 @@ impl BlockPart for BlockHooks {
             Block::CopperBoiler | Block::IronBoiler | Block::StorageTank => {
                 super::pipes::bucket(host, event.click)
             }
+            // Horizon asks here, once per hand with no stack, rather than in
+            // `use_without_item`: the empty main hand works the valve.
+            Block::ManualValve | Block::SteamRelease
+                if item.is_none() && event.click.hand == mod_api::Hand::Main =>
+            {
+                hand_on_vent(self.0, host, event.click)
+            }
             _ => None,
         }
     }
@@ -321,14 +328,7 @@ impl BlockPart for BlockHooks {
         match self.0 {
             Block::Crank => Some(crank(host, event.click)),
             Block::Grinder | Block::Firebox => Some(super::grinder::open(host, event.click)),
-            Block::ManualValve => {
-                let close = host
-                    .player(event.click.player)
-                    .and_then(|p| p.is_secondary_use_active(&*host))
-                    == Some(true);
-                Some(super::pipes::manual_valve(host, event.click, close))
-            }
-            Block::SteamRelease => Some(super::pipes::steam_release(host, event.click)),
+            Block::ManualValve | Block::SteamRelease => hand_on_vent(self.0, host, event.click),
             _ => None,
         }
     }
@@ -730,6 +730,26 @@ pub fn comparator(rpm: f64, red: f64) -> i32 {
         crate::sim::rot::part::HARD_CAP_RPM
     };
     ((rpm.abs() / red) * 15.0).floor().clamp(0.0, 15.0) as i32
+}
+
+/// An empty hand on a manual valve (one step open, sneaking one step closed)
+/// or a steam release (open or close it).
+fn hand_on_vent(
+    block: Block,
+    host: &mut dyn ServerHost,
+    click: &mod_api::BlockClick<'_>,
+) -> Option<InteractionResult> {
+    match block {
+        Block::ManualValve => {
+            let close = host
+                .player(click.player)
+                .and_then(|p| p.is_secondary_use_active(&*host))
+                == Some(true);
+            Some(super::pipes::manual_valve(host, click, close))
+        }
+        Block::SteamRelease => Some(super::pipes::steam_release(host, click)),
+        _ => None,
+    }
 }
 
 #[cfg(test)]

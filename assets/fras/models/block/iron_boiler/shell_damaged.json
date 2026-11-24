@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "minecraft:block/cracked_deepslate_tiles",
+    "end": "minecraft:block/cracked_deepslate_tiles",
+    "particle": "minecraft:block/cracked_deepslate_tiles"
+  }
+}

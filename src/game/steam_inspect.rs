@@ -79,7 +79,7 @@ pub fn lines(
         }
         if w.partial(pos) {
             out.push(red(tr("fras.inspect.partial", vec![])));
-        } else if block.is_plant() && w.paused(pos) {
+        } else if block.is_plant() && w.paused(pos) && w.refusal(pos).is_none() {
             out.push(tr("fras.inspect.plant_paused", vec![]));
         }
         // Why a group doesn't form.

@@ -190,7 +190,7 @@
   "fras.inspect.plant_paused": "Paused: part of this plant is outside the simulated area",
   "fras.inspect.too_big": "Too big: %s blocks, %s hold %s",
   "fras.inspect.not_cuboid": "Not a cuboid: fill the gaps or remove the extra blocks",
-  "fras.inspect.shell": "Size %s×%s×%s, %s blocks",
+  "fras.inspect.shell": "Size %s×%s×%s, block count %s",
   "fras.inspect.water": "Water %s / %s mB (%s%%)",
   "fras.inspect.dry": "Dry! Shell %s °C",
   "fras.inspect.temperature": "Temperature %s °C",
