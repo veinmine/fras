@@ -49,7 +49,7 @@ impl Hooks for Fras {
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.
-        r.menu_part("minecraft:hopper", game::grinder::OutputSlots);
+        r.menu_part("fras:grinder", game::grinder::InputSlot);
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
         let wrench = r.item_key("fras:wrench");

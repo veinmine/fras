@@ -50,11 +50,12 @@ Tuned in a game so the exit criteria hold; reported to veinmine:
 
 Not in 0.1 (no hook yet, or left for later):
 
-- The grinder's container is the same for every side (`ModContainer` is static per block), so it can't
-  refuse items without a recipe or insertion through the socket side.
+- The grinder's menu (`fras:grinder`) takes only grindable items into its input and nothing into its outputs,
+  but hoppers follow the container's faces, which are the same for every side (`ModContainer` is static per
+  block): a hopper can put any item into the input, through the socket side too.
 - Items tossed onto the grinder aren't pulled in.
 - The hand hammer is a crafting remainder and doesn't wear out.
-- Shift-click in the grinder screen uses the default quick-move.
+- Shift-click in the grinder screen uses the default quick-move (first slot with room, never a result slot).
 
 ## Testing in a game
 

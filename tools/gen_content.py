@@ -400,6 +400,9 @@ def main():
                 "random_sequence": f"{NS}:blocks/{name}",
             },
         )
+    # The grinder's menu: input slot 0, results 1-4 (players only take from
+    # those), data slots [progress, rpm, status, max].
+    write(f"data/{NS}/horizon/menu/grinder.json", {"slots": 5, "data_slots": 4, "results": [1, 2, 3, 4]})
     for name, decl in ITEMS.items():
         write(f"data/{NS}/horizon/item/{name}.json", decl)
         write(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/{name}"}})

@@ -34,7 +34,7 @@ pub fn container() -> ModContainer {
         ],
         inputs: vec![0],
         outputs: vec![1, 2, 3, 4],
-        menu: Some("minecraft:hopper".into()),
+        menu: Some("fras:grinder".into()),
     }
 }
 
@@ -322,29 +322,34 @@ pub fn refresh_signal(host: &dyn mod_api::Host, level: mod_api::LevelRef, pos: P
     });
 }
 
-/// The grinder's menu (a hopper's): its four output slots take nothing by
-/// hand.
-pub struct OutputSlots;
+/// Whether `stack` has a grinding recipe. True while the recipes aren't
+/// loaded (a client before the server's recipes arrive): the server decides.
+pub fn grindable(host: &dyn Host, stack: &ItemStack) -> bool {
+    let book = BOOK.read().unwrap_or_else(|e| e.into_inner());
+    let Some(book) = book.as_ref() else {
+        return true;
+    };
+    let items = HostItems {
+        host,
+        tags: &book.tags,
+    };
+    grind::find(&book.recipes, &stack.item().id(host), &items).is_some()
+}
+
+/// The grinder's menu (`fras:grinder`): its four output slots are results,
+/// which players only take from (the menu type says so); its input takes
+/// only what it can grind.
+pub struct InputSlot;
 
 #[mod_api::horizon_part]
-impl mod_api::MenuPart for OutputSlots {
+impl mod_api::MenuPart for InputSlot {
     fn menu_slot_rules(
         &self,
         host: &dyn mod_api::Host,
         event: &mut mod_api::MenuSlotRulesEvent<'_>,
     ) {
-        if event.container != mod_api::MenuContainer::Main || !(1..SLOTS).contains(&event.slot) {
-            return;
-        }
-        let context = event.context;
-        let (Some(pos), Some(player)) = (context.pos, context.player) else {
-            return;
-        };
-        let Some(level) = host.player(player).and_then(|p| p.level(host)) else {
-            return;
-        };
-        if server::block_at(host, level, Pos::from_array(pos)) == Some(blocks::Block::Grinder) {
-            event.may_place = false;
+        if event.container == mod_api::MenuContainer::Main && event.slot == 0 {
+            event.may_place &= grindable(host, event.stack);
         }
     }
 }
