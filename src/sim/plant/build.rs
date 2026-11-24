@@ -638,8 +638,8 @@ impl Works {
             }
         }
         let mut groups: BTreeMap<usize, (Vec<usize>, Vec<usize>)> = BTreeMap::new();
-        for si in 0..ns {
-            if steam_shell(&self.shells[si]) {
+        for (si, shell) in self.shells.iter().enumerate() {
+            if steam_shell(shell) {
                 groups
                     .entry(dsu.find(shell_item(si)))
                     .or_default()
@@ -647,8 +647,7 @@ impl Works {
                     .push(si);
             }
         }
-        for ni in 0..nn {
-            let net = &self.nets[ni];
+        for (ni, net) in self.nets.iter().enumerate() {
             if net.content == Some(Content::Steam) && !net.mixed {
                 groups.entry(dsu.find(net_item(ni))).or_default().1.push(ni);
             }

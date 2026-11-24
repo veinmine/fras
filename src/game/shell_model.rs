@@ -387,6 +387,32 @@ mod tests {
     }
 
     #[test]
+    fn no_quad_is_a_sliver() {
+        // Every quad has four distinct corners and some width (no wedges
+        // meeting in a point, as a fan from one corner gives).
+        for axis in Axis::ALL {
+            for mask in 0..64u8 {
+                for q in quads(mask, axis, "side", "end") {
+                    let p = q.positions;
+                    for i in 0..4 {
+                        for j in i + 1..4 {
+                            let d = sub(p[i], p[j]);
+                            assert!(dot(d, d) > 1e-8, "{mask} {axis:?} {p:?}");
+                        }
+                    }
+                    let edges = (0..4).map(|i| {
+                        let d = sub(p[(i + 1) % 4], p[i]);
+                        dot(d, d).sqrt()
+                    });
+                    let longest = edges.fold(0.0f32, f32::max);
+                    let area = (dot(normal(&q), normal(&q))).sqrt();
+                    assert!(area / longest > 0.02, "{mask} {axis:?} {p:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
     fn end_caps_are_strips_not_wedges() {
         for axis in Axis::ALL {
             for mask in 0..64u8 {
