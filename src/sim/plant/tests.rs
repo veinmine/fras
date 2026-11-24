@@ -668,3 +668,84 @@ fn a_new_valve_reads_the_red_line_once_rebuilt() {
     assert_eq!(red, 6.0);
     assert_eq!(crate::sim::fluid::valve::default_set(Some(red)), 5.5);
 }
+
+#[test]
+fn fifty_plants_step_and_rebuild_quickly() {
+    // Exit criterion 14: 50 boilers, 50 engines and 2000 pipe blocks. Each
+    // plant: a 2×2×2 iron boiler, a dome, 40 iron pipes east to a cylinder
+    // facing a flywheel, 8 blocks apart along z.
+    let world = World::default();
+    let mut w = Works::new();
+    for k in 0..50 {
+        let z0 = k * 8;
+        for x in 0..2 {
+            for y in 0..2 {
+                for z in 0..2 {
+                    let saved = Saved {
+                        water: BOILER_WATER,
+                        temp: 100.0,
+                        ..Saved::default()
+                    };
+                    w.insert(
+                        p(x, y, z0 + z),
+                        Spec::new(Kind::Shell(ShellKind::IronBoiler)),
+                        Some(saved),
+                    );
+                }
+            }
+        }
+        for (x, z) in [(0, 0), (1, 0), (0, 1), (1, 1)] {
+            w.insert(p(x, -1, z0 + z), Spec::new(Kind::Firebox), None);
+            w.set_heat(p(x, -1, z0 + z), COAL);
+        }
+        w.insert(p(0, 2, z0), Spec::new(Kind::Dome), None);
+        pipe(&mut w, p(0, 3, z0), &[Dir::Down, Dir::East]);
+        for x in 1..40 {
+            pipe(&mut w, p(x, 3, z0), &[Dir::West, Dir::East]);
+        }
+        w.insert(
+            p(40, 3, z0),
+            Spec::new(Kind::Cylinder).with_dir(Dir::East),
+            None,
+        );
+        w.insert(
+            p(42, 3, z0),
+            Spec::new(Kind::Flywheel).with_dir(Dir::North),
+            None,
+        );
+    }
+    let start = std::time::Instant::now();
+    w.rebuild(&world);
+    let rebuild = start.elapsed();
+    for _ in 0..50 {
+        w.step(&world);
+    }
+    let start = std::time::Instant::now();
+    for _ in 0..100 {
+        w.step(&world);
+    }
+    let per_step = start.elapsed() / 100;
+    // One steam step every 4 ticks.
+    eprintln!(
+        "50 plants: step {per_step:?} (per tick {:?}), rebuild {rebuild:?}",
+        per_step / 4
+    );
+    assert_eq!(w.shells.iter().filter(|s| s.is_boiler()).count(), 50);
+    // Generous bounds for a debug build; the release targets are 0.2 ms per
+    // tick and 2 ms for a rebuild.
+    assert!(per_step.as_micros() < 8000, "{per_step:?}");
+    assert!(rebuild.as_millis() < 200, "{rebuild:?}");
+    // A lone network of 2000 pipe blocks off one dome.
+    let mut w = Works::new();
+    boiler(&mut w, ShellKind::IronBoiler);
+    w.insert(p(0, 2, 0), Spec::new(Kind::Dome), None);
+    pipe(&mut w, p(0, 3, 0), &[Dir::Down, Dir::East]);
+    for x in 1..2000 {
+        pipe(&mut w, p(x, 3, 0), &[Dir::West, Dir::East]);
+    }
+    let start = std::time::Instant::now();
+    w.rebuild(&world);
+    let pipes = start.elapsed();
+    eprintln!("2000 pipe blocks: rebuild {pipes:?}");
+    assert!(pipes.as_millis() < 200, "{pipes:?}");
+}
