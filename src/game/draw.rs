@@ -255,19 +255,20 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
             axle(draw, axis, [0.0, 16.0], 2.0, LOG, LOG_END);
             draw.still();
-            let sides = if block == Block::LargePulley { 12 } else { 8 };
+            let sides = pulley_sides(block == Block::LargePulley);
             disc(draw, pos, axis, rpm, r, sides, [5.0, 11.0]);
             if let Some(belt) = blocks::belt(nbt)
                 && (belt.partner.x, belt.partner.y, belt.partner.z) > (pos.x, pos.y, pos.z)
             {
-                let other = pulley_radius(blocks::get_bool(nbt, "belt_big"));
+                // The belt lies a hair outside the corners of the turning rim.
+                let lie = |large: bool| (pulley_corner(large) + 0.15) / 16.0;
                 draw_belt(
                     draw,
                     pos,
                     belt.partner,
                     axis,
-                    r / 16.0,
-                    other / 16.0,
+                    lie(block == Block::LargePulley),
+                    lie(blocks::get_bool(nbt, "belt_big")),
                     belt.crossed,
                 );
             }
@@ -416,9 +417,19 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     draw.keep();
 }
 
-/// Radius of a pulley's rim, texels.
+/// Radius of a pulley's rim (to the middle of its flat sides), texels.
 fn pulley_radius(large: bool) -> f32 {
     if large { 22.0 } else { 7.0 }
+}
+
+/// A pulley's number of sides.
+fn pulley_sides(large: bool) -> usize {
+    if large { 12 } else { 8 }
+}
+
+/// Radius of a pulley's rim to its corners, texels.
+fn pulley_corner(large: bool) -> f32 {
+    pulley_radius(large) / (std::f32::consts::PI / pulley_sides(large) as f32).cos()
 }
 
 /// A pulley's disc: a regular polygon (`sides`) whose flat sides sit at
@@ -539,8 +550,9 @@ fn wheel_arms(draw: &mut dyn BlockEntityDrawContext, axis: Axis, t: f32) {
     }
 }
 
-/// The belt: two straight runs between the pulleys' rims (none of the
-/// obstruction checks of later versions).
+/// The belt: one strip, lying on each pulley's rim round its far half and
+/// running straight between them (none of the obstruction checks of later
+/// versions). `r1` and `r2` are the radii it lies at, in blocks.
 fn draw_belt(
     draw: &mut dyn BlockEntityDrawContext,
     pos: Pos,
@@ -558,80 +570,64 @@ fn draw_belt(
         (partner.z - pos.z) as f32,
     ];
     let c2 = [c1[0] + d[0], c1[1] + d[1], c1[2] + d[2]];
-    let cross = [
-        a[1] * d[2] - a[2] * d[1],
-        a[2] * d[0] - a[0] * d[2],
-        a[0] * d[1] - a[1] * d[0],
+    let dl = d.iter().map(|c| c * c).sum::<f32>().sqrt().max(1e-6);
+    let dh = d.map(|c| c / dl);
+    // Across the line between the pulleys, in their plane.
+    let n = [
+        a[1] * dh[2] - a[2] * dh[1],
+        a[2] * dh[0] - a[0] * dh[2],
+        a[0] * dh[1] - a[1] * dh[0],
     ];
-    let len = (cross.iter().map(|c| c * c).sum::<f32>()).sqrt().max(1e-6);
-    let n = cross.map(|c| c / len);
-    let at = |c: [f32; 3], s: f32, r: f32| {
-        [
-            c[0] + n[0] * s * r,
-            c[1] + n[1] * s * r,
-            c[2] + n[2] * s * r,
-        ]
+    let at = |c: [f32; 3], dir: [f32; 3], r: f32| {
+        [c[0] + dir[0] * r, c[1] + dir[1] * r, c[2] + dir[2] * r]
     };
+    let neg = |v: [f32; 3]| v.map(|c| -c);
     let hw = 2.5 / 16.0;
-    let off = |p: [f32; 3], s: f32| {
+    let edge = |p: [f32; 3], s: f32| {
         [
             p[0] + a[0] * hw * s,
             p[1] + a[1] * hw * s,
             p[2] + a[2] * hw * s,
         ]
     };
-    // The belt rides just outside the rims, so it never meets their faces.
-    let lift = 1.0 / 16.0;
-    let (r1, r2) = (r1 + lift, r2 + lift);
-    let runs = if crossed {
-        [
-            (at(c1, 1.0, r1), at(c2, -1.0, r2)),
-            (at(c1, -1.0, r1), at(c2, 1.0, r2)),
-        ]
-    } else {
-        [
-            (at(c1, 1.0, r1), at(c2, 1.0, r2)),
-            (at(c1, -1.0, r1), at(c2, -1.0, r2)),
-        ]
-    };
-    // Half a texel of thickness: the outer and inner faces sit apart, each
-    // facing its own way.
-    let thick = 0.5 / 16.0;
-    for (p1, p2) in runs {
-        let run = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+    // One strip from p to q: a single quad per block of length (drawn from
+    // both sides), so the texture repeats instead of stretching.
+    let mut strip = |p: [f32; 3], q: [f32; 3]| {
+        let run = [q[0] - p[0], q[1] - p[1], q[2] - p[2]];
         let length = run.iter().map(|c| c * c).sum::<f32>().sqrt();
-        // Outward: away from the line between the pulleys' centres.
-        let mid = [
-            (p1[0] + p2[0]) / 2.0 - (c1[0] + c2[0]) / 2.0,
-            (p1[1] + p2[1]) / 2.0 - (c1[1] + c2[1]) / 2.0,
-            (p1[2] + p2[2]) / 2.0 - (c1[2] + c2[2]) / 2.0,
-        ];
-        let ml = mid.iter().map(|c| c * c).sum::<f32>().sqrt().max(1e-6);
-        let out = mid.map(|c| c / ml * thick / 2.0);
-        let shift = |p: [f32; 3], s: f32| [p[0] + out[0] * s, p[1] + out[1] * s, p[2] + out[2] * s];
-        // One sprite per block of length, so the texture isn't stretched.
         let pieces = length.ceil().max(1.0) as usize;
         for k in 0..pieces {
             let f0 = k as f32 / pieces as f32;
             let f1 = (k + 1) as f32 / pieces as f32;
-            let lerp = |f: f32| [p1[0] + run[0] * f, p1[1] + run[1] * f, p1[2] + run[2] * f];
+            let lerp = |f: f32| [p[0] + run[0] * f, p[1] + run[1] * f, p[2] + run[2] * f];
             let (q1, q2) = (lerp(f0), lerp(f1));
-            let v1 = 16.0 * (length / pieces as f32).min(1.0);
-            let uv = [0.0, 0.0, 5.0, v1];
-            for s in [1.0f32, -1.0] {
-                let quad = [
-                    off(shift(q1, s), -1.0),
-                    off(shift(q2, s), -1.0),
-                    off(shift(q2, s), 1.0),
-                    off(shift(q1, s), 1.0),
-                ];
-                let quad = if s > 0.0 {
-                    quad
-                } else {
-                    [quad[3], quad[2], quad[1], quad[0]]
-                };
-                draw.quad(BELT, quad, uv, 0xFFFFFF);
-            }
+            let uv = [0.0, 0.0, 5.0, (16.0 * length / pieces as f32).min(16.0)];
+            draw.quad(
+                BELT,
+                [edge(q1, 1.0), edge(q1, -1.0), edge(q2, -1.0), edge(q2, 1.0)],
+                uv,
+                0xFFFFFF,
+            );
+        }
+    };
+    // The straight runs: open, or crossed (each run from one side to the other).
+    let s2 = if crossed { -1.0 } else { 1.0 };
+    strip(at(c1, n, r1), at(c2, n.map(|c| c * s2), r2));
+    strip(at(c1, neg(n), r1), at(c2, neg(n).map(|c| c * s2), r2));
+    // Round each pulley's far half, from one run's end to the other's.
+    const STEPS: usize = 8;
+    for (c, r, away) in [(c1, r1, neg(dh)), (c2, r2, dh)] {
+        let point = |k: usize| {
+            let t = std::f32::consts::PI * (k as f32 / STEPS as f32 - 0.5);
+            let dir = [
+                away[0] * t.cos() + n[0] * t.sin(),
+                away[1] * t.cos() + n[1] * t.sin(),
+                away[2] * t.cos() + n[2] * t.sin(),
+            ];
+            at(c, dir, r)
+        };
+        for k in 0..STEPS {
+            strip(point(k), point(k + 1));
         }
     }
 }
