@@ -71,6 +71,27 @@ for those, prefer the word a Polish mechanic would use.
 | ratio | przełożenie | **mod** |
 | paddles (water wheel) | łopatki | **mod** |
 | paused (outside the simulated area) | wstrzymane | **mod** |
+| Firebox | Palenisko | **mod** |
+| Boiler (copper / iron) | Kocioł (miedziany / żelazny) | **mod** |
+| Steam dome | Kołpak parowy | **mod** |
+| Pipe (copper / iron) | Rura (miedziana / żelazna) | **mod** |
+| Valve | Zawór | **mod** |
+| Redstone valve | Zawór sterowany czerwonym kamieniem | **mod** |
+| Steam release | Upust pary | **mod** |
+| Emergency valve | Zawór bezpieczeństwa | **mod** |
+| Pressure gauge | Manometr | **mod** |
+| Sight glass | Wodowskaz | **mod** |
+| Pump | Pompa | **mod** |
+| Steam cylinder | Cylinder parowy | **mod** |
+| Flywheel | Koło zamachowe | **mod** |
+| Storage tank | Zbiornik | **mod** |
+| steam | para | **mod** |
+| pressure / rated pressure | ciśnienie / ciśnienie dopuszczalne | **mod** |
+| rupture / burst | rozerwanie / pęknięcie | **mod** |
+| scald, "was scalded" | poparzenie, "został poparzony parą" | **mod** |
+| bar (unit) | bar | **mod** |
+| simmering (a valve) | syczy | **mod** |
+| starved (an engine) | niedobór pary | **mod** |
 
 ## Vanilla words FRAS uses
 
