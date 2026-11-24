@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LLL"
+  ],
+  "key": {
+    "L": "minecraft:leather"
+  },
+  "result": {
+    "id": "fras:leather_belt",
+    "count": 2
+  }
+}

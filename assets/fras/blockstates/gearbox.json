@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/gearbox"
+    },
+    "facing=south": {
+      "model": "fras:block/gearbox",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "fras:block/gearbox",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "fras:block/gearbox",
+      "y": 270
+    },
+    "facing=up": {
+      "model": "fras:block/gearbox",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "fras:block/gearbox",
+      "x": 90
+    }
+  }
+}

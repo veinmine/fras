@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "fras:iron_shaft",
+    "fras:bearing",
+    "fras:clutch",
+    "fras:iron_bevel_gear",
+    "fras:gearbox",
+    "fras:tachometer"
+  ]
+}

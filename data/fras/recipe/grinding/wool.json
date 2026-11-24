@@ -1,0 +1,12 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "#minecraft:wool",
+  "results": [
+    {
+      "id": "minecraft:string",
+      "count": 4
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 3.0
+}

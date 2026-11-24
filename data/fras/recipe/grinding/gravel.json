@@ -1,0 +1,15 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "minecraft:gravel",
+  "results": [
+    {
+      "id": "minecraft:sand"
+    },
+    {
+      "id": "minecraft:flint",
+      "chance": 0.1
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 6.0
+}

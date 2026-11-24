@@ -1,0 +1,27 @@
+{
+  "title": "Fire, Rust and Steam",
+  "icon": "fras:gearbox",
+  "items": [
+    "fras:wooden_shaft",
+    "fras:iron_shaft",
+    "fras:bearing",
+    "fras:clutch",
+    "fras:pulley",
+    "fras:large_pulley",
+    "fras:wooden_bevel_gear",
+    "fras:iron_bevel_gear",
+    "fras:gearbox",
+    "fras:crank",
+    "fras:water_wheel",
+    "fras:grinder",
+    "fras:tachometer",
+    "fras:wrench",
+    "fras:hand_hammer",
+    "fras:leather_belt",
+    "fras:crushed_iron",
+    "fras:crushed_copper",
+    "fras:crushed_gold",
+    "fras:iron_plate",
+    "fras:copper_plate"
+  ]
+}

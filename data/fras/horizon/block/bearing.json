@@ -1,0 +1,60 @@
+{
+  "template": "minecraft:iron_chain",
+  "properties": {
+    "hardness": 3.0,
+    "render_shape": "ENTITYBLOCK_ANIMATED",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "mount": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    }
+  },
+  "shapes": {
+    "properties": [
+      "axis"
+    ],
+    "values": {
+      "x": [
+        [
+          0.0,
+          0.1875,
+          0.1875,
+          1.0,
+          0.8125,
+          0.8125
+        ]
+      ],
+      "y": [
+        [
+          0.1875,
+          0.0,
+          0.1875,
+          0.8125,
+          1.0,
+          0.8125
+        ]
+      ],
+      "z": [
+        [
+          0.1875,
+          0.1875,
+          0.0,
+          0.8125,
+          0.8125,
+          1.0
+        ]
+      ]
+    }
+  }
+}

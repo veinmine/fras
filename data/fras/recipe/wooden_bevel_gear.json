@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "P P",
+    " S ",
+    "P P"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "fras:wooden_shaft"
+  },
+  "result": {
+    "id": "fras:wooden_bevel_gear",
+    "count": 2
+  }
+}

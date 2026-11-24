@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I I",
+    " S ",
+    "I I"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "fras:iron_shaft"
+  },
+  "result": {
+    "id": "fras:iron_bevel_gear",
+    "count": 2
+  }
+}

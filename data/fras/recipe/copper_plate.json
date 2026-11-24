@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:hand_hammer",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "fras:copper_plate",
+    "count": 1
+  }
+}

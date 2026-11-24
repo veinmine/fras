@@ -1,0 +1,48 @@
+{
+  "template": "minecraft:iron_chain",
+  "properties": {
+    "hardness": 1.5,
+    "sounds": "minecraft:oak_planks",
+    "render_shape": "ENTITYBLOCK_ANIMATED",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "shapes": {
+    "properties": [
+      "axis"
+    ],
+    "values": {
+      "x": [
+        [
+          0.0,
+          0.375,
+          0.375,
+          1.0,
+          0.625,
+          0.625
+        ]
+      ],
+      "y": [
+        [
+          0.375,
+          0.0,
+          0.375,
+          0.625,
+          1.0,
+          0.625
+        ]
+      ],
+      "z": [
+        [
+          0.375,
+          0.375,
+          0.0,
+          0.625,
+          0.625,
+          1.0
+        ]
+      ]
+    }
+  }
+}
