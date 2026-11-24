@@ -442,10 +442,14 @@ Each subsystem gets its own detailed spec, written and agreed before it is imple
    ratios, conflicts, supports, overspeed timing, client sync. **Written:** [`specs/rotational-network.md`](specs/rotational-network.md)
    (2026-11-23); it refines sections 3 and 9 (see its section 15).
 2. **Steam and heat:** boiler state, heat rates per fuel, boiling, pressure, throughput, engine
-   steam draw, governor and damper control loops (with hunting), failure ladder.
+   steam draw, governor and damper control loops (with hunting), failure ladder. **Written for 0.2:**
+   [`specs/steam-and-heat.md`](specs/steam-and-heat.md) (2026-11-24, holds the 0.2 exit criteria; the governor
+   and damper are reserved for 0.3).
 3. **Fluids and pipes:** pump flow, pipe throughput per material, tanks, hot water, condensers,
-   machine cooling.
-4. **Multiblocks:** formation and validation, chunk-border handling, rendering as one object.
+   machine cooling. **Written for 0.2:** [`specs/fluids-and-pipes.md`](specs/fluids-and-pipes.md)
+   (2026-11-24; hot water, condensers and cooling reserved for 0.3).
+4. **Multiblocks:** formation and validation, chunk-border handling, rendering as one object. **Written
+   for 0.2:** [`specs/multiblocks.md`](specs/multiblocks.md) (2026-11-24).
 5. **Rust:** triggers, stage timing, effects, paint and repair.
 6. **Items and machines:** recipes, processing times, speed ranges and loads per machine, belts.
    **Grinder written:** [`specs/grinder.md`](specs/grinder.md) (2026-11-23), the one machine 0.1 needs; it
