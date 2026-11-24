@@ -33,7 +33,7 @@
   "tooltip.fras.pulley.details": "A belt carries at most 24 Nm and slips above that. Not a support.",
   "tooltip.fras.large_pulley": "Max 96 RPM. Twice a pulley's size: a 2:1 ratio.",
   "tooltip.fras.large_pulley.details": "Needs the 8 blocks around it in its plane clear. Not a support.",
-  "tooltip.fras.wooden_bevel_gear": "Max 64 RPM. Turns the line by 90°.",
+  "tooltip.fras.wooden_bevel_gear": "Max 56 RPM. Turns the line by 90°.",
   "tooltip.fras.wooden_bevel_gear.details": "The wrench moves the output to the face you click, or toggles a T (a second output).",
   "tooltip.fras.iron_bevel_gear": "Max 192 RPM. Turns the line by 90°.",
   "tooltip.fras.iron_bevel_gear.details": "The wrench moves the output to the face you click, or toggles a T (a second output).",

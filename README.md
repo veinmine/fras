@@ -15,7 +15,7 @@ jam; the wrench repairs them.
 | Water wheel | Turns in flowing water: 8 Nm per flowing block among its paddles, up to 32 Nm, 24 RPM. |
 | Wooden / iron shaft | Carries power. Torque limit 32 / 128 Nm; needs a support every 8 / 16 blocks. |
 | Bearing | A shaft segment that supports the line. Hangs on a sturdy face, fence, wall, bars or a chain above. |
-| Wooden / iron bevel gear | Turns the line 90°; the wrench toggles a T. Max 64 / 192 RPM. |
+| Wooden / iron bevel gear | Turns the line 90°; the wrench toggles a T. Max 56 / 192 RPM. |
 | Gearbox | 2:1 (the wrench flips it). Max 192 RPM on the fast side. |
 | Clutch | Disengages while powered by redstone. |
 | Pulley, large pulley, leather belt | Link parallel shafts up to 16 blocks apart; large:small is 2:1. Belts slip above 24 Nm. |

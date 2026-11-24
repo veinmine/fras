@@ -167,7 +167,9 @@ impl Spec {
     /// shaft segments and sources.
     pub fn max_rpm(&self) -> Option<f64> {
         match self.kind {
-            Kind::BevelGear(Material::Wood) => Some(64.0),
+            // 56, not the spec's 64: in game a water wheel geared up 4×
+            // levels off at ~63 RPM (exit criterion 3).
+            Kind::BevelGear(Material::Wood) => Some(56.0),
             Kind::BevelGear(Material::Iron) | Kind::Gearbox => Some(192.0),
             Kind::Pulley { .. } => Some(96.0),
             Kind::Grinder => Some(GRINDER_MAX_RPM),

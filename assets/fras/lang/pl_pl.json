@@ -33,7 +33,7 @@
   "tooltip.fras.pulley.details": "Pas przenosi najwyżej 24 Nm, powyżej się ślizga. Nie jest podporą.",
   "tooltip.fras.large_pulley": "Maks. 96 obr./min. Dwa razy większe: przełożenie 2:1.",
   "tooltip.fras.large_pulley.details": "Potrzebuje 8 wolnych bloków wokół siebie w swojej płaszczyźnie. Nie jest podporą.",
-  "tooltip.fras.wooden_bevel_gear": "Maks. 64 obr./min. Skręca linię o 90°.",
+  "tooltip.fras.wooden_bevel_gear": "Maks. 56 obr./min. Skręca linię o 90°.",
   "tooltip.fras.wooden_bevel_gear.details": "Klucz przenosi wyjście na klikniętą ścianę albo przełącza trójnik (drugie wyjście).",
   "tooltip.fras.iron_bevel_gear": "Maks. 192 obr./min. Skręca linię o 90°.",
   "tooltip.fras.iron_bevel_gear.details": "Klucz przenosi wyjście na klikniętą ścianę albo przełącza trójnik (drugie wyjście).",

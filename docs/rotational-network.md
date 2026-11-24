@@ -24,7 +24,7 @@ version.
 
 | Problem | Warning | Then |
 | --- | --- | --- |
-| **Overspeed**: a gear, gearbox or pulley over its max RPM (wood 64, iron 192, pulley 96) | Rattle, sparks; the tachometer goes red | After 5 s (faster at 1.5× the limit) the part **jams** |
+| **Overspeed**: a gear, gearbox or pulley over its max RPM (wooden bevel 56, iron 192, pulley 96) | Rattle, sparks; the tachometer goes red | After 5 s (faster at 1.5× the limit) the part **jams** |
 | **Overload**: a shaft, bearing or clutch carrying more than its torque limit (wood 32, iron 128 Nm; half that while sagging) | Creaking, dust | After 5 s it **shears** (jams) |
 | **Shock**: joining two lines turning opposite ways faster than 8 RPM | — | The part that joined them jams at once |
 | **Conflict**: a loop of gears that can't agree on a speed | — | The part that closed the loop jams |
