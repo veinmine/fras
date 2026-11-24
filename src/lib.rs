@@ -7,8 +7,9 @@ pub mod game;
 pub mod sim;
 
 use mod_api::{
-    self, Hooks, HostSide, LevelTickPostEvent, Registrar, RegistrationContext,
-    ServerAboutToStartEvent, ServerHost, ServerStoppedEvent, TagsUpdatedEvent,
+    self, EntityPlaceEvent, Flow, Hooks, HostSide, InteractionResult, LevelTickPostEvent,
+    Registrar, RegistrationContext, ServerAboutToStartEvent, ServerHost, ServerStoppedEvent,
+    TagsUpdatedEvent, UseItemOnBlockEvent, UsePhase,
 };
 
 use game::blocks::Block;
@@ -48,6 +49,7 @@ impl Hooks for Fras {
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.
+        r.menu_part("minecraft:hopper", game::grinder::OutputSlots);
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
         let wrench = r.item_key("fras:wrench");
@@ -95,6 +97,33 @@ impl Hooks for Fras {
         if let HostSide::Server(host) = host {
             game::grinder::load(&*host);
         }
+    }
+
+    /// On the client, a click with an item on a part that takes it (the
+    /// grinder's menu, the crank, a bearing onto a shaft) is the server's to
+    /// answer: don't predict placing the held block meanwhile.
+    fn use_item_on_block(&self, host: HostSide, event: &mut UseItemOnBlockEvent<'_>) -> Flow {
+        let HostSide::Client(host) = host else {
+            return Flow::Continue;
+        };
+        if !matches!(event.phase, UsePhase::Block) || !game::parts::takes_item(&*host, event.click)
+        {
+            return Flow::Continue;
+        }
+        *event.cancellation_result = InteractionResult::Success;
+        Flow::Cancel
+    }
+
+    /// Nothing but liquid goes into a water wheel's paddles.
+    fn entity_place(&self, host: &mut dyn ServerHost, event: &mut EntityPlaceEvent) -> Flow {
+        let Some(level) = event.placer.and_then(|e| e.level(&*host)) else {
+            return Flow::Continue;
+        };
+        if game::world::in_wheel(&*host, level, event.pos, event.state) {
+            event.cancelled = true;
+            return Flow::Cancel;
+        }
+        Flow::Continue
     }
 
     /// After each level's tick: run its networks.

@@ -16,7 +16,7 @@ version.
 
 ## Ratios
 
-- A gearbox is 2:1: its large-gear face turns half as fast with twice the torque. The wrench flips it.
+- A gearbox is 2:1: its large-gear face (the bigger box) turns half as fast with twice the torque. The wrench flips it, and so does a redstone signal each time it comes or goes. A gearbox driven from its slow side asks the driving side for twice the torque, so gearing up before a belt can make the belt slip.
 - A large pulley belted to a small one is 2:1 the same way. A crossed belt (wrench) reverses direction.
 - A bevel gear turns the line by 90° at 1:1.
 

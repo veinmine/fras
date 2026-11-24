@@ -46,6 +46,9 @@ pub struct Level {
     pub bearings: BTreeSet<Pos>,
     /// Clutches whose redstone input may have changed.
     pub clutches: BTreeSet<Pos>,
+    /// Gearboxes whose redstone may have changed; true when just placed
+    /// (it takes the signal as it is without flipping).
+    pub gearboxes: BTreeMap<Pos, bool>,
     /// Large pulleys just placed: check their plane is clear.
     pub large_pulleys: BTreeSet<Pos>,
     /// Water wheels whose water may have changed, and their torque.

@@ -12,11 +12,11 @@ jam; the wrench repairs them.
 | Block / item | What it does |
 | --- | --- |
 | Crank | Hold right-click to turn it (sneak for the other way). 16 Nm, up to 32 RPM. |
-| Water wheel | Turns in flowing water: 8 Nm per flowing block among its paddles, up to 32 Nm, 24 RPM. |
+| Water wheel | Turns in flowing water (only liquids go into its paddles): 8 Nm per flowing block among its paddles, up to 32 Nm, 24 RPM. |
 | Wooden / iron shaft | Carries power. Torque limit 32 / 128 Nm; needs a support every 8 / 16 blocks. |
 | Bearing | A shaft segment that supports the line. Hangs on a sturdy face, fence, wall, bars or a chain above. |
 | Wooden / iron bevel gear | Turns the line 90°; the wrench toggles a T. Max 56 / 192 RPM. |
-| Gearbox | 2:1 (the wrench flips it). Max 192 RPM on the fast side. |
+| Gearbox | 2:1 (the wrench or a change of redstone signal flips it). Max 192 RPM on the fast side. |
 | Clutch | Disengages while powered by redstone. |
 | Pulley, large pulley, leather belt | Link parallel shafts up to 16 blocks apart; large:small is 2:1. Belts slip above 24 Nm. |
 | Grinder | Raw ores → 1.5 crushed ore, cobblestone → gravel, gravel → sand, wool → string, bone → bone meal. 12 to 96 RPM. |

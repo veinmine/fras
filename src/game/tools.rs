@@ -49,13 +49,20 @@ impl ItemPart for Wrench {
         let HostSide::Server(host) = host else {
             return None;
         };
-        wrench(host, event)
+        wrench(host, event.player, event.pos, event.face)
     }
 }
 
-fn wrench(host: &mut dyn ServerHost, event: &UseOnEvent<'_>) -> Option<InteractionResult> {
-    let (player, level, dim) = context(&*host, event.player)?;
-    let mut pos = Pos::from_array(event.pos);
+/// The wrench used on `pos`, clicked on `face`. The parts' own block hook
+/// calls this too, so a machine never opens its menu for the wrench.
+pub fn wrench(
+    host: &mut dyn ServerHost,
+    player: u128,
+    pos: [i32; 3],
+    face: [i32; 3],
+) -> Option<InteractionResult> {
+    let (player, level, dim) = context(&*host, player)?;
+    let mut pos = Pos::from_array(pos);
     let mut block = block_at(&*host, level, pos)?;
     // A tachometer stands for the part it is on.
     if block == Block::Tachometer {
@@ -75,7 +82,7 @@ fn wrench(host: &mut dyn ServerHost, event: &UseOnEvent<'_>) -> Option<Interacti
     if let Some(jam) = jammed {
         return Some(repair(host, player, level, dim, pos, block, jam));
     }
-    let clicked = super::dir_of_vec(event.face);
+    let clicked = super::dir_of_vec(face);
     if configure(host, player, level, pos, block, clicked) {
         effects::sound(host, level, pos, "minecraft:block.chain.place", 0.6, 1.4);
         Some(InteractionResult::Success)
@@ -323,11 +330,12 @@ pub fn inspect(
             ))
             .append(Text::literal(" —")),
     ];
-    let (part, reading, wheel) = with_level(dim, |l| {
+    let (part, reading, wheel, slipping) = with_level(dim, |l| {
         (
             l.mech.part(pos).cloned(),
             l.mech.reading(pos),
             l.wheel_torque.get(&pos).copied(),
+            l.mech.belt_slipping(pos),
         )
     });
     let Some(part) = part else {
@@ -363,6 +371,12 @@ pub fn inspect(
     ));
     if r.paused {
         lines.push(tr("fras.inspect.paused", vec![]));
+    }
+    if slipping {
+        lines.push(tr(
+            "fras.inspect.slipping",
+            vec![num(crate::sim::rot::part::BELT_LIMIT)],
+        ));
     }
     if let Some(red) = r.red_line {
         lines.push(tr("fras.inspect.red_line", vec![num(red.abs())]));

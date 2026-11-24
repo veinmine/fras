@@ -47,13 +47,14 @@ pub fn break_block(host: &mut dyn ServerHost, level: LevelRef, pos: Pos) {
 
 /// The queued work of one level.
 pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
-    let (pending, clear, bearings, clutches, larges) = with_level(dim, |l| {
+    let (pending, clear, bearings, clutches, larges, gearboxes) = with_level(dim, |l| {
         (
             std::mem::take(&mut l.pending),
             std::mem::take(&mut l.clear_belts),
             std::mem::take(&mut l.bearings),
             std::mem::take(&mut l.clutches),
             std::mem::take(&mut l.large_pulleys),
+            std::mem::take(&mut l.gearboxes),
         )
     });
     // Belts whose other end broke (queued without a level: check it is ours).
@@ -92,6 +93,9 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
                 if powered { "true" } else { "false" },
             );
         }
+    }
+    for (pos, placed) in gearboxes {
+        gearbox_signal(host, level, pos, placed);
     }
     for pos in bearings {
         check_bearing(host, level, pos);
@@ -136,6 +140,69 @@ fn clear_belt(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, pos: Pos) {
     with_level(dim, |l| {
         l.pending.insert(pos, true);
     });
+}
+
+/// A gearbox reverses its ratio each time its redstone signal comes or goes:
+/// its slow face moves to the other side. Just placed, it only notes the
+/// signal it was placed into.
+fn gearbox_signal(host: &mut dyn ServerHost, level: LevelRef, pos: Pos, placed: bool) {
+    if block_at(&*host, level, pos) != Some(Block::Gearbox) {
+        return;
+    }
+    let powered = level.has_neighbor_signal(&*host, pos.to_array());
+    let was = server::property(&*host, level, pos, "powered").as_deref() == Some("true");
+    if powered == was {
+        return;
+    }
+    let value = if powered { "true" } else { "false" };
+    if placed {
+        set_property(host, level, pos, "powered", value);
+        return;
+    }
+    let slow = server::property(&*host, level, pos, "facing")
+        .as_deref()
+        .and_then(Dir::from_name)
+        .unwrap_or(Dir::North);
+    set_properties(
+        host,
+        level,
+        pos,
+        &[("powered", value), ("facing", slow.opposite().name())],
+    );
+}
+
+/// Set several block state properties at `pos` in one change.
+pub fn set_properties(
+    host: &mut dyn ServerHost,
+    level: LevelRef,
+    pos: Pos,
+    props: &[(&str, &str)],
+) -> bool {
+    let Some(state) = level.block_state(&*host, pos.to_array()) else {
+        return false;
+    };
+    let new = {
+        let states = host.block_states();
+        let mut new = state;
+        for (key, value) in props {
+            match new.with(&states, key, value) {
+                Ok(s) => new = s,
+                Err(_) => return false,
+            }
+        }
+        new
+    };
+    if new == state {
+        return false;
+    }
+    level
+        .set_block(
+            host,
+            pos.to_array(),
+            new,
+            BlockUpdateFlags::NEIGHBORS | BlockUpdateFlags::CLIENTS,
+        )
+        .unwrap_or(false)
 }
 
 // ---- Bearings ---------------------------------------------------------------
@@ -234,6 +301,45 @@ fn large_pulley_fits(host: &dyn Host, level: LevelRef, pos: Pos) -> bool {
             .block_state(host, q.to_array())
             .is_some_and(|s| states.replaceable(s) == Some(true))
     })
+}
+
+/// Whether placing `state` at `pos` would put a block into a water wheel's
+/// paddles (the 8 positions around its hub). Liquids may go there.
+pub fn in_wheel(
+    host: &dyn Host,
+    level: LevelRef,
+    pos: mod_api::BlockPos,
+    state: mod_api::BlockState,
+) -> bool {
+    let id = state.block().id(host);
+    if matches!(
+        id.as_str(),
+        "minecraft:water" | "minecraft:lava" | "minecraft:bubble_column"
+    ) {
+        return false;
+    }
+    let pos = Pos::new(pos.x, pos.y, pos.z);
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            for dz in -1..=1 {
+                if (dx, dy, dz) == (0, 0, 0) {
+                    continue;
+                }
+                let hub = Pos::new(pos.x + dx, pos.y + dy, pos.z + dz);
+                if block_at(host, level, hub) != Some(Block::WaterWheel) {
+                    continue;
+                }
+                let axis = server::property(host, level, hub, "axis")
+                    .as_deref()
+                    .and_then(Axis::from_name)
+                    .unwrap_or(Axis::X);
+                if ring(hub, axis).contains(&pos) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 /// Water wheels whose water may have changed: read their torque again.

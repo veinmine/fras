@@ -72,7 +72,11 @@ pub fn event(host: &mut dyn ServerHost, level: LevelRef, event: &Event) {
 /// Every half second: rattle for overspeed, creak for overload, louder and
 /// quicker as the warning timer fills.
 pub fn warnings(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
-    let warned = with_level(dim, |l| l.mech.warned());
+    let (warned, slipping) = with_level(dim, |l| (l.mech.warned(), l.mech.slipping_belts()));
+    // A slipping belt keeps squealing.
+    for (a, _) in slipping {
+        sound(host, level, a, "minecraft:block.grindstone.use", 0.35, 1.7);
+    }
     for (pos, overspeed, level_) in warned {
         let volume = 0.2 + 0.15 * level_ as f32;
         if overspeed {

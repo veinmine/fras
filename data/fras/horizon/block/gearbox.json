@@ -16,6 +16,9 @@
         "west",
         "east"
       ]
+    },
+    "powered": {
+      "type": "boolean"
     }
   },
   "default_state": {

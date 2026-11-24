@@ -299,6 +299,56 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
     }
 }
 
+/// Read the grinder's comparator signal from its slots as they are now.
+pub fn refresh_signal(host: &dyn mod_api::Host, level: mod_api::LevelRef, pos: Pos) {
+    let Some(dim) = server::dim_of(host, level) else {
+        return;
+    };
+    let Some(entity) = host.block_entity(level, pos.to_array()) else {
+        return;
+    };
+    let slots: Vec<Option<(u32, u32)>> = (0..SLOTS as u32)
+        .map(|i| {
+            entity
+                .item_slot(host, i)
+                .ok()
+                .flatten()
+                .map(|s| (s.count(), host.max_stack_size(s.item()).unwrap_or(64)))
+        })
+        .collect();
+    let signal = grind::comparator(&slots) as i32;
+    with_level(dim, |l| {
+        l.grinder_signal.insert(pos, signal);
+    });
+}
+
+/// The grinder's menu (a hopper's): its four output slots take nothing by
+/// hand.
+pub struct OutputSlots;
+
+#[mod_api::horizon_part]
+impl mod_api::MenuPart for OutputSlots {
+    fn menu_slot_rules(
+        &self,
+        host: &dyn mod_api::Host,
+        event: &mut mod_api::MenuSlotRulesEvent<'_>,
+    ) {
+        if event.container != mod_api::MenuContainer::Main || !(1..SLOTS).contains(&event.slot) {
+            return;
+        }
+        let context = event.context;
+        let (Some(pos), Some(player)) = (context.pos, context.player) else {
+            return;
+        };
+        let Some(level) = host.player(player).and_then(|p| p.level(host)) else {
+            return;
+        };
+        if server::block_at(host, level, Pos::from_array(pos)) == Some(blocks::Block::Grinder) {
+            event.may_place = false;
+        }
+    }
+}
+
 /// Move one item from the outputs into the inventory below, if it takes it.
 fn push_down(
     host: &mut dyn ServerHost,

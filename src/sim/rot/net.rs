@@ -455,6 +455,18 @@ impl Mechanics {
 
     /// Parts whose warning timers are filling: position, whether it is
     /// overspeed (else overload), and the warning level (1 to 3).
+    /// The belts slipping now, by their two pulleys.
+    pub fn slipping_belts(&self) -> Vec<(Pos, Pos)> {
+        let mut out: Vec<(Pos, Pos)> = self.slipping.iter().copied().collect();
+        out.sort();
+        out
+    }
+
+    /// Whether the belt on the pulley at `pos` is slipping.
+    pub fn belt_slipping(&self, pos: Pos) -> bool {
+        self.slipping.iter().any(|(a, b)| *a == pos || *b == pos)
+    }
+
     pub fn warned(&self) -> Vec<(Pos, bool, u8)> {
         self.parts
             .iter()

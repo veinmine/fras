@@ -123,7 +123,7 @@ BLOCKS = {
         {
             "template": IRON,
             "properties": {"hardness": 3.0},
-            "state_properties": {"facing": DIR_ENUM},
+            "state_properties": {"facing": DIR_ENUM, "powered": {"type": "boolean"}},
             "default_state": {"facing": "north"},
             "shapes": {"default": CASING},
         },
@@ -216,7 +216,14 @@ def models():
     # Particle-only block models for the parts the block entity draws.
     for name in ["wooden_shaft", "iron_shaft", "bearing", "clutch", "pulley", "large_pulley", "crank", "water_wheel"]:
         m[f"block/{name}"] = {"textures": {"particle": BLOCKS[name][2]}, "elements": []}
-    for name, tex in [("wooden_bevel_gear", spruce), ("iron_bevel_gear", andesite), ("gearbox", iron)]:
+    # The gearbox: a large box on its slow face (north in the model) and a
+    # small one on its fast face, so its ratio shows.
+    m["block/gearbox"] = block_model(
+        {"all": iron, "fast": andesite},
+        [element([1, 1, 0], [15, 15, 9], {"side": "#all"}), element([4, 4, 9], [12, 12, 16], {"side": "#fast"})],
+        iron,
+    )
+    for name, tex in [("wooden_bevel_gear", spruce), ("iron_bevel_gear", andesite)]:
         m[f"block/{name}"] = block_model({"all": tex}, [element([2, 2, 2], [14, 14, 14], {"side": "#all"})], tex)
     m["block/grinder"] = block_model(
         {"side": log, "top": "minecraft:block/smooth_stone", "post": "minecraft:block/dark_oak_log"},
@@ -282,6 +289,9 @@ def models():
 
 
 def blockstate(name):
+    if name == "gearbox":
+        rot = {"north": {}, "south": {"y": 180}, "east": {"y": 90}, "west": {"y": 270}, "up": {"x": 270}, "down": {"x": 90}}
+        return {"variants": {f"facing={d}": dict({"model": f"{NS}:block/gearbox"}, **r) for d, r in rot.items()}}
     if name == "tachometer":
         rot = {"up": {}, "down": {"x": 180}, "north": {"x": 90}, "south": {"x": 90, "y": 180}, "east": {"x": 90, "y": 90}, "west": {"x": 90, "y": 270}}
         return {"variants": {f"facing={d}": dict({"model": f"{NS}:block/tachometer"}, **r) for d, r in rot.items()}}

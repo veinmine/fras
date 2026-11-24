@@ -153,6 +153,9 @@ impl BlockPart for BlockHooks {
                         Block::Clutch => {
                             l.clutches.insert(pos);
                         }
+                        Block::Gearbox => {
+                            l.gearboxes.insert(pos, true);
+                        }
                         Block::LargePulley => {
                             l.large_pulleys.insert(pos);
                         }
@@ -179,6 +182,9 @@ impl BlockPart for BlockHooks {
             Block::Clutch => {
                 l.clutches.insert(pos);
             }
+            Block::Gearbox => {
+                l.gearboxes.entry(pos).or_insert(false);
+            }
             Block::WaterWheel => {
                 l.wheels.insert(pos);
             }
@@ -193,8 +199,14 @@ impl BlockPart for BlockHooks {
     ) -> Option<InteractionResult> {
         let keys = super::keys()?;
         let item = event.click.stack.map(|s| s.item());
-        // The wrench and the belt are the item's to answer.
-        if item == Some(keys.wrench) || item == Some(keys.leather_belt) {
+        // The wrench is answered here, so a machine never opens its menu
+        // for it; the belt is the item's to answer.
+        if item == Some(keys.wrench) {
+            let click = event.click;
+            super::tools::wrench(host, click.player, click.pos, click.hit.face);
+            return Some(InteractionResult::Success);
+        }
+        if item == Some(keys.leather_belt) {
             return Some(InteractionResult::Pass);
         }
         match self.0 {
@@ -219,6 +231,18 @@ impl BlockPart for BlockHooks {
         }
     }
 
+    /// The grinder's slots changed (a player, a hopper, the grinder itself):
+    /// read its comparator signal again before comparators ask.
+    fn contents_changed(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut mod_api::ContentsChangedEvent,
+    ) {
+        if self.0 == Block::Grinder {
+            super::grinder::refresh_signal(&*host, event.level, pos_of(event.pos));
+        }
+    }
+
     fn has_analog_output(&self, _: &dyn LevelHost, event: &mut HasAnalogOutputEvent) {
         if matches!(self.0, Block::Tachometer | Block::Grinder) {
             event.output = true;
@@ -239,6 +263,34 @@ impl BlockPart for BlockHooks {
             _ => {}
         }
     }
+}
+
+/// Whether a part takes the item clicked on it itself (the server answers),
+/// so the client mustn't predict placing it: asked on the client.
+pub fn takes_item(host: &dyn mod_api::Host, click: &mod_api::BlockClick<'_>) -> bool {
+    let (Some(keys), Some(stack)) = (super::keys(), click.stack) else {
+        return false;
+    };
+    let item = stack.item();
+    if item == keys.leather_belt {
+        return false;
+    }
+    let level = host
+        .level(click.dimension.key().id())
+        .or_else(|| host.player(click.player).and_then(|p| p.level(host)));
+    let Some(level) = level else {
+        return false;
+    };
+    match super::server::block_at(host, level, pos_of_array(click.pos)) {
+        Some(Block::Grinder | Block::Crank) => true,
+        Some(Block::ShaftWood | Block::ShaftIron) => item == keys.bearing,
+        Some(_) => item == keys.wrench,
+        None => false,
+    }
+}
+
+fn pos_of_array(p: [i32; 3]) -> Pos {
+    Pos::new(p[0], p[1], p[2])
 }
 
 /// Hold the use button on a crank to turn it; sneak to turn it the other
