@@ -171,7 +171,15 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
         super::pipes::connect_around(host, level, dim, pos);
     }
     // A new emergency valve opens half a bar under the red line of what it
-    // sits on (fluids spec 6.4).
+    // sits on (fluids spec 6.4). Placing it dissolved the networks, so they
+    // are rebuilt first: otherwise every new valve reads no red line.
+    if !new_vents.is_empty() {
+        let view = GameView {
+            host: &*host,
+            level,
+        };
+        with_level(dim, |l| l.steam.works.rebuild(&view));
+    }
     for (pos, facing) in new_vents {
         let red = with_level(dim, |l| l.steam.works.gauge(pos.offset(facing)).red);
         let set = crate::sim::fluid::valve::default_set((red > 0.0).then_some(red));
@@ -439,13 +447,24 @@ fn random() -> f64 {
 fn apply_event(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, event: Event) {
     match event {
         Event::Rupture {
+            kind,
             blocks: shell,
             center: at,
             power,
             cloud,
-            ..
+            dry,
         } => {
             let mode = explosion_mode();
+            // One line per rupture in the game log, so a lost boiler can be
+            // explained afterwards.
+            eprintln!(
+                "[fras] {kind:?} of {} blocks ruptured at {:.0} {:.0} {:.0}: {}, power {power:.2}",
+                shell.len(),
+                at[0],
+                at[1],
+                at[2],
+                if dry { "dry" } else { "overpressure" },
+            );
             sound_at(
                 host,
                 level,

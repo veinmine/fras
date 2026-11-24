@@ -647,3 +647,24 @@ fn red_line_is_the_weakest_part() {
     let g = w.gauge(p(2, 3, 0));
     assert_eq!(g.red, 4.0);
 }
+
+#[test]
+fn a_new_valve_reads_the_red_line_once_rebuilt() {
+    // The game sets a new emergency valve from the red line of what it sits
+    // on; inserting it dissolves the networks, so it must rebuild first.
+    let world = World::default();
+    let mut w = Works::new();
+    boiler(&mut w, ShellKind::IronBoiler);
+    w.insert(p(0, 2, 0), Spec::new(Kind::Dome), None);
+    w.step(&world);
+    w.insert(
+        p(0, 3, 0),
+        Spec::new(Kind::Vent { emergency: true }).with_dir(Dir::Down),
+        None,
+    );
+    assert_eq!(w.gauge(p(0, 2, 0)).red, 0.0);
+    w.rebuild(&world);
+    let red = w.gauge(p(0, 2, 0)).red;
+    assert_eq!(red, 6.0);
+    assert_eq!(crate::sim::fluid::valve::default_set(Some(red)), 5.5);
+}
