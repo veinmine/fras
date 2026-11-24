@@ -92,11 +92,41 @@ fn faces<'a>(axis: Axis, side: &'a str, end: &'a str) -> [Option<CubeFace<'a>>; 
     }
 }
 
+/// Each face's texture rectangle from the corner of its sprite, at most a
+/// whole sprite. A box's own UVs come from its position in the block, which
+/// for a box reaching outside the block points outside its sprite (into the
+/// atlas's neighbours).
+fn uvs(from: [f32; 3], to: [f32; 3]) -> [[f32; 4]; 6] {
+    let d = [
+        (to[0] - from[0]).abs().min(16.0),
+        (to[1] - from[1]).abs().min(16.0),
+        (to[2] - from[2]).abs().min(16.0),
+    ];
+    let r = |w: f32, h: f32| [0.0, 0.0, w, h];
+    [
+        r(d[0], d[2]), // down
+        r(d[0], d[2]), // up
+        r(d[0], d[1]), // north
+        r(d[0], d[1]), // south
+        r(d[2], d[1]), // west
+        r(d[2], d[1]), // east
+    ]
+}
+
 fn boxed(
     draw: &mut dyn BlockEntityDrawContext,
     b: ([f32; 3], [f32; 3]),
     faces: [Option<CubeFace<'_>>; 6],
 ) {
+    let uv = uvs(b.0, b.1);
+    let mut faces = faces;
+    for (face, uv) in faces.iter_mut().zip(uv) {
+        if let Some(f) = face
+            && f.uv.is_none()
+        {
+            *f = f.with_uv(uv);
+        }
+    }
     if !draw.cube(b.0, b.1, faces, 0xFFFFFF) {
         eprintln!("[fras] a sprite was refused while drawing");
     }
@@ -221,27 +251,15 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             );
         }
         Block::Pulley | Block::LargePulley => {
-            let r = if block == Block::LargePulley {
-                24.0
-            } else {
-                7.0
-            };
+            let r = pulley_radius(block == Block::LargePulley);
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
             axle(draw, axis, [0.0, 16.0], 2.0, LOG, LOG_END);
-            boxed(
-                draw,
-                span(axis, [5.0, 11.0], [8.0 - r, 8.0 + r], [8.0 - r, 8.0 + r]),
-                faces(axis, PLANKS, PLANKS),
-            );
             draw.still();
+            disc(draw, pos, axis, rpm, r, [5.0, 11.0]);
             if let Some(belt) = blocks::belt(nbt)
                 && (belt.partner.x, belt.partner.y, belt.partner.z) > (pos.x, pos.y, pos.z)
             {
-                let other = if blocks::get_bool(nbt, "belt_big") {
-                    24.0
-                } else {
-                    7.0
-                };
+                let other = pulley_radius(blocks::get_bool(nbt, "belt_big"));
                 draw_belt(
                     draw,
                     pos,
@@ -301,15 +319,18 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
         Block::WaterWheel => {
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
             axle(draw, axis, [0.0, 16.0], 2.0, LOG, LOG_END);
+            // The hub, a little wider than the spokes so their ends hide in it.
             boxed(
                 draw,
-                span(axis, [4.0, 12.0], [4.0, 12.0], [4.0, 12.0]),
-                faces(axis, OAK, LOG_END),
+                span(axis, [4.5, 11.5], [3.5, 12.5], [3.5, 12.5]),
+                faces(axis, LOG, LOG_END),
             );
-            wheel_cross(draw, axis);
+            wheel_arms(draw, axis, 0.0);
             draw.still();
-            spin(draw, pos, 0, axis, CENTER, rpm, 45.0);
-            wheel_cross(draw, axis);
+            // The other four arms, turned 45° and a hair thinner so no faces meet
+            // in one plane.
+            spin(draw, pos, 1, axis, CENTER, rpm, 45.0);
+            wheel_arms(draw, axis, 0.1);
             draw.still();
         }
         Block::Grinder => {
@@ -394,26 +415,70 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     draw.keep();
 }
 
-/// Four spokes and paddles in the wheel's plane (the other four are this
-/// drawn again a quarter of a quarter turn on).
-fn wheel_cross(draw: &mut dyn BlockEntityDrawContext, axis: Axis) {
-    boxed(
-        draw,
-        span(axis, [6.0, 10.0], [-16.0, 32.0], [7.0, 9.0]),
-        faces(axis, LOG, LOG),
-    );
-    boxed(
-        draw,
-        span(axis, [6.0, 10.0], [7.0, 9.0], [-16.0, 32.0]),
-        faces(axis, LOG, LOG),
-    );
+/// Radius of a pulley's rim, texels.
+fn pulley_radius(large: bool) -> f32 {
+    if large { 22.0 } else { 7.0 }
+}
+
+/// A pulley's disc, round enough: three square plates turned 30° apart
+/// (a twelve-sided rim), each a hair thinner than the last so their faces
+/// never share a plane.
+fn disc(
+    draw: &mut dyn BlockEntityDrawContext,
+    pos: Pos,
+    axis: Axis,
+    rpm: f64,
+    r: f32,
+    along: [f32; 2],
+) {
+    for i in 0..3u8 {
+        let t = 0.1 * i as f32;
+        spin(draw, pos, 20 + i, axis, CENTER, rpm, 30.0 * i as f32);
+        boxed(
+            draw,
+            span(
+                axis,
+                [along[0] + t, along[1] - t],
+                [8.0 - r, 8.0 + r],
+                [8.0 - r, 8.0 + r],
+            ),
+            faces(axis, PLANKS, PLANKS),
+        );
+        draw.still();
+    }
+}
+
+/// Four arms of the wheel: a spoke from the hub out into each paddle (it
+/// stops inside the paddle, so no faces meet), and the paddle. `t` thins
+/// them, so the two sets drawn 45° apart never share a plane.
+fn wheel_arms(draw: &mut dyn BlockEntityDrawContext, axis: Axis, t: f32) {
+    let spoke = |a: f32, b: f32| [a, b];
+    let w = [7.0 + t, 9.0 - t];
+    for (u, v) in [
+        (spoke(-14.5, 4.0), w),
+        (spoke(12.0, 30.5), w),
+        (w, spoke(-14.5, 4.0)),
+        (w, spoke(12.0, 30.5)),
+    ] {
+        boxed(
+            draw,
+            span(axis, [6.5 + t, 9.5 - t], u, v),
+            faces(axis, LOG, LOG),
+        );
+    }
     for (u, v) in [
         ([-16.0, -13.0], [2.0, 14.0]),
         ([29.0, 32.0], [2.0, 14.0]),
         ([2.0, 14.0], [-16.0, -13.0]),
         ([2.0, 14.0], [29.0, 32.0]),
     ] {
-        boxed(draw, span(axis, [2.0, 14.0], u, v), faces(axis, OAK, OAK));
+        let u = [u[0] + t, u[1] - t];
+        let v = [v[0] + t, v[1] - t];
+        boxed(
+            draw,
+            span(axis, [2.0 + t, 14.0 - t], u, v),
+            faces(axis, OAK, OAK),
+        );
     }
 }
 
@@ -458,6 +523,9 @@ fn draw_belt(
             p[2] + a[2] * hw * s,
         ]
     };
+    // The belt rides just outside the rims, so it never meets their faces.
+    let lift = 0.6 / 16.0;
+    let (r1, r2) = (r1 + lift, r2 + lift);
     let runs = if crossed {
         [
             (at(c1, 1.0, r1), at(c2, -1.0, r2)),
@@ -469,11 +537,45 @@ fn draw_belt(
             (at(c1, -1.0, r1), at(c2, -1.0, r2)),
         ]
     };
+    // Half a texel of thickness: the outer and inner faces sit apart, each
+    // facing its own way.
+    let thick = 0.5 / 16.0;
     for (p1, p2) in runs {
-        let quad = [off(p1, -1.0), off(p2, -1.0), off(p2, 1.0), off(p1, 1.0)];
-        draw.quad(BELT, quad, [0.0, 0.0, 16.0, 16.0], 0xFFFFFF);
-        let back = [quad[3], quad[2], quad[1], quad[0]];
-        draw.quad(BELT, back, [0.0, 0.0, 16.0, 16.0], 0xFFFFFF);
+        let run = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+        let length = run.iter().map(|c| c * c).sum::<f32>().sqrt();
+        // Outward: away from the line between the pulleys' centres.
+        let mid = [
+            (p1[0] + p2[0]) / 2.0 - (c1[0] + c2[0]) / 2.0,
+            (p1[1] + p2[1]) / 2.0 - (c1[1] + c2[1]) / 2.0,
+            (p1[2] + p2[2]) / 2.0 - (c1[2] + c2[2]) / 2.0,
+        ];
+        let ml = mid.iter().map(|c| c * c).sum::<f32>().sqrt().max(1e-6);
+        let out = mid.map(|c| c / ml * thick / 2.0);
+        let shift = |p: [f32; 3], s: f32| [p[0] + out[0] * s, p[1] + out[1] * s, p[2] + out[2] * s];
+        // One sprite per block of length, so the texture isn't stretched.
+        let pieces = length.ceil().max(1.0) as usize;
+        for k in 0..pieces {
+            let f0 = k as f32 / pieces as f32;
+            let f1 = (k + 1) as f32 / pieces as f32;
+            let lerp = |f: f32| [p1[0] + run[0] * f, p1[1] + run[1] * f, p1[2] + run[2] * f];
+            let (q1, q2) = (lerp(f0), lerp(f1));
+            let v1 = 16.0 * (length / pieces as f32).min(1.0);
+            let uv = [0.0, 0.0, 5.0, v1];
+            for s in [1.0f32, -1.0] {
+                let quad = [
+                    off(shift(q1, s), -1.0),
+                    off(shift(q2, s), -1.0),
+                    off(shift(q2, s), 1.0),
+                    off(shift(q1, s), 1.0),
+                ];
+                let quad = if s > 0.0 {
+                    quad
+                } else {
+                    [quad[3], quad[2], quad[1], quad[0]]
+                };
+                draw.quad(BELT, quad, uv, 0xFFFFFF);
+            }
+        }
     }
 }
 
