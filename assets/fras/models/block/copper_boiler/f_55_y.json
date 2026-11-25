@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/copper_boiler/shell",
+  "loader": "fras:shell",
+  "mask": 55,
+  "axis": "y"
+}

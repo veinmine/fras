@@ -1,0 +1,49 @@
+{
+  "template": "minecraft:iron_block",
+  "properties": {
+    "hardness": 3.5,
+    "render_shape": "ENTITYBLOCK_ANIMATED",
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "axis": {
+      "type": "enum",
+      "values": [
+        "x",
+        "z"
+      ]
+    }
+  },
+  "default_state": {
+    "axis": "x"
+  },
+  "shapes": {
+    "properties": [
+      "axis"
+    ],
+    "values": {
+      "x": [
+        [
+          0.0,
+          0.25,
+          0.25,
+          1.0,
+          0.75,
+          0.75
+        ]
+      ],
+      "z": [
+        [
+          0.25,
+          0.25,
+          0.0,
+          0.75,
+          0.75,
+          1.0
+        ]
+      ]
+    }
+  }
+}

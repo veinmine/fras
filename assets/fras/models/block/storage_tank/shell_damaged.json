@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "minecraft:block/cracked_stone_bricks",
+    "end": "minecraft:block/cracked_stone_bricks",
+    "particle": "minecraft:block/cracked_stone_bricks"
+  }
+}

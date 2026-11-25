@@ -25,12 +25,18 @@ pub enum Kind {
     Shaft(Material),
     Bearing,
     Clutch,
-    Pulley { large: bool },
+    Pulley {
+        large: bool,
+    },
     BevelGear(Material),
     Gearbox,
     Crank,
     WaterWheel,
     Grinder,
+    /// The steam engine's flywheel: a source driven by its cylinders.
+    Flywheel,
+    /// A water pump: a machine.
+    Pump,
 }
 
 /// How a part sits in the world: the faces it connects through.
@@ -146,6 +152,8 @@ impl Spec {
             }
             Kind::Gearbox | Kind::Grinder => 4.0,
             Kind::WaterWheel => 20.0,
+            Kind::Flywheel => FLYWHEEL_INERTIA,
+            Kind::Pump => 4.0,
         }
     }
 
@@ -159,7 +167,7 @@ impl Spec {
             Kind::Shaft(_) | Kind::Bearing => 0.0025,
             Kind::Clutch | Kind::BevelGear(_) | Kind::Pulley { .. } | Kind::Crank => 0.005,
             Kind::Gearbox => 0.01,
-            Kind::WaterWheel | Kind::Grinder => 0.0125,
+            Kind::WaterWheel | Kind::Grinder | Kind::Flywheel | Kind::Pump => 0.0125,
         }
     }
 
@@ -173,6 +181,7 @@ impl Spec {
             Kind::BevelGear(Material::Iron) | Kind::Gearbox => Some(192.0),
             Kind::Pulley { .. } => Some(96.0),
             Kind::Grinder => Some(GRINDER_MAX_RPM),
+            Kind::Flywheel | Kind::Pump => Some(192.0),
             _ => None,
         }
     }
@@ -212,11 +221,20 @@ impl Spec {
     }
 
     pub fn is_source(&self) -> bool {
-        matches!(self.kind, Kind::Crank | Kind::WaterWheel)
+        matches!(self.kind, Kind::Crank | Kind::WaterWheel | Kind::Flywheel)
     }
 
     pub fn is_machine(&self) -> bool {
-        matches!(self.kind, Kind::Grinder)
+        matches!(self.kind, Kind::Grinder | Kind::Pump)
+    }
+
+    /// The lowest speed a machine works at, RPM.
+    pub fn min_working(&self) -> Option<f64> {
+        match self.kind {
+            Kind::Grinder => Some(GRINDER_MIN_RPM),
+            Kind::Pump => Some(crate::sim::fluid::pump::MIN_RPM),
+            _ => None,
+        }
     }
 
     /// A pulley's diameter, in small-pulley units.
@@ -243,6 +261,9 @@ pub const HARD_CAP_RPM: f64 = 256.0;
 /// The grinder's working range.
 pub const GRINDER_MIN_RPM: f64 = 12.0;
 pub const GRINDER_MAX_RPM: f64 = 96.0;
+/// The flywheel's inertia: 90, not spec 9.4's 200, which spins up in 22 s
+/// against the spec's target of about 10 s to 90% of settled speed.
+pub const FLYWHEEL_INERTIA: f64 = 90.0;
 /// Crank: stall torque and top speed.
 pub const CRANK_STALL: f64 = 16.0;
 pub const CRANK_TOP: f64 = 32.0;

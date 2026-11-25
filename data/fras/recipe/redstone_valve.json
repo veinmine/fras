@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:manual_valve",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "fras:redstone_valve",
+    "count": 1
+  }
+}

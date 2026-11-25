@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/storage_tank/shell_damaged",
+  "loader": "fras:shell",
+  "mask": 50,
+  "axis": "y"
+}

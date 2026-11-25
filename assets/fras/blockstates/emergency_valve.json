@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=up,damaged=false": {
+      "model": "fras:block/emergency_valve"
+    },
+    "facing=up,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged"
+    },
+    "facing=down,damaged=false": {
+      "model": "fras:block/emergency_valve",
+      "x": 180
+    },
+    "facing=down,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged",
+      "x": 180
+    },
+    "facing=north,damaged=false": {
+      "model": "fras:block/emergency_valve",
+      "x": 90
+    },
+    "facing=north,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged",
+      "x": 90
+    },
+    "facing=south,damaged=false": {
+      "model": "fras:block/emergency_valve",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east,damaged=false": {
+      "model": "fras:block/emergency_valve",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,damaged=false": {
+      "model": "fras:block/emergency_valve",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,damaged=true": {
+      "model": "fras:block/emergency_valve_damaged",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

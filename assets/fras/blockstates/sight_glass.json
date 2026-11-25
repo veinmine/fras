@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/sight_glass"
+    },
+    "facing=east": {
+      "model": "fras:block/sight_glass",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fras:block/sight_glass",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fras:block/sight_glass",
+      "y": 270
+    }
+  }
+}

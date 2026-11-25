@@ -3,9 +3,29 @@
 A native [Horizon](https://github.com/horizon-rust/horizon) technology mod for Minecraft 26.3: shaft power
 first, steam later. Mod id `fras`. Licence: GPL-3.0-or-later.
 
-**0.1 — Mechanical** (this version): turn things by hand or with water, carry the power along shafts,
+**0.2 — Steam** (this version): fire a boiler, pipe its steam to an engine and drive the shaft network of
+0.1 with it; pump water back in. Overfire it and it hisses, shakes and bursts unless an emergency valve
+lets the steam go. **0.1 — Mechanical**: turn things by hand or with water, carry the power along shafts,
 gears, gearboxes, clutches and belts, and grind ore with it. Push too hard and parts overspeed, shear or
 jam; the wrench repairs them.
+
+## What's in 0.2
+
+| Block | What it does |
+| --- | --- |
+| Firebox | Burns any fuel (coal 1000 kW) and heats the boiler above or beside it. |
+| Copper / iron boiler | Blocks that fill a cuboid form one boiler: up to 4 / 8 blocks, rated 4 / 6 bar. Fill by bucket or pump. |
+| Steam dome | Goes on top of a boiler and lets the steam out (100 mB/s). A boiler without one is sealed and bursts when heated. |
+| Storage tank | Up to 27 blocks; holds water or steam (an accumulator). |
+| Copper / iron pipe | 80 / 200 mB/s, rated 4 / 8 bar. One content per network; the wrench connects or cuts a face. |
+| Valve, redstone valve | Opens in 10% steps by hand / while powered. Closed, it splits the network. |
+| Steam release, emergency valve | Vent steam by hand / at a set pressure (the wrench sets it in 0.5 bar steps). |
+| Pump | On a shaft, 8 to 128 RPM: draws 25 mB/s per water source it touches. |
+| Steam cylinder, flywheel | Two blocks apart they make an engine: 16 Nm per bar stall, 32 RPM per bar top. Two cylinders make a twin. |
+| Pressure gauge, sight glass | Pressure against the red line, water level; both drive a comparator. |
+
+Burst boilers explode; the client setting "Explosions" picks full, contained (only the boiler breaks) or
+off (the boiler is only damaged). Escaping steam scalds; fire resistance protects.
 
 ## What's in 0.1
 

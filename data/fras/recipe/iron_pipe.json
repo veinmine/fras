@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP"
+  ],
+  "key": {
+    "P": "fras:iron_plate"
+  },
+  "result": {
+    "id": "fras:iron_pipe",
+    "count": 6
+  }
+}

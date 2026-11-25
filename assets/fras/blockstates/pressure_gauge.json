@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "fras:block/pressure_gauge"
+    },
+    "facing=down": {
+      "model": "fras:block/pressure_gauge",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "fras:block/pressure_gauge",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "fras:block/pressure_gauge",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "fras:block/pressure_gauge",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "fras:block/pressure_gauge",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

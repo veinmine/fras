@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "minecraft:block/copper_block",
+    "end": "minecraft:block/cut_copper",
+    "particle": "minecraft:block/copper_block"
+  }
+}

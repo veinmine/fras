@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PIP",
+    "I I",
+    "PIP"
+  ],
+  "key": {
+    "P": "fras:iron_plate",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "fras:storage_tank",
+    "count": 2
+  }
+}

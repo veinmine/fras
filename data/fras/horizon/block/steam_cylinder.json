@@ -1,0 +1,33 @@
+{
+  "template": "minecraft:iron_block",
+  "properties": {
+    "hardness": 3.5,
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "formed": {
+      "type": "boolean"
+    },
+    "damaged": {
+      "type": "boolean"
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "formed": "false",
+    "damaged": "false"
+  }
+}

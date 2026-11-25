@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N",
+    "G",
+    "N"
+  ],
+  "key": {
+    "N": "minecraft:copper_nugget",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "fras:sight_glass",
+    "count": 1
+  }
+}

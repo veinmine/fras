@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "K S",
+    "PPP"
+  ],
+  "key": {
+    "P": "fras:iron_plate",
+    "K": "minecraft:piston",
+    "S": "fras:iron_shaft"
+  },
+  "result": {
+    "id": "fras:steam_cylinder",
+    "count": 1
+  }
+}

@@ -3,7 +3,10 @@
 
 use mod_api::{Compound, Tag};
 
+use crate::sim::fluid::Content;
 use crate::sim::geom::{Axis, Dir, Pos};
+use crate::sim::multi::shape::Cuboid;
+use crate::sim::plant::{Kind as PlantKind, Saved as PlantSaved, Spec as PlantSpec};
 use crate::sim::rot::{BeltEnd, Jam, Kind, Material, Saved, Shape, Spec};
 
 /// Every block of the mod, each with a block entity type of its own (spike
@@ -23,10 +26,27 @@ pub enum Block {
     WaterWheel,
     Grinder,
     Tachometer,
+    // ---- 0.2: steam, fluids, multiblocks ----
+    CopperBoiler,
+    IronBoiler,
+    StorageTank,
+    SteamDome,
+    Firebox,
+    CopperPipe,
+    IronPipe,
+    ManualValve,
+    RedstoneValve,
+    SteamRelease,
+    EmergencyValve,
+    Pump,
+    SteamCylinder,
+    Flywheel,
+    PressureGauge,
+    SightGlass,
 }
 
 impl Block {
-    pub const ALL: [Block; 13] = [
+    pub const ALL: [Block; 29] = [
         Block::ShaftWood,
         Block::ShaftIron,
         Block::Bearing,
@@ -40,6 +60,22 @@ impl Block {
         Block::WaterWheel,
         Block::Grinder,
         Block::Tachometer,
+        Block::CopperBoiler,
+        Block::IronBoiler,
+        Block::StorageTank,
+        Block::SteamDome,
+        Block::Firebox,
+        Block::CopperPipe,
+        Block::IronPipe,
+        Block::ManualValve,
+        Block::RedstoneValve,
+        Block::SteamRelease,
+        Block::EmergencyValve,
+        Block::Pump,
+        Block::SteamCylinder,
+        Block::Flywheel,
+        Block::PressureGauge,
+        Block::SightGlass,
     ];
 
     /// The path of its id (`fras:<name>`).
@@ -58,6 +94,22 @@ impl Block {
             Block::WaterWheel => "water_wheel",
             Block::Grinder => "grinder",
             Block::Tachometer => "tachometer",
+            Block::CopperBoiler => "copper_boiler",
+            Block::IronBoiler => "iron_boiler",
+            Block::StorageTank => "storage_tank",
+            Block::SteamDome => "steam_dome",
+            Block::Firebox => "firebox",
+            Block::CopperPipe => "copper_pipe",
+            Block::IronPipe => "iron_pipe",
+            Block::ManualValve => "manual_valve",
+            Block::RedstoneValve => "redstone_valve",
+            Block::SteamRelease => "steam_release",
+            Block::EmergencyValve => "emergency_valve",
+            Block::Pump => "pump",
+            Block::SteamCylinder => "steam_cylinder",
+            Block::Flywheel => "flywheel",
+            Block::PressureGauge => "pressure_gauge",
+            Block::SightGlass => "sight_glass",
         }
     }
 
@@ -70,7 +122,8 @@ impl Block {
         Block::ALL.into_iter().find(|b| b.name() == name)
     }
 
-    /// The network part it is; the tachometer is none.
+    /// The rotational network part it is; the tachometer and most steam
+    /// blocks are none.
     pub fn kind(self) -> Option<Kind> {
         Some(match self {
             Block::ShaftWood => Kind::Shaft(Material::Wood),
@@ -85,7 +138,9 @@ impl Block {
             Block::Crank => Kind::Crank,
             Block::WaterWheel => Kind::WaterWheel,
             Block::Grinder => Kind::Grinder,
-            Block::Tachometer => return None,
+            Block::Flywheel => Kind::Flywheel,
+            Block::Pump => Kind::Pump,
+            _ => return None,
         })
     }
 
@@ -94,8 +149,108 @@ impl Block {
     pub fn ticks(self) -> bool {
         matches!(
             self,
-            Block::Crank | Block::WaterWheel | Block::Grinder | Block::Tachometer
+            Block::Crank
+                | Block::WaterWheel
+                | Block::Grinder
+                | Block::Tachometer
+                | Block::Firebox
+                | Block::PressureGauge
+                | Block::SightGlass
         )
+    }
+
+    /// Whether it is a part of the steam plant (spec 2 to 4).
+    pub fn is_plant(self) -> bool {
+        self.plant_kind().is_some()
+    }
+
+    /// The steam plant part it is.
+    pub fn plant_kind(self) -> Option<PlantKind> {
+        use crate::sim::multi::ShellKind;
+        use crate::sim::plant::PipeMat;
+        Some(match self {
+            Block::CopperBoiler => PlantKind::Shell(ShellKind::CopperBoiler),
+            Block::IronBoiler => PlantKind::Shell(ShellKind::IronBoiler),
+            Block::StorageTank => PlantKind::Shell(ShellKind::Tank),
+            Block::SteamDome => PlantKind::Dome,
+            Block::Firebox => PlantKind::Firebox,
+            Block::CopperPipe => PlantKind::Pipe(PipeMat::Copper),
+            Block::IronPipe => PlantKind::Pipe(PipeMat::Iron),
+            Block::ManualValve => PlantKind::Valve { redstone: false },
+            Block::RedstoneValve => PlantKind::Valve { redstone: true },
+            Block::SteamRelease => PlantKind::Vent { emergency: false },
+            Block::EmergencyValve => PlantKind::Vent { emergency: true },
+            Block::Pump => PlantKind::Pump,
+            Block::SteamCylinder => PlantKind::Cylinder,
+            Block::Flywheel => PlantKind::Flywheel,
+            _ => return None,
+        })
+    }
+
+    pub fn is_shell(self) -> bool {
+        matches!(
+            self,
+            Block::CopperBoiler | Block::IronBoiler | Block::StorageTank
+        )
+    }
+
+    pub fn is_pipe(self) -> bool {
+        matches!(self, Block::CopperPipe | Block::IronPipe)
+    }
+
+    /// The plant part's spec from its block state and saved data.
+    pub fn plant_spec(
+        self,
+        get: &dyn Fn(&str) -> Option<String>,
+        nbt: &Compound,
+    ) -> Option<PlantSpec> {
+        let kind = self.plant_kind()?;
+        let flag = |key: &str| get(key).as_deref() == Some("true");
+        let dir = |key: &str, default: Dir| {
+            get(key)
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(default)
+        };
+        let axis = || {
+            get("axis")
+                .as_deref()
+                .and_then(Axis::from_name)
+                .unwrap_or(Axis::X)
+        };
+        let mut spec = PlantSpec::new(kind);
+        spec.damaged = flag("damaged");
+        match self {
+            Block::CopperPipe | Block::IronPipe => {
+                let faces: Vec<Dir> = Dir::ALL.into_iter().filter(|d| flag(d.name())).collect();
+                spec = spec.with_faces(&faces);
+            }
+            Block::ManualValve => {
+                spec.dir = axis().positive();
+                spec.opening = get_i32(nbt, "opening").unwrap_or(10).clamp(0, 10) as f64 / 10.0;
+            }
+            Block::RedstoneValve => {
+                spec.dir = axis().positive();
+                spec.opening = if flag("powered") { 1.0 } else { 0.0 };
+            }
+            Block::SteamRelease => {
+                spec.dir = dir("facing", Dir::Down);
+                spec.opening = if flag("open") { 1.0 } else { 0.0 };
+            }
+            Block::EmergencyValve => {
+                spec.dir = dir("facing", Dir::Down);
+                if let Some(set) = get_f64(nbt, "set") {
+                    spec.set = set;
+                }
+            }
+            Block::Pump | Block::SteamCylinder => spec.dir = dir("facing", Dir::North),
+            Block::Flywheel => {
+                spec.dir = axis().positive();
+                spec.reverse = get_bool(nbt, "reverse");
+            }
+            _ => {}
+        }
+        Some(spec)
     }
 
     pub fn is_wooden(self) -> bool {
@@ -152,8 +307,14 @@ impl Block {
                     slow,
                 }
             }
-            Block::Crank | Block::Grinder => Shape::Socket(dir("facing", Dir::North)),
-            Block::Tachometer => return None,
+            Block::Crank | Block::Grinder | Block::Pump => Shape::Socket(dir("facing", Dir::North)),
+            Block::Flywheel => Shape::Inline(
+                get("axis")
+                    .as_deref()
+                    .and_then(Axis::from_name)
+                    .unwrap_or(Axis::X),
+            ),
+            _ => return None,
         })
     }
 
@@ -283,6 +444,58 @@ pub fn part_fields(
     c
 }
 
+/// What a plant part saved: its share of a multiblock and its steam. `None`
+/// when it never saved (`pv` missing).
+pub fn plant_saved(nbt: &Compound) -> Option<PlantSaved> {
+    get_i32(nbt, "pv")?;
+    let formation = match (
+        get_i32(nbt, "fx"),
+        get_i32(nbt, "fy"),
+        get_i32(nbt, "fz"),
+        get_i32(nbt, "fsx"),
+        get_i32(nbt, "fsy"),
+        get_i32(nbt, "fsz"),
+    ) {
+        (Some(x), Some(y), Some(z), Some(sx), Some(sy), Some(sz)) if sx > 0 => Some(Cuboid {
+            min: Pos::new(x, y, z),
+            size: [sx, sy, sz],
+        }),
+        _ => None,
+    };
+    let d = PlantSaved::default();
+    Some(PlantSaved {
+        water: get_f64(nbt, "water").unwrap_or(d.water),
+        temp: get_f64(nbt, "temp").unwrap_or(d.temp),
+        steam: get_f64(nbt, "steam").unwrap_or(d.steam),
+        timer: get_f64(nbt, "ptimer").unwrap_or(d.timer),
+        content: get_str(nbt, "content")
+            .as_deref()
+            .and_then(Content::from_name),
+        formation,
+    })
+}
+
+/// The fields a plant part saves.
+pub fn plant_fields(s: &PlantSaved) -> Compound {
+    let mut c = Compound::new();
+    put_i32(&mut c, "pv", 1);
+    put_f64(&mut c, "water", s.water);
+    put_f64(&mut c, "temp", s.temp);
+    put_f64(&mut c, "steam", s.steam);
+    put_f64(&mut c, "ptimer", s.timer);
+    put_str(&mut c, "content", s.content.map_or("", Content::name));
+    let (min, size) = s
+        .formation
+        .map_or((Pos::new(0, 0, 0), [0, 0, 0]), |f| (f.min, f.size));
+    put_i32(&mut c, "fx", min.x);
+    put_i32(&mut c, "fy", min.y);
+    put_i32(&mut c, "fz", min.z);
+    put_i32(&mut c, "fsx", size[0]);
+    put_i32(&mut c, "fsy", size[1]);
+    put_i32(&mut c, "fsz", size[2]);
+    c
+}
+
 /// The keys clients get (`block_entity_update_tag`).
 pub const CLIENT_KEYS: &[&str] = &[
     "rpm",
@@ -299,6 +512,17 @@ pub const CLIENT_KEYS: &[&str] = &[
     "needle",
     "red",
     "yellow",
+    // 0.2
+    "opening",
+    "set",
+    "bar",
+    "level",
+    "lwarn",
+    "pwarn",
+    "glow",
+    "reverse",
+    "fill",
+    "content",
 ];
 
 #[cfg(test)]

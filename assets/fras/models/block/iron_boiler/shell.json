@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "minecraft:block/iron_block",
+    "end": "minecraft:block/polished_basalt_top",
+    "particle": "minecraft:block/iron_block"
+  }
+}

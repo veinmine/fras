@@ -18,6 +18,8 @@ pub enum Jam {
     Shock,
     /// Closed a loop that demands two speeds for one part.
     Conflict,
+    /// A flywheel whose plane a solid block entered (multiblocks spec 4).
+    Blocked,
 }
 
 impl Jam {
@@ -27,13 +29,20 @@ impl Jam {
             Jam::Shear => "shear",
             Jam::Shock => "shock",
             Jam::Conflict => "conflict",
+            Jam::Blocked => "blocked",
         }
     }
 
     pub fn from_name(name: &str) -> Option<Jam> {
-        [Jam::Overspeed, Jam::Shear, Jam::Shock, Jam::Conflict]
-            .into_iter()
-            .find(|j| j.name() == name)
+        [
+            Jam::Overspeed,
+            Jam::Shear,
+            Jam::Shock,
+            Jam::Conflict,
+            Jam::Blocked,
+        ]
+        .into_iter()
+        .find(|j| j.name() == name)
     }
 }
 
@@ -128,7 +137,13 @@ mod tests {
 
     #[test]
     fn names_round_trip() {
-        for j in [Jam::Overspeed, Jam::Shear, Jam::Shock, Jam::Conflict] {
+        for j in [
+            Jam::Overspeed,
+            Jam::Shear,
+            Jam::Shock,
+            Jam::Conflict,
+            Jam::Blocked,
+        ] {
             assert_eq!(Jam::from_name(j.name()), Some(j));
         }
         assert_eq!(warning_level(0.0), 0);

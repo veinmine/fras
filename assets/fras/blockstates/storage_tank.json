@@ -1,0 +1,1162 @@
+{
+  "variants": {
+    "formed=false,damaged=false": {
+      "model": "fras:block/storage_tank/unformed"
+    },
+    "formed=false,damaged=true": {
+      "model": "fras:block/storage_tank/damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_x_damaged"
+    },
+    "formed=true,damaged=false,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_x"
+    },
+    "formed=true,damaged=true,axis=x,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_x_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_y_damaged"
+    },
+    "formed=true,damaged=false,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_y"
+    },
+    "formed=true,damaged=true,axis=y,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_y_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_0_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_1_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_2_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_3_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_4_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_5_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_6_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_7_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_8_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_9_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_10_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_11_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_12_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_13_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_14_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=false": {
+      "model": "fras:block/storage_tank/f_15_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_16_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_17_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_18_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_19_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_20_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_21_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_22_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_23_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_24_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_25_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_26_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_27_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_28_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_29_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_30_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=false": {
+      "model": "fras:block/storage_tank/f_31_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_32_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_33_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_34_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_35_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_36_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_37_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_38_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_39_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_40_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_41_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_42_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_43_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_44_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_45_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_46_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=false,joined_east=true": {
+      "model": "fras:block/storage_tank/f_47_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_48_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_49_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_50_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_51_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_52_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_53_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_54_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=false,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_55_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_56_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_57_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_58_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=false,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_59_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_60_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=false,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_61_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=false,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_62_z_damaged"
+    },
+    "formed=true,damaged=false,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_z"
+    },
+    "formed=true,damaged=true,axis=z,joined_down=true,joined_up=true,joined_north=true,joined_south=true,joined_west=true,joined_east=true": {
+      "model": "fras:block/storage_tank/f_63_z_damaged"
+    }
+  }
+}
