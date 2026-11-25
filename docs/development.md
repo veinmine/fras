@@ -80,6 +80,7 @@ Not in 0.1 (no hook yet, or left for later):
 | Pump rocking beam moves with speed | Static | |
 | A new pipe connects the face it was placed against first | Faces in direction order | Contents still decide which faces join. |
 | Flywheel blocked: "Blocked by Stone at …" | "Blocked at x y z" | No block names from a state in the API. |
+| Performance: 50 boilers, 50 engines, 2000 pipes under 0.2 ms per tick; a 2000-pipe rebuild under 2 ms | ~0.46 ms per tick in game (steam step 0.12, shell saves 0.13, block entities 0.20, of which ~0.13 is Horizon copying each block entity's data); rebuild ~0.6 ms alone, ~2.1 ms with the 50-boiler plant in the level | Measured on archmage. A rebuild rebuilds every plant in the level; per-network rebuilds and fewer ticking block entities are left for later. |
 | Hot steam pipe 1 damage per second | 1 damage every half second, like a magma block | At 1 per second a fed player's regeneration cancelled it out in game. |
 
 ## Testing in a game
