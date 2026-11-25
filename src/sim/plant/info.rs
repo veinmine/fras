@@ -286,7 +286,7 @@ impl Works {
                 continue;
             }
             for (i, c) in e.cylinders.iter().enumerate() {
-                if e.demand[i] > 0.5 && e.fill[i] > 0.0 {
+                if e.vented[i] > 0.5 {
                     out.push(*c);
                 }
             }
@@ -369,4 +369,249 @@ impl Works {
             .and_then(|p| self.plants.get(p))
             .is_some_and(|p| p.partial)
     }
+
+    // ---- 0.3: regulation, cooling, rust ---------------------------------------
+
+    /// A governor as the overlay shows it.
+    pub fn governor_info(&self, pos: Pos) -> Option<GovernorInfo> {
+        let part = self.parts.get(&pos)?;
+        if part.spec.kind != Kind::Governor {
+            return None;
+        }
+        let st = self.govs.get(&pos).cloned().unwrap_or_default();
+        let (engines, behind) = match self.net_of.get(&pos) {
+            Some(&ni) => {
+                let net = &self.nets[ni];
+                let mut engines = BTreeSet::new();
+                let mut behind = false;
+                for (e, at) in &net.consumers {
+                    let under = at
+                        .iter()
+                        .any(|&u| net.govs.get(u).is_some_and(|g| g.contains(&pos)));
+                    if !under {
+                        continue;
+                    }
+                    match e {
+                        End::Cylinder(q) => {
+                            if let Some(&ei) = self.engine_of.get(q) {
+                                engines.insert(ei);
+                            }
+                        }
+                        End::Vent(_) => behind = true,
+                        _ => {}
+                    }
+                }
+                (engines.len(), behind)
+            }
+            None => (0, false),
+        };
+        Some(GovernorInfo {
+            target: part.spec.target,
+            sens: part.spec.sens,
+            speed: st.speed,
+            ball: part.saved.ball,
+            throttle: if self.govs.contains_key(&pos) {
+                st.g
+            } else {
+                1.0
+            },
+            swing: st.history.swing(),
+            engines,
+            vent_behind: behind,
+            on_steam: self
+                .net_of
+                .get(&pos)
+                .is_some_and(|&ni| self.nets[ni].content == Some(Content::Steam)),
+        })
+    }
+
+    /// A governor's look: ball step (0 to 7) and lever (0 to 3).
+    pub fn governor_look(&self, pos: Pos) -> (u8, u8) {
+        let ball = self.parts.get(&pos).map_or(0.0, |p| p.saved.ball);
+        let g = self.govs.get(&pos).map_or(1.0, |s| s.g);
+        (
+            crate::sim::steam::govern::Balls { x: ball, v: 0.0 }.step_shown(),
+            crate::sim::steam::govern::lever(g),
+        )
+    }
+
+    /// A damper: its opening (0 to 1), set pressure, boiler pressure and
+    /// whether it is attached to a formed boiler.
+    pub fn damper_info(&self, pos: Pos) -> Option<DamperInfo> {
+        let part = self.parts.get(&pos)?;
+        if part.spec.kind != Kind::Damper {
+            return None;
+        }
+        let shell = self.shells.iter().find(|s| s.dampers.contains(&pos));
+        Some(DamperInfo {
+            opening: part.saved.opening,
+            set: part.spec.set,
+            powered: part.spec.powered,
+            stuck: part.spec.leaking(),
+            bar: shell
+                .and_then(|s| s.pool)
+                .map(|i| self.steam[i].pool.pressure()),
+            red: shell.map(|s| s.kind.rating()),
+            boiler_opening: shell.map(|s| s.opening),
+        })
+    }
+
+    /// A firebox's heat last step (None when it never burned in a step).
+    pub fn fire(&self, pos: Pos) -> Option<FireState> {
+        self.fires.get(&pos).copied()
+    }
+
+    /// A firebox's burn-rate factor from its dampers: 1 with none, 0 when
+    /// they are all shut.
+    pub fn burn_factor(&self, pos: Pos) -> f64 {
+        self.fires.get(&pos).map_or(1.0, |f| f.damper)
+    }
+
+    /// The firebox a bellows blows, and whether it counts (the first by
+    /// position).
+    pub fn bellows_target(&self, pos: Pos) -> Option<Pos> {
+        self.bellows_of
+            .iter()
+            .find(|(_, b)| **b == pos)
+            .map(|(f, _)| *f)
+    }
+
+    /// Each bellows' load now (a load only while it blows a burning fire).
+    pub fn bellows_loads(&self) -> Vec<(Pos, f64)> {
+        self.bellows_loads.iter().map(|(q, l)| (*q, *l)).collect()
+    }
+
+    /// A heat exchanger last step.
+    pub fn exchanger_info(&self, pos: Pos) -> Option<ExState> {
+        self.exchangers.get(&pos).copied()
+    }
+
+    /// A cooled machine last step.
+    pub fn cooling_info(&self, pos: Pos) -> Option<CoolState> {
+        self.cooling.get(&pos).copied()
+    }
+
+    /// Whether a grinder is cooled now.
+    pub fn cooled(&self, pos: Pos) -> bool {
+        self.cooling.get(&pos).is_some_and(|c| c.cooled)
+    }
+
+    /// What a drain dumps now.
+    pub fn drain_flow(&self, pos: Pos) -> Option<(Content, f64)> {
+        self.drains.get(&pos).copied()
+    }
+
+    /// Drains dumping now.
+    pub fn drains(&self) -> Vec<(Pos, Content, f64)> {
+        self.drains
+            .iter()
+            .filter(|(_, (_, f))| *f > 1e-6)
+            .map(|(q, (c, f))| (*q, *c, *f))
+            .collect()
+    }
+
+    /// Leaking parts losing something now.
+    pub fn leaks(&self) -> Vec<(Pos, Content, f64)> {
+        self.leaks
+            .iter()
+            .filter(|(_, (_, f))| *f > 1e-6)
+            .map(|(q, (c, f))| (*q, *c, *f))
+            .collect()
+    }
+
+    /// The leak at one part now.
+    pub fn leak_at(&self, pos: Pos) -> Option<(Content, f64)> {
+        self.leaks.get(&pos).copied()
+    }
+
+    /// The leaks on the network a part is on, and their total (mB/s).
+    pub fn net_leaks(&self, pos: Pos) -> (usize, f64) {
+        let mut members: BTreeSet<Pos> = BTreeSet::new();
+        if let Some(i) = self.steam_net_at(pos) {
+            let n = &self.steam[i];
+            for &ni in &n.nets {
+                members.extend(self.nets[ni].pipes.iter().copied());
+                members.extend(self.nets[ni].consumers.iter().filter_map(|(e, _)| e.pos()));
+            }
+            for &si in &n.shells {
+                members.extend(self.shells[si].blocks.iter().copied());
+            }
+        } else if let Some(&ni) = self.net_of.get(&pos) {
+            members.extend(self.nets[ni].pipes.iter().copied());
+        } else if let Some(s) = self.shell_at(pos) {
+            members.extend(s.blocks.iter().copied());
+        }
+        let mut n = 0;
+        let mut total = 0.0;
+        for q in members {
+            if let Some((_, f)) = self.leaks.get(&q)
+                && *f > 1e-6
+            {
+                n += 1;
+                total += f;
+            }
+        }
+        (n, total)
+    }
+
+    /// Exhaust each cylinder vents now (mB/s), and what it pipes away.
+    pub fn exhaust_at(&self, pos: Pos) -> Option<(f64, f64)> {
+        let &ei = self.engine_of.get(&pos)?;
+        let e = &self.engines[ei];
+        let i = e.cylinders.iter().position(|c| *c == pos)?;
+        Some((e.vented[i], (e.drawn[i] - e.vented[i]).max(0.0)))
+    }
+
+    /// The governors' throttle on an engine (the lowest over its cylinders).
+    pub fn engine_throttle(&self, pos: Pos) -> f64 {
+        let Some(&ei) = self.engine_of.get(&pos) else {
+            return 1.0;
+        };
+        self.engines[ei]
+            .throttle
+            .iter()
+            .copied()
+            .fold(1.0, f64::min)
+    }
+
+    /// The governor parts, for the game's per-tick ball step.
+    pub fn governors(&self) -> Vec<Pos> {
+        let mut out: Vec<Pos> = self
+            .parts
+            .iter()
+            .filter(|(_, p)| p.spec.kind == Kind::Governor)
+            .map(|(q, _)| *q)
+            .collect();
+        out.sort();
+        out
+    }
+}
+
+/// A governor as the overlay and its screen show it.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GovernorInfo {
+    pub target: f64,
+    pub sens: u8,
+    pub speed: f64,
+    pub ball: f64,
+    pub throttle: f64,
+    /// The speed's swing over the last 10 s (hunting when wide).
+    pub swing: f64,
+    /// The engines it throttles.
+    pub engines: usize,
+    /// A vent on its downstream side.
+    pub vent_behind: bool,
+    pub on_steam: bool,
+}
+
+/// A furnace damper as the overlay shows it.
+#[derive(Clone, Debug, PartialEq)]
+pub struct DamperInfo {
+    pub opening: f64,
+    pub set: f64,
+    pub powered: bool,
+    pub stuck: bool,
+    pub bar: Option<f64>,
+    pub red: Option<f64>,
+    pub boiler_opening: Option<f64>,
 }

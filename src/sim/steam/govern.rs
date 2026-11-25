@@ -133,7 +133,7 @@ mod tests {
         for n in 0..(seconds / dt) as usize {
             let t = n as f64 * dt;
             balls.step(w, dt);
-            if n as u64 % STEP_TICKS == 0 {
+            if (n as u64).is_multiple_of(STEP_TICKS) {
                 g = throttle(balls.x, 90.0, band(sens));
             }
             let stall = engine::stall(p, 1.0) * g;

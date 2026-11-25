@@ -37,6 +37,10 @@ pub enum Kind {
     Flywheel,
     /// A water pump: a machine.
     Pump,
+    /// The governor's spindle (regulation spec 3.1): a machine.
+    Governor,
+    /// The bellows (regulation spec 5.1): a machine.
+    Bellows,
 }
 
 /// How a part sits in the world: the faces it connects through.
@@ -71,6 +75,8 @@ pub struct Spec {
     pub engaged: bool,
     /// A pulley's belt.
     pub belt: Option<BeltEnd>,
+    /// A grinder with cooling water: its limit rises (cooling spec 6).
+    pub cooled: bool,
 }
 
 impl Spec {
@@ -80,6 +86,7 @@ impl Spec {
             shape,
             engaged: true,
             belt: None,
+            cooled: false,
         }
     }
 
@@ -154,6 +161,8 @@ impl Spec {
             Kind::WaterWheel => 20.0,
             Kind::Flywheel => FLYWHEEL_INERTIA,
             Kind::Pump => 4.0,
+            Kind::Governor => crate::sim::steam::govern::INERTIA,
+            Kind::Bellows => crate::sim::steam::bellows::INERTIA,
         }
     }
 
@@ -167,7 +176,12 @@ impl Spec {
             Kind::Shaft(_) | Kind::Bearing => 0.0025,
             Kind::Clutch | Kind::BevelGear(_) | Kind::Pulley { .. } | Kind::Crank => 0.005,
             Kind::Gearbox => 0.01,
-            Kind::WaterWheel | Kind::Grinder | Kind::Flywheel | Kind::Pump => 0.0125,
+            Kind::WaterWheel
+            | Kind::Grinder
+            | Kind::Flywheel
+            | Kind::Pump
+            | Kind::Governor
+            | Kind::Bellows => 0.0125,
         }
     }
 
@@ -180,8 +194,11 @@ impl Spec {
             Kind::BevelGear(Material::Wood) => Some(56.0),
             Kind::BevelGear(Material::Iron) | Kind::Gearbox => Some(192.0),
             Kind::Pulley { .. } => Some(96.0),
+            Kind::Grinder if self.cooled => Some(crate::sim::fluid::cool::GRINDER_COOLED_MAX),
             Kind::Grinder => Some(GRINDER_MAX_RPM),
             Kind::Flywheel | Kind::Pump => Some(192.0),
+            Kind::Governor => Some(crate::sim::steam::govern::MAX_RPM),
+            Kind::Bellows => Some(crate::sim::steam::bellows::MAX_RPM),
             _ => None,
         }
     }
@@ -225,7 +242,10 @@ impl Spec {
     }
 
     pub fn is_machine(&self) -> bool {
-        matches!(self.kind, Kind::Grinder | Kind::Pump)
+        matches!(
+            self.kind,
+            Kind::Grinder | Kind::Pump | Kind::Governor | Kind::Bellows
+        )
     }
 
     /// The lowest speed a machine works at, RPM.
@@ -233,6 +253,7 @@ impl Spec {
         match self.kind {
             Kind::Grinder => Some(GRINDER_MIN_RPM),
             Kind::Pump => Some(crate::sim::fluid::pump::MIN_RPM),
+            Kind::Bellows => Some(crate::sim::steam::bellows::MIN_RPM),
             _ => None,
         }
     }

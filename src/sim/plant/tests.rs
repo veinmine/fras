@@ -749,3 +749,5 @@ fn fifty_plants_step_and_rebuild_quickly() {
     eprintln!("2000 pipe blocks: rebuild {pipes:?}");
     assert!(pipes.as_millis() < 200, "{pipes:?}");
 }
+
+mod v03;

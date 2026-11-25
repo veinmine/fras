@@ -20,6 +20,8 @@ pub enum Jam {
     Conflict,
     /// A flywheel whose plane a solid block entered (multiblocks spec 4).
     Blocked,
+    /// A part rusted through (rust spec 6): scraping clears it.
+    Rusted,
 }
 
 impl Jam {
@@ -30,6 +32,7 @@ impl Jam {
             Jam::Shock => "shock",
             Jam::Conflict => "conflict",
             Jam::Blocked => "blocked",
+            Jam::Rusted => "rusted",
         }
     }
 
@@ -40,6 +43,7 @@ impl Jam {
             Jam::Shock,
             Jam::Conflict,
             Jam::Blocked,
+            Jam::Rusted,
         ]
         .into_iter()
         .find(|j| j.name() == name)
@@ -143,6 +147,7 @@ mod tests {
             Jam::Shock,
             Jam::Conflict,
             Jam::Blocked,
+            Jam::Rusted,
         ] {
             assert_eq!(Jam::from_name(j.name()), Some(j));
         }

@@ -179,6 +179,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             saved.is_some_and(|s| s.jam.is_some()),
         ),
     });
+    let cooled = with_level(dim, |l| l.steam.works.cooled(pos));
 
     let before = event.entity.items.clone();
     if event.entity.items.len() < SLOTS {
@@ -208,13 +209,22 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             rpm,
             jammed,
             paused,
+            cooled,
             &book.recipes,
             &items,
             &mut random,
         )
     };
+    let working = result.status == Status::Grinding;
     with_level(dim, |l| {
         l.loads.insert(pos, result.load);
+        // Cooling water it asks for (cooling spec 6).
+        let demand = if paused {
+            0.0
+        } else {
+            crate::sim::fluid::cool::demand(rpm, working)
+        };
+        l.steam.works.set_cool_demand(pos, demand);
     });
 
     // Write the items back where they changed.
@@ -256,7 +266,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
         progress,
         (rpm * 10.0).round() as i32,
         result.status.code(),
-        grind::working_range(false).1 as i32,
+        grind::working_range(cooled).1 as i32,
     ];
     let data_changed = event.entity.data != data;
     if data_changed {
