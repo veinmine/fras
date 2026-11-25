@@ -561,13 +561,17 @@ pub fn inspect(
         return lines;
     };
     if let Some(jam) = part.jam {
-        lines.push(Text::translate(
-            "fras.inspect.jammed",
-            vec![
-                Text::translate(format!("fras.jam.{}", jam.name()), vec![]),
-                cost_text(&repair_cost(block)),
-            ],
-        ));
+        // Rusted through: the rust line already says to scrape it with an
+        // iron plate (rust spec 8); the wrench's repair cost doesn't apply.
+        if jam != Jam::Rusted {
+            lines.push(Text::translate(
+                "fras.inspect.jammed",
+                vec![
+                    Text::translate(format!("fras.jam.{}", jam.name()), vec![]),
+                    cost_text(&repair_cost(block)),
+                ],
+            ));
+        }
         if jam == Jam::Blocked
             && let Some(q) = steam::flywheel_blocker(host, level, pos)
         {

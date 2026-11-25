@@ -43,6 +43,8 @@ pub struct Keys {
     pub iron_plate: ItemKey,
     pub leather: ItemKey,
     pub paint: ItemKey,
+    /// The pre-painted items (rust spec 7.2).
+    pub painted: Vec<ItemKey>,
     pub rust_flakes: ItemKey,
     pub smoke: ParticleKey,
     pub crit: ParticleKey,

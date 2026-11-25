@@ -238,6 +238,14 @@ impl BlockPart for BlockHooks {
                 state = set(state, "axis", axis.name());
             }
         }
+        // A pre-painted item places its part painted (rust spec 7.2): the
+        // item's block state component isn't applied to a mod block.
+        if self.0.rusts()
+            && let (Some(item), Some(k)) = (ctx.item, super::keys())
+            && k.painted.contains(&item)
+        {
+            state = set(state, "rust", "painted");
+        }
         Some(Some(state))
     }
 
