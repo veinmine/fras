@@ -66,9 +66,15 @@ impl Boiler {
             energy -= need;
             self.temp = BOILING;
         }
-        // Boiling, while there is water.
+        // Boiling, while there is water. A wet shell a hair over the boiling
+        // point (shares averaged in a rebuild give 100.00000000000004) gives
+        // the excess to boiling too, or it would never boil again.
         let mut boiled = 0.0;
-        if !self.dry() && self.temp <= BOILING {
+        if !self.dry() {
+            if self.temp > BOILING {
+                energy += (self.temp - BOILING) * self.heat_capacity();
+                self.temp = BOILING;
+            }
             boiled = (energy / BOIL_KJ).min(self.water);
             self.water -= boiled;
             energy -= boiled * BOIL_KJ;
@@ -127,6 +133,15 @@ mod tests {
             }
         }
         panic!("never");
+    }
+
+    #[test]
+    fn a_wet_boiler_just_over_the_boiling_point_still_boils() {
+        let mut b = full(8);
+        b.temp = 100.00000000000004;
+        let boiled = b.heat(2000.0, DT);
+        assert!(boiled > 0.0, "{boiled}");
+        assert_eq!(b.temp, BOILING);
     }
 
     #[test]
