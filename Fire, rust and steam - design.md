@@ -444,13 +444,17 @@ Each subsystem gets its own detailed spec, written and agreed before it is imple
 2. **Steam and heat:** boiler state, heat rates per fuel, boiling, pressure, throughput, engine
    steam draw, governor and damper control loops (with hunting), failure ladder. **Written for 0.2:**
    [`specs/steam-and-heat.md`](specs/steam-and-heat.md) (2026-11-24, holds the 0.2 exit criteria; the governor
-   and damper are reserved for 0.3).
+   and damper are reserved for 0.3). **Written for 0.3:** [`specs/regulation.md`](specs/regulation.md)
+   (2026-11-25: governor, damper, bellows; holds the 0.3 exit criteria).
 3. **Fluids and pipes:** pump flow, pipe throughput per material, tanks, hot water, condensers,
    machine cooling. **Written for 0.2:** [`specs/fluids-and-pipes.md`](specs/fluids-and-pipes.md)
-   (2026-11-24; hot water, condensers and cooling reserved for 0.3).
+   (2026-11-24; hot water, condensers and cooling reserved for 0.3). **Written for 0.3:**
+   [`specs/cooling.md`](specs/cooling.md) (2026-11-25: exhaust steam, heat exchanger, radiators, hot water,
+   drain, machine cooling).
 4. **Multiblocks:** formation and validation, chunk-border handling, rendering as one object. **Written
    for 0.2:** [`specs/multiblocks.md`](specs/multiblocks.md) (2026-11-24).
-5. **Rust:** triggers, stage timing, effects, paint and repair.
+5. **Rust:** triggers, stage timing, effects, paint and repair. **Written:** [`specs/rust.md`](specs/rust.md)
+   (2026-11-25, for 0.3).
 6. **Items and machines:** recipes, processing times, speed ranges and loads per machine, belts.
    **Grinder written:** [`specs/grinder.md`](specs/grinder.md) (2026-11-23), the one machine 0.1 needs; it
    refines section 6 (see its section 13). The other machines follow with their milestones.
