@@ -83,9 +83,15 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
     let dim = host.dimension();
     let pos = Pos::from_array(event.pos);
     let nbt = &event.entity.nbt;
-    let mut burn = blocks::get_i32(nbt, "burn").unwrap_or(0);
-    let mut total = blocks::get_i32(nbt, "burn_total").unwrap_or(0);
-    let mut kw = blocks::get_f64(nbt, "kw").unwrap_or(0.0);
+    // The countdown lives in memory; the block entity is written only
+    // about once a second or when something else changes (criterion 14).
+    let saved = (
+        blocks::get_i32(nbt, "burn").unwrap_or(0),
+        blocks::get_i32(nbt, "burn_total").unwrap_or(0),
+        blocks::get_f64(nbt, "kw").unwrap_or(0.0),
+    );
+    let (mut burn, mut total, mut kw) =
+        with_level(dim, |l| l.steam.fires.get(&pos).copied()).unwrap_or(saved);
     let (old_burn, old_total, old_kw) = (burn, total, kw);
     let paused = steam::paused(dim, pos);
     if event.entity.items.is_empty() {
@@ -121,12 +127,19 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             l.steam.lit.insert(pos, lit);
         });
     }
-    let data = vec![burn, total.max(1), kw.round() as i32, boilers];
+    with_level(dim, |l| {
+        l.steam.fires.insert(pos, (burn, total, kw));
+    });
+    // The menu's flame moves in steps of half a second.
+    let shown = |b: i32| if b > 0 { (b + 9) / 10 * 10 } else { 0 };
+    let data = vec![shown(burn), total.max(1), kw.round() as i32, boilers];
     let data_changed = event.entity.data != data;
     if data_changed {
         event.entity.data = data;
     }
-    let changed = burn != old_burn || total != old_total || kw != old_kw;
+    let others = total != old_total || kw != old_kw || lit != (old_burn > 0) || items_changed;
+    let changed =
+        (burn != saved.0 && (others || burn % 20 == 0)) || total != saved.1 || kw != saved.2;
     if changed {
         let nbt = &mut event.entity.nbt;
         blocks::put_i32(nbt, "burn", burn);

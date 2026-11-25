@@ -51,6 +51,12 @@ pub struct Steam {
     pub signals: HashMap<Pos, i32>,
     pub clouds: Vec<Cloud>,
     /// Short scalding puffs: position and ticks left.
+    /// The share last written to each shell block, so unchanged ones aren't
+    /// written again.
+    pub saved: HashMap<Pos, Compound>,
+    /// Each firebox's burn countdown, total and heat (written to its block
+    /// entity about once a second).
+    pub fires: HashMap<Pos, (i32, i32, f64)>,
     pub puffs: Vec<(Pos, u32)>,
 }
 
@@ -287,11 +293,14 @@ pub fn after_rot(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, ticks: u6
                 l.steam.works.set_rot(q, rot);
             }
             l.steam.works.step(&view);
-            let saves = if ticks.is_multiple_of(100) {
-                shell_saves(&l.steam.works)
-            } else {
-                Vec::new()
-            };
+            // Each shell block saves once every 100 ticks, a 25th of them
+            // per step, and only when its share changed.
+            let slot = (ticks / STEP_TICKS) % SAVE_SLOTS;
+            let mut saves = shell_saves(&l.steam.works, slot);
+            saves.retain(|(q, c)| l.steam.saved.get(q) != Some(c));
+            for (q, c) in &saves {
+                l.steam.saved.insert(*q, c.clone());
+            }
             (
                 l.steam.works.take_events(),
                 l.steam.works.take_formations(),
@@ -324,10 +333,19 @@ pub fn after_rot(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, ticks: u6
     vent_effects(host, level, dim);
 }
 
-/// Every shell block's share, to save (every 5 s).
-fn shell_saves(works: &Works) -> Vec<(Pos, Compound)> {
+/// Steps over which the shell saves are spread (100 ticks).
+const SAVE_SLOTS: u64 = 100 / STEP_TICKS;
+
+/// The shares of the shell blocks in save slot `slot`.
+fn shell_saves(works: &Works, slot: u64) -> Vec<(Pos, Compound)> {
     let mut out = Vec::new();
     for q in shell_blocks(works) {
+        let h = (q.x as i64).wrapping_mul(73_856_093)
+            ^ (q.y as i64).wrapping_mul(19_349_663)
+            ^ (q.z as i64).wrapping_mul(83_492_791);
+        if h.rem_euclid(SAVE_SLOTS as i64) as u64 != slot {
+            continue;
+        }
         if let Some(s) = works.saved(q) {
             out.push((q, blocks::plant_fields(&s)));
         }
@@ -902,6 +920,8 @@ pub fn forget(dim: Dim, pos: Pos) {
     with_level(dim, |l| {
         l.steam.works.remove(pos);
         l.steam.signals.remove(&pos);
+        l.steam.saved.remove(&pos);
+        l.steam.fires.remove(&pos);
     });
 }
 
