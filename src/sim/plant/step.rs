@@ -442,7 +442,11 @@ impl Works {
         self.pump_flow.clear();
         self.drains.clear();
         self.leaks.clear();
-        for ni in 0..self.nets.len() {
+        // Hot water networks first, so boilers fed both ways prefer hot feed
+        // whatever order the networks were built in (cooling spec 7.4).
+        let mut order: Vec<usize> = (0..self.nets.len()).collect();
+        order.sort_by_key(|&ni| self.nets[ni].content != Some(Content::HotWater));
+        for ni in order {
             let net = &self.nets[ni];
             let Some(c) = net.content.filter(|c| c.is_liquid()) else {
                 continue;

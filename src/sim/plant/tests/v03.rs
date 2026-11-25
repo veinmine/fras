@@ -409,6 +409,42 @@ fn a_boiler_fed_hot_water_keeps_boiling() {
     assert!(w.shells[bi].boiled > 0.0);
 }
 
+#[test]
+fn hot_feed_comes_before_cold_feed_on_another_face() {
+    // The water tank north of the boiler, whose network sorts first, the hot
+    // water tank east of it (tank_feed): the boiler still takes hot feed first.
+    let world = World::default();
+    let mut w = Works::new();
+    tank_feed(&mut w, Content::HotWater);
+    let cold = Saved {
+        water: 1000.0,
+        content: Some(Content::Water),
+        ..Saved::default()
+    };
+    w.insert(
+        p(0, 0, -4),
+        Spec::new(Kind::Shell(ShellKind::Tank)),
+        Some(cold),
+    );
+    for z in -3..0 {
+        pipe(&mut w, p(0, 0, z), &[Dir::North, Dir::South]);
+    }
+    w.step(&world);
+    let bi = w.shell_of[&p(0, 0, 0)];
+    let cap = w.shells[bi].water_capacity();
+    w.shells[bi].water = cap - 20.0;
+    let level = |w: &Works, at: Pos| w.shells[w.shell_of[&at]].water;
+    let (hot_before, cold_before) = (level(&w, p(5, 0, 0)), level(&w, p(0, 0, -4)));
+    w.step(&world);
+    let hot_gave = hot_before - level(&w, p(5, 0, 0));
+    let cold_gave = cold_before - level(&w, p(0, 0, -4));
+    assert!(
+        (hot_gave - 20.0).abs() < 1e-6,
+        "hot {hot_gave}, cold {cold_gave}"
+    );
+    assert!(cold_gave.abs() < 1e-6, "hot {hot_gave}, cold {cold_gave}");
+}
+
 /// A grinder at (10,0,0), socket east, fed from a water tank on its west and
 /// draining hot water north (when `drain`).
 fn cooled_grinder(w: &mut Works, water: f64, drain: bool) -> Pos {

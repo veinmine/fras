@@ -295,6 +295,11 @@ pub fn lines(
                         && vented + piped > 0.05
                     {
                         out.push(tr("fras.inspect.exhaust", vec![num(vented), num(piped)]));
+                        // Piped but not all taken: the exchangers are short
+                        // (cooling spec 4).
+                        if vented > 0.05 && piped > 0.05 {
+                            out.push(red(tr("fras.inspect.exhaust_short", vec![])));
+                        }
                     }
                 }
                 None if block == Block::SteamCylinder => {
@@ -338,7 +343,7 @@ pub fn lines(
             }
             Block::FurnaceDamper => {
                 if let Some(d) = w.damper_info(pos) {
-                    out.push(tr("fras.inspect.set_pressure", vec![num(d.set)]));
+                    out.push(tr("fras.wrench.damper_set", vec![num(d.set)]));
                     match d.bar {
                         Some(bar) => out.push(tr(
                             "fras.inspect.damper",
@@ -409,6 +414,13 @@ pub fn lines(
                         )),
                         None => out.push(tr("fras.inspect.exchanger_idle", vec![])),
                     }
+                    if e.inlet == Some(crate::sim::fluid::Content::Exhaust)
+                        && e.blocked.is_none()
+                        && e.capacity > 0.0
+                        && e.took >= e.capacity - 1e-3
+                    {
+                        out.push(red(tr("fras.inspect.exchanger_short", vec![])));
+                    }
                     match e.blocked {
                         Some(crate::sim::plant::ExBlock::NoOutlet) => {
                             out.push(red(tr("fras.inspect.no_outlet", vec![])))
@@ -443,6 +455,9 @@ pub fn lines(
                         "fras.inspect.not_cooled"
                     };
                     out.push(tr(key, vec![num(c.received), num(c.demand)]));
+                    if !c.cooled && w.cool_buffer_full(pos) {
+                        out.push(red(tr("fras.inspect.hot_water_stuck", vec![])));
+                    }
                 }
             }
             _ => {}
