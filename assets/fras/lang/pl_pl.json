@@ -293,7 +293,7 @@
   "fras.inspect.burn_rate": "Spala paliwo w %s%% pełnego tempa",
   "fras.inspect.throttled": "Przydławiony do %s%% przez regulator",
   "fras.inspect.exhaust": "Para wylotowa: %s mB/s w powietrze, %s mB/s do rur",
-  "fras.inspect.exhaust_short": "Za mało chłodzenia: dodaj chłodnice albo zalej wymiennik wodą",
+  "fras.inspect.exhaust_short": "Nie cała para wylotowa jest odbierana: za mało wymienników albo ich wylot jest pełny",
   "fras.inspect.exchanger_short": "Pełna moc: czego nie skropli, uchodzi przy cylindrach",
   "fras.inspect.governor": "Prędkość zadana %s obr/min, czułość %s (pasmo %s obr/min)",
   "fras.inspect.governor_state": "Prędkość %s obr/min, kule na %s obr/min, przepustnica %s%%",

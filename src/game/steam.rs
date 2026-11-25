@@ -1159,6 +1159,8 @@ pub fn forget(dim: Dim, pos: Pos) {
         l.steam.signals.remove(&pos);
         l.steam.saved.remove(&pos);
         l.steam.fires.remove(&pos);
+        // A grinder placed here next starts uncooled: tell the network again.
+        l.steam.cooled.remove(&pos);
     });
 }
 

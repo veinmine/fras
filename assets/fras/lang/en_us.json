@@ -293,7 +293,7 @@
   "fras.inspect.burn_rate": "Burning fuel at %s%% of the full rate",
   "fras.inspect.throttled": "Throttled to %s%% by a governor",
   "fras.inspect.exhaust": "Exhaust: %s mB/s vented, %s mB/s piped",
-  "fras.inspect.exhaust_short": "Cooling short: add radiators or waterlog the heat exchanger",
+  "fras.inspect.exhaust_short": "Not all the exhaust is taken: the heat exchangers are short or their outlet is full",
   "fras.inspect.exchanger_short": "At full power: exhaust it can\u2019t condense vents at the cylinders",
   "fras.inspect.governor": "Target %s RPM, sensitivity %s (band %s RPM)",
   "fras.inspect.governor_state": "Speed %s RPM, balls at %s RPM, throttle %s%%",
