@@ -658,8 +658,21 @@ fn warnings(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             .filter(|(_, s)| s.0 > 0 || s.1)
             .collect()
     });
-    // One sound per multiblock is enough: take every fourth block.
+    // Sounds once per multiblock or so (every fourth block); particles on
+    // every warning block, so the whole shell shows it (multiblocks spec 6.1).
     for (i, (pos, (w, glow))) in warned.into_iter().enumerate() {
+        let c = center(pos);
+        if w > 0 {
+            // Hissing wisps from the seams, more as the timer runs.
+            particles(host, level, |k| k.wisp, c, 0.45, 2 * w as i32, 0.02);
+            if w >= 2 {
+                puff_particles(host, level, c, 0.5, 2 * w as i32, 0.05);
+            }
+        }
+        if glow {
+            // A dry, hot shell spits embers.
+            particles(host, level, |k| k.ember, c, 0.4, 2, 0.0);
+        }
         if i % 4 != 0 {
             continue;
         }
@@ -667,32 +680,47 @@ fn warnings(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             sound_at(
                 host,
                 level,
-                center(pos),
+                c,
                 "minecraft:block.fire.extinguish",
                 0.2 + 0.2 * w as f32,
                 1.2 + 0.25 * w as f32,
             );
-            if w >= 2 {
-                puff_particles(host, level, center(pos), 0.5, 2 * w as i32, 0.05);
-            }
         }
         if glow {
-            sound_at(
-                host,
-                level,
-                center(pos),
-                "minecraft:block.chain.hit",
-                0.4,
-                0.5,
-            );
+            sound_at(host, level, c, "minecraft:block.chain.hit", 0.4, 0.5);
         }
     }
 }
 
+fn particles(
+    host: &mut dyn ServerHost,
+    level: LevelRef,
+    kind: impl Fn(&super::Keys) -> mod_api::ParticleKey,
+    at: [f64; 3],
+    spread: f64,
+    count: i32,
+    speed: f64,
+) {
+    let Some(keys) = super::keys() else {
+        return;
+    };
+    let options = ParticleOptions::simple(kind(keys));
+    level.send_particles(
+        host,
+        &options,
+        None,
+        at,
+        [spread, spread, spread],
+        speed,
+        count,
+    );
+}
+
 /// Scald damage per 10 ticks (2 per second, spec 2, 8).
 const SCALD: f32 = 1.0;
-/// Hot pipes burn half as hard.
-const HOT_PIPE: f32 = 0.5;
+/// Hot pipes burn like a magma block: 1 damage a hit (at 0.5 a hit the
+/// regeneration of a fed player cancelled it out).
+const HOT_PIPE: f32 = 1.0;
 
 fn hurt_in(host: &mut dyn ServerHost, level: LevelRef, min: [f64; 3], max: [f64; 3], amount: f32) {
     let Some(entities) = level.entities_in(&*host, min, max) else {
@@ -798,10 +826,29 @@ fn scald(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
                 p[1].floor() as i32,
                 p[2].floor() as i32,
             );
+            // Standing on it: the feet rest on a pipe's top (11/16 up its
+            // cell) or on the cell below. Walking into it: the body within
+            // reach of a pipe core beside it, below its top.
             let below = Pos::new(feet.x, (p[1] - 0.05).floor() as i32, feet.z);
-            let inside = set.contains(&feet);
-            let on_top = !inside && set.contains(&below);
-            if inside || (on_top && e.is_crouching(&*host) != Some(true)) {
+            let frac = p[1] - p[1].floor();
+            let on_top = (set.contains(&feet) && frac >= 0.6) || set.contains(&below);
+            let reach = |q: &Pos| {
+                let dx = (p[0] - (q.x as f64 + 0.5)).abs() - 3.0 / 16.0;
+                let dz = (p[2] - (q.z as f64 + 0.5)).abs() - 3.0 / 16.0;
+                dx.max(0.0).hypot(dz.max(0.0)) <= 0.35
+            };
+            let beside = frac < 0.6
+                && [feet, feet.offset(Dir::Up)]
+                    .iter()
+                    .flat_map(|c| {
+                        Dir::ALL
+                            .into_iter()
+                            .filter(|d| d.axis() != Axis::Y)
+                            .map(move |d| c.offset(d))
+                    })
+                    .chain([feet])
+                    .any(|q| set.contains(&q) && reach(&q));
+            if beside || (on_top && e.is_crouching(&*host) != Some(true)) {
                 let _ = e.hurt(host, "fras:scald", HOT_PIPE, None, None);
             }
         }

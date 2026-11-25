@@ -80,6 +80,7 @@ Not in 0.1 (no hook yet, or left for later):
 | Pump rocking beam moves with speed | Static | |
 | A new pipe connects the face it was placed against first | Faces in direction order | Contents still decide which faces join. |
 | Flywheel blocked: "Blocked by Stone at …" | "Blocked at x y z" | No block names from a state in the API. |
+| Hot steam pipe 1 damage per second | 1 damage every half second, like a magma block | At 1 per second a fed player's regeneration cancelled it out in game. |
 
 ## Testing in a game
 

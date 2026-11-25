@@ -98,6 +98,8 @@ impl Hooks for Fras {
             smoke: r.particle_key("minecraft:smoke"),
             crit: r.particle_key("minecraft:crit"),
             cloud: r.particle_key("minecraft:poof"),
+            ember: r.particle_key("minecraft:lava"),
+            wisp: r.particle_key("minecraft:white_smoke"),
         });
     }
 

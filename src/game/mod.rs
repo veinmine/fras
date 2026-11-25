@@ -42,6 +42,8 @@ pub struct Keys {
     pub smoke: ParticleKey,
     pub crit: ParticleKey,
     pub cloud: ParticleKey,
+    pub ember: ParticleKey,
+    pub wisp: ParticleKey,
 }
 
 pub static KEYS: OnceLock<Keys> = OnceLock::new();
