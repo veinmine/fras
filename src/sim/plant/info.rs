@@ -576,10 +576,15 @@ impl Works {
 
     /// The governor parts, for the game's per-tick ball step.
     pub fn governors(&self) -> Vec<Pos> {
+        self.parts_of(Kind::Governor)
+    }
+
+    /// Every part of one kind, by position.
+    pub fn parts_of(&self, kind: Kind) -> Vec<Pos> {
         let mut out: Vec<Pos> = self
             .parts
             .iter()
-            .filter(|(_, p)| p.spec.kind == Kind::Governor)
+            .filter(|(_, p)| p.spec.kind == kind)
             .map(|(q, _)| *q)
             .collect();
         out.sort();

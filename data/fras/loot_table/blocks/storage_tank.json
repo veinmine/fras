@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:storage_tank"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_storage_tank",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:storage_tank",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:storage_tank"
+            }
+          ]
         }
       ],
       "condition": {

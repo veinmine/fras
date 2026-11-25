@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/iron_boiler/shell_damaged_rust_spotty",
+  "loader": "fras:shell",
+  "mask": 29,
+  "axis": "y"
+}

@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:iron_bevel_gear"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_iron_bevel_gear",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:iron_bevel_gear",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:iron_bevel_gear"
+            }
+          ]
         }
       ],
       "condition": {

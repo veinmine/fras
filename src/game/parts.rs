@@ -174,6 +174,42 @@ impl BlockPart for BlockHooks {
                     .unwrap_or(facing);
                 state = set(state, "facing", toward.name());
             }
+            // ---- 0.3 ----
+            Block::Governor => {
+                // Along the pipe it was placed against; its socket toward an
+                // adjacent shaft-like part pointing at it, else on top.
+                let axis = face.axis();
+                let pos = pos_of(ctx.pos);
+                let socket = Dir::ALL
+                    .into_iter()
+                    .filter(|d| d.axis() != axis)
+                    .find(|d| {
+                        let Some(s) = level.block_state(pos.offset(*d).to_array()) else {
+                            return false;
+                        };
+                        let (name, props) = state_props(level, s);
+                        name.starts_with("fras:")
+                            && !name.ends_with("_pipe")
+                            && props
+                                .iter()
+                                .any(|(k, v)| k == "axis" && v == d.axis().name())
+                    })
+                    .unwrap_or(if axis == Axis::Y {
+                        facing.opposite()
+                    } else {
+                        Dir::Up
+                    });
+                state = set(state, "axis", axis.name());
+                state = set(state, "socket", socket.name());
+            }
+            // Like a gauge: on the face of the boiler block it was placed against.
+            Block::FurnaceDamper | Block::CopperRadiator | Block::IronRadiator => {
+                state = set(state, "facing", face.name());
+            }
+            Block::HeatExchanger => state = set(state, "facing", face.name()),
+            // The nozzle (bellows) or pipe face (drain) toward the block it
+            // was placed against.
+            Block::Bellows | Block::Drain => state = set(state, "facing", face.opposite().name()),
             Block::Flywheel => {
                 let axis = if face.axis() != Axis::Y {
                     face.axis()
@@ -270,8 +306,11 @@ impl BlockPart for BlockHooks {
             Block::WaterWheel => {
                 l.wheels.insert(pos);
             }
-            Block::RedstoneValve => {
+            Block::RedstoneValve | Block::FurnaceDamper => {
                 l.steam.redstone.insert(pos);
+            }
+            Block::HeatExchanger => {
+                l.steam.pending.entry(pos).or_insert(false);
             }
             Block::Pump => {
                 l.steam.pumps.insert(pos);
@@ -300,12 +339,18 @@ impl BlockPart for BlockHooks {
         if item == Some(keys.leather_belt) {
             return Some(InteractionResult::Pass);
         }
+        // Paint is the item's to answer (rust spec 7.1).
+        if item == Some(keys.paint) {
+            return None;
+        }
         match self.0 {
             Block::ShaftWood | Block::ShaftIron if item == Some(keys.bearing) => {
                 super::tools::swap_bearing(host, event.click)
             }
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder | Block::Firebox => Some(super::grinder::open(host, event.click)),
+            Block::Grinder | Block::Firebox | Block::Governor => {
+                Some(super::grinder::open(host, event.click))
+            }
             Block::CopperBoiler | Block::IronBoiler | Block::StorageTank => {
                 super::pipes::bucket(host, event.click)
             }
@@ -327,10 +372,26 @@ impl BlockPart for BlockHooks {
     ) -> Option<InteractionResult> {
         match self.0 {
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder | Block::Firebox => Some(super::grinder::open(host, event.click)),
+            Block::Grinder | Block::Firebox | Block::Governor => {
+                Some(super::grinder::open(host, event.click))
+            }
             Block::ManualValve | Block::SteamRelease => hand_on_vent(self.0, host, event.click),
             _ => None,
         }
+    }
+
+    /// Rusting parts count their exposure on random ticks (rust spec 5.1):
+    /// queued here, done by the level tick.
+    fn random_tick(
+        &self,
+        _: &mut dyn mod_api::LevelWriteHost,
+        event: &mut mod_api::RandomTickEvent,
+    ) -> mod_api::Flow {
+        if self.0.rusts() {
+            let dim = event.dimension.key().id();
+            super::rust::queue(dim, pos_of(event.pos));
+        }
+        mod_api::Flow::Continue
     }
 
     /// The grinder's slots changed (a player, a hopper, the grinder itself):
@@ -390,7 +451,8 @@ pub fn takes_item(host: &dyn mod_api::Host, click: &mod_api::BlockClick<'_>) -> 
         return false;
     };
     match super::server::block_at(host, level, pos_of_array(click.pos)) {
-        Some(Block::Grinder | Block::Crank | Block::Firebox) => true,
+        _ if item == keys.paint => false,
+        Some(Block::Grinder | Block::Crank | Block::Firebox | Block::Governor) => true,
         Some(Block::CopperBoiler | Block::IronBoiler | Block::StorageTank) => {
             item == keys.wrench || item == keys.water_bucket || item == keys.bucket
         }
@@ -473,6 +535,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Grinder => super::grinder::tick(host, event),
             Block::Tachometer => tachometer_tick(host, event),
             Block::Firebox => super::firebox::tick(host, event),
+            Block::Governor => super::governor::tick(host, event),
             Block::PressureGauge | Block::SightGlass => gauge_tick(self.0, host, event),
             _ => *event.reply = BlockEntityTickReply::Unchanged,
         }
@@ -595,6 +658,7 @@ impl BlockEntityPart for EntityHooks {
                 | Block::Pulley
                 | Block::Flywheel
                 | Block::SteamCylinder
+                | Block::Governor
         ) {
             event.distance = event.distance.max(96.0);
         }
@@ -604,6 +668,7 @@ impl BlockEntityPart for EntityHooks {
         match self.0 {
             Block::Grinder => super::grinder::screen(event),
             Block::Firebox => super::firebox::screen(event),
+            Block::Governor => super::governor::screen(event),
             _ => None,
         }
     }
@@ -612,7 +677,25 @@ impl BlockEntityPart for EntityHooks {
         match self.0 {
             Block::Grinder => super::grinder::screen_draw(host, event),
             Block::Firebox => super::firebox::screen_draw(host, event),
+            Block::Governor => super::governor::screen_draw(host, event),
             _ => {}
+        }
+    }
+
+    fn screen_click(
+        &self,
+        host: &dyn ClientHost,
+        event: &mut mod_api::ScreenClickEvent<'_>,
+    ) -> Option<i32> {
+        match self.0 {
+            Block::Governor => super::governor::screen_click(host, event),
+            _ => None,
+        }
+    }
+
+    fn menu_button(&self, host: &mut dyn ServerHost, event: &mut mod_api::MenuButtonEvent<'_>) {
+        if self.0 == Block::Governor {
+            super::governor::menu_button(host, event);
         }
     }
 }

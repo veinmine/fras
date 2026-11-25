@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/iron_boiler/shell_damaged_rust_leaking",
+  "loader": "fras:shell",
+  "mask": 63,
+  "axis": "x"
+}

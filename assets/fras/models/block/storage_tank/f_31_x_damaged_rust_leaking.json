@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/storage_tank/shell_damaged_rust_leaking",
+  "loader": "fras:shell",
+  "mask": 31,
+  "axis": "x"
+}

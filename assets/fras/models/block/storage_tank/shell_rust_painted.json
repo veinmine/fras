@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "fras:block/rust_painted",
+    "end": "fras:block/rust_painted",
+    "particle": "fras:block/rust_painted"
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "template": "minecraft:iron_block",
+  "properties": {
+    "hardness": 2.5,
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "flap": {
+      "type": "enum",
+      "values": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    "powered": {
+      "type": "boolean"
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "flap": "3",
+    "powered": "false",
+    "rust": "clean"
+  },
+  "shapes": {
+    "properties": [
+      "facing"
+    ],
+    "values": {
+      "down": [
+        [
+          0.125,
+          0.625,
+          0.125,
+          0.875,
+          1.0,
+          0.875
+        ]
+      ],
+      "up": [
+        [
+          0.125,
+          0.0,
+          0.125,
+          0.875,
+          0.375,
+          0.875
+        ]
+      ],
+      "north": [
+        [
+          0.125,
+          0.125,
+          0.625,
+          0.875,
+          0.875,
+          1.0
+        ]
+      ],
+      "south": [
+        [
+          0.125,
+          0.125,
+          0.0,
+          0.875,
+          0.875,
+          0.375
+        ]
+      ],
+      "west": [
+        [
+          0.625,
+          0.125,
+          0.125,
+          1.0,
+          0.875,
+          0.875
+        ]
+      ],
+      "east": [
+        [
+          0.0,
+          0.125,
+          0.125,
+          0.375,
+          0.875,
+          0.875
+        ]
+      ]
+    }
+  },
+  "collision_shapes": {
+    "properties": [
+      "facing"
+    ],
+    "values": {
+      "down": [
+        [
+          0.125,
+          0.625,
+          0.125,
+          0.875,
+          1.0,
+          0.875
+        ]
+      ],
+      "up": [
+        [
+          0.125,
+          0.0,
+          0.125,
+          0.875,
+          0.375,
+          0.875
+        ]
+      ],
+      "north": [
+        [
+          0.125,
+          0.125,
+          0.625,
+          0.875,
+          0.875,
+          1.0
+        ]
+      ],
+      "south": [
+        [
+          0.125,
+          0.125,
+          0.0,
+          0.875,
+          0.875,
+          0.375
+        ]
+      ],
+      "west": [
+        [
+          0.625,
+          0.125,
+          0.125,
+          1.0,
+          0.875,
+          0.875
+        ]
+      ],
+      "east": [
+        [
+          0.0,
+          0.125,
+          0.125,
+          0.375,
+          0.875,
+          0.875
+        ]
+      ]
+    }
+  }
+}

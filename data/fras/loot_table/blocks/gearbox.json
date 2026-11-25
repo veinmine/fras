@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:gearbox"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_gearbox",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:gearbox",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:gearbox"
+            }
+          ]
         }
       ],
       "condition": {

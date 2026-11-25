@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "axis=y,damaged=false,rust=clean": {
+      "model": "fras:block/governor"
+    },
+    "axis=y,damaged=false,rust=spotty": {
+      "model": "fras:block/governor_rust_spotty"
+    },
+    "axis=y,damaged=false,rust=rusty": {
+      "model": "fras:block/governor_rust_rusty"
+    },
+    "axis=y,damaged=false,rust=leaking": {
+      "model": "fras:block/governor_rust_leaking"
+    },
+    "axis=y,damaged=false,rust=painted": {
+      "model": "fras:block/governor_rust_painted"
+    },
+    "axis=y,damaged=true,rust=clean": {
+      "model": "fras:block/governor_damaged"
+    },
+    "axis=y,damaged=true,rust=spotty": {
+      "model": "fras:block/governor_damaged_rust_spotty"
+    },
+    "axis=y,damaged=true,rust=rusty": {
+      "model": "fras:block/governor_damaged_rust_rusty"
+    },
+    "axis=y,damaged=true,rust=leaking": {
+      "model": "fras:block/governor_damaged_rust_leaking"
+    },
+    "axis=y,damaged=true,rust=painted": {
+      "model": "fras:block/governor_damaged_rust_painted"
+    },
+    "axis=z,damaged=false,rust=clean": {
+      "model": "fras:block/governor",
+      "x": 90
+    },
+    "axis=z,damaged=false,rust=spotty": {
+      "model": "fras:block/governor_rust_spotty",
+      "x": 90
+    },
+    "axis=z,damaged=false,rust=rusty": {
+      "model": "fras:block/governor_rust_rusty",
+      "x": 90
+    },
+    "axis=z,damaged=false,rust=leaking": {
+      "model": "fras:block/governor_rust_leaking",
+      "x": 90
+    },
+    "axis=z,damaged=false,rust=painted": {
+      "model": "fras:block/governor_rust_painted",
+      "x": 90
+    },
+    "axis=z,damaged=true,rust=clean": {
+      "model": "fras:block/governor_damaged",
+      "x": 90
+    },
+    "axis=z,damaged=true,rust=spotty": {
+      "model": "fras:block/governor_damaged_rust_spotty",
+      "x": 90
+    },
+    "axis=z,damaged=true,rust=rusty": {
+      "model": "fras:block/governor_damaged_rust_rusty",
+      "x": 90
+    },
+    "axis=z,damaged=true,rust=leaking": {
+      "model": "fras:block/governor_damaged_rust_leaking",
+      "x": 90
+    },
+    "axis=z,damaged=true,rust=painted": {
+      "model": "fras:block/governor_damaged_rust_painted",
+      "x": 90
+    },
+    "axis=x,damaged=false,rust=clean": {
+      "model": "fras:block/governor",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=false,rust=spotty": {
+      "model": "fras:block/governor_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=false,rust=rusty": {
+      "model": "fras:block/governor_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=false,rust=leaking": {
+      "model": "fras:block/governor_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=false,rust=painted": {
+      "model": "fras:block/governor_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true,rust=clean": {
+      "model": "fras:block/governor_damaged",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true,rust=spotty": {
+      "model": "fras:block/governor_damaged_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true,rust=rusty": {
+      "model": "fras:block/governor_damaged_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true,rust=leaking": {
+      "model": "fras:block/governor_damaged_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,damaged=true,rust=painted": {
+      "model": "fras:block/governor_damaged_rust_painted",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

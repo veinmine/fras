@@ -36,7 +36,7 @@ pub fn offers(
     let net = || with_level(dim, |l| l.steam.works.content_at(q));
     match block {
         Block::CopperPipe | Block::IronPipe => Some(net()),
-        Block::ManualValve | Block::RedstoneValve => {
+        Block::ManualValve | Block::RedstoneValve | Block::Governor => {
             let axis = server::property(host, level, q, "axis")
                 .as_deref()
                 .and_then(Axis::from_name)
@@ -44,12 +44,37 @@ pub fn offers(
             (face.axis() == axis).then(net)
         }
         Block::SteamDome => (face != Dir::Down).then_some(Some(Content::Steam)),
-        Block::CopperBoiler | Block::IronBoiler => {
-            (face != Dir::Up).then_some(Some(Content::Water))
-        }
+        // A boiler's feed takes water or hot water: it sets no content
+        // (cooling spec 7).
+        Block::CopperBoiler | Block::IronBoiler => (face != Dir::Up).then_some(None),
         Block::StorageTank => Some(net()),
-        Block::SteamCylinder => (face == dir_prop(host, level, q, "facing", Dir::North).opposite())
-            .then_some(Some(Content::Steam)),
+        Block::SteamCylinder => {
+            let f = dir_prop(host, level, q, "facing", Dir::North);
+            if face == f.opposite() {
+                Some(Some(Content::Steam))
+            } else if face == Dir::Up && f.axis() != Axis::Y {
+                Some(Some(Content::Exhaust))
+            } else {
+                None
+            }
+        }
+        Block::HeatExchanger => {
+            let f = dir_prop(host, level, q, "facing", Dir::Up);
+            // The outlet's content follows its inlet's; the inlet takes
+            // exhaust or hot water.
+            (face.axis() == f.axis()).then_some(None)
+        }
+        Block::Drain => (face == dir_prop(host, level, q, "facing", Dir::North)).then_some(None),
+        Block::Grinder => {
+            let socket = dir_prop(host, level, q, "facing", Dir::North);
+            if face == socket.opposite() {
+                Some(Some(Content::Water))
+            } else if face.axis() != socket.axis() && face.axis() != Axis::Y {
+                Some(Some(Content::HotWater))
+            } else {
+                None
+            }
+        }
         Block::SteamRelease | Block::EmergencyValve => {
             (face == dir_prop(host, level, q, "facing", Dir::Down)).then_some(Some(Content::Steam))
         }

@@ -476,6 +476,15 @@ pub fn builtin() -> Vec<Recipe> {
         2.0,
         3.0,
     ));
+    // Rust flakes grind into pigment (rust spec 7).
+    v.push(recipe(
+        "rust_flakes",
+        item("fras:rust_flakes"),
+        1,
+        vec![out("fras:red_oxide_pigment", 1, 1.0)],
+        2.0,
+        3.0,
+    ));
     v
 }
 

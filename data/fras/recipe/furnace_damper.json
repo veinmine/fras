@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PRP"
+  ],
+  "key": {
+    "P": "fras:iron_plate",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "fras:furnace_damper",
+    "count": 1
+  }
+}

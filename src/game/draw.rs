@@ -17,11 +17,35 @@ use crate::sim::rot::{Shape, Spec};
 
 const LOG: &str = "block/stripped_oak_log";
 const LOG_END: &str = "block/stripped_oak_log_top";
-const IRON: &str = "block/iron_block";
 const PLANKS: &str = "block/spruce_planks";
 const OAK: &str = "block/oak_planks";
-const HOUSING: &str = "block/polished_andesite";
 const BELT: &str = "block/brown_wool";
+
+thread_local! {
+    /// The iron sprite of the part being drawn: its rust stage (rust spec 7).
+    static RUST: std::cell::Cell<Option<&'static str>> = const { std::cell::Cell::new(None) };
+}
+
+/// Set the rust look for the part about to be drawn, from its `rust` state.
+pub fn set_rust(host: &dyn ClientHost, state: BlockState) {
+    let sprite = match prop(host, state, "rust").as_deref() {
+        Some("spotty") => Some("fras:block/rust_spotty"),
+        Some("rusty") => Some("fras:block/rust_rusty"),
+        Some("leaking") => Some("fras:block/rust_leaking"),
+        Some("painted") => Some("fras:block/rust_painted"),
+        _ => None,
+    };
+    RUST.with(|r| r.set(sprite));
+}
+
+/// Iron, as rusted as the part being drawn.
+pub fn iron() -> &'static str {
+    RUST.with(|r| r.get()).unwrap_or("block/iron_block")
+}
+
+fn housing() -> &'static str {
+    RUST.with(|r| r.get()).unwrap_or("block/polished_andesite")
+}
 
 pub fn prop(host: &dyn ClientHost, state: BlockState, key: &str) -> Option<String> {
     let states = host.block_states();
@@ -177,7 +201,7 @@ fn stubs(draw: &mut dyn BlockEntityDrawContext, pos: Pos, spec: &Spec, rpm: f64,
 }
 
 pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
-    if block.is_plant() || matches!(block, Block::PressureGauge | Block::SightGlass) {
+    if block.steam_drawn() {
         super::steam_draw::submit(block, host, event);
         return;
     }
@@ -194,11 +218,12 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     let sag = blocks::get_bool(nbt, "sag");
     let spec = block.spec(&get, nbt);
     let axis = spec.as_ref().and_then(|s| s.axis()).unwrap_or(Axis::Y);
+    set_rust(host, state);
     let draw = &mut *event.draw;
     match block {
         Block::ShaftWood | Block::ShaftIron => {
             let (w, side, end) = if block == Block::ShaftIron {
-                (1.5, IRON, IRON)
+                (1.5, iron(), iron())
             } else {
                 (2.0, LOG, LOG_END)
             };
@@ -218,12 +243,12 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
         }
         Block::Bearing => {
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
-            axle(draw, axis, [0.0, 16.0], 1.5, IRON, IRON);
+            axle(draw, axis, [0.0, 16.0], 1.5, iron(), iron());
             draw.still();
             boxed(
                 draw,
                 span(axis, [4.0, 12.0], [3.0, 13.0], [3.0, 13.0]),
-                faces(axis, HOUSING, HOUSING),
+                faces(axis, housing(), housing()),
             );
             if let Some(mount) = get("mount").as_deref().and_then(Dir::from_name) {
                 let range = |c: Axis| -> [f32; 2] {
@@ -243,7 +268,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 boxed(
                     draw,
                     ([x[0], y[0], z[0]], [x[1], y[1], z[1]]),
-                    faces(axis, HOUSING, HOUSING),
+                    faces(axis, housing(), housing()),
                 );
             }
         }
@@ -254,7 +279,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             let collar = if get("powered").as_deref() == Some("true") {
                 "block/redstone_block"
             } else {
-                IRON
+                iron()
             };
             boxed(
                 draw,
@@ -361,7 +386,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             boxed(
                 draw,
                 span(axis, range, [3.0, 13.0], [3.0, 13.0]),
-                faces(axis, IRON, IRON),
+                faces(axis, iron(), iron()),
             );
             draw.still();
             // Two rollers in the mouth turning toward each other.
@@ -383,7 +408,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                     Axis::X => ([3.0, lo[1], lo[0]], [13.0, hi[1], hi[0]]),
                     _ => ([lo[0], lo[1], 3.0], [hi[0], hi[1], 13.0]),
                 };
-                boxed(draw, b, faces(axis, IRON, "block/smooth_stone"));
+                boxed(draw, b, faces(axis, iron(), "block/smooth_stone"));
                 draw.still();
             }
         }

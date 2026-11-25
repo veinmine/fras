@@ -24,7 +24,7 @@ fn tell(host: &mut dyn ServerHost, player: PlayerRef, line: Text) {
     let _ = player.tell(host, line);
 }
 
-fn bar(host: &mut dyn ServerHost, player: PlayerRef, line: Text) {
+pub(crate) fn bar(host: &mut dyn ServerHost, player: PlayerRef, line: Text) {
     let _ = player.action_bar(host, line);
 }
 
@@ -86,6 +86,10 @@ pub fn wrench(
         }
         return Some(InteractionResult::Success);
     }
+    // A rusted part is scraped first (rust spec 8).
+    if let Some(r) = super::rust::scrape(host, player, level, dim, pos, block) {
+        return Some(r);
+    }
     if block.is_plant()
         && server::property(&*host, level, pos, "damaged").as_deref() == Some("true")
     {
@@ -137,6 +141,12 @@ pub fn repair_cost(block: Block) -> Vec<(&'static str, u32)> {
         Block::SteamCylinder => vec![("minecraft:iron_nugget", 2)],
         Block::Flywheel => vec![("minecraft:iron_nugget", 4)],
         Block::Pump => vec![("minecraft:iron_nugget", 2), ("minecraft:copper_ingot", 1)],
+        // 0.3 (regulation spec 7)
+        Block::Governor => vec![("minecraft:iron_nugget", 2)],
+        Block::Bellows => vec![("minecraft:leather", 1)],
+        Block::FurnaceDamper => vec![("minecraft:iron_nugget", 1)],
+        Block::HeatExchanger | Block::Drain => vec![("minecraft:iron_nugget", 1)],
+        Block::CopperRadiator | Block::IronRadiator => vec![],
         Block::Tachometer
         | Block::SteamDome
         | Block::Firebox
@@ -154,6 +164,7 @@ fn cost_key(id: &str) -> Option<ItemKey> {
         "minecraft:copper_ingot" => k.copper_ingot,
         "minecraft:copper_nugget" => k.copper_nugget,
         "fras:iron_plate" => k.iron_plate,
+        "minecraft:leather" => k.leather,
         _ => return None,
     })
 }
@@ -173,7 +184,11 @@ pub fn cost_text(cost: &[(&str, u32)]) -> Text {
 }
 
 /// How many of `item` the player carries, by slot.
-fn carried(host: &dyn mod_api::Host, player: PlayerRef, item: ItemKey) -> Vec<(u32, ItemStack)> {
+pub(crate) fn carried(
+    host: &dyn mod_api::Host,
+    player: PlayerRef,
+    item: ItemKey,
+) -> Vec<(u32, ItemStack)> {
     player
         .inventory_slots(host)
         .unwrap_or_default()
@@ -184,7 +199,12 @@ fn carried(host: &dyn mod_api::Host, player: PlayerRef, item: ItemKey) -> Vec<(u
 
 /// Take `count` of `item` from the player's inventory. False (and nothing
 /// taken) if they don't have that many.
-fn take(host: &mut dyn ServerHost, player: PlayerRef, item: ItemKey, count: u32) -> bool {
+pub(crate) fn take(
+    host: &mut dyn ServerHost,
+    player: PlayerRef,
+    item: ItemKey,
+    count: u32,
+) -> bool {
     let slots = carried(&*host, player, item);
     if slots.iter().map(|(_, s)| s.count()).sum::<u32>() < count {
         return false;
@@ -201,7 +221,7 @@ fn take(host: &mut dyn ServerHost, player: PlayerRef, item: ItemKey, count: u32)
     true
 }
 
-fn creative(host: &dyn mod_api::Host, player: PlayerRef) -> bool {
+pub(crate) fn creative(host: &dyn mod_api::Host, player: PlayerRef) -> bool {
     player.has_infinite_materials(host) == Some(true)
 }
 
@@ -451,6 +471,54 @@ fn configure(
             pipes::connect_around(host, level, dim, pos);
             done
         }
+        // ---- 0.3 ----
+        Block::Governor => {
+            // The socket turns among the four faces across the pipe.
+            let axis = prop(&*host, "axis")
+                .as_deref()
+                .and_then(Axis::from_name)
+                .unwrap_or(Axis::X);
+            let socket = prop(&*host, "socket")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::Up);
+            let faces: Vec<Dir> = Dir::ALL.into_iter().filter(|d| d.axis() != axis).collect();
+            let i = faces
+                .iter()
+                .position(|d| *d == socket)
+                .map_or(0, |i| (i + 1) % faces.len());
+            set_property(host, level, pos, "socket", faces[i].name())
+        }
+        Block::FurnaceDamper => {
+            let nbt = host
+                .block_entity(level, pos.to_array())
+                .and_then(|e| e.data(&*host))
+                .unwrap_or_default();
+            let set =
+                blocks::get_f64(&nbt, "set").unwrap_or(crate::sim::steam::damper::DEFAULT_SET);
+            let next = crate::sim::steam::damper::next_set(set);
+            let mut c = mod_api::Compound::new();
+            blocks::put_f64(&mut c, "set", next);
+            server::merge(host, level, pos, c);
+            steam::queue(dim, pos, false);
+            bar(
+                host,
+                player,
+                tr("fras.wrench.damper_set", vec![format!("{next:.1}")]),
+            );
+            true
+        }
+        Block::HeatExchanger => {
+            // Turn it end for end: inlet and outlet swap.
+            let f = prop(&*host, "facing")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::Up);
+            let next = Dir::from_index((f.index() + 1) % 6).unwrap_or(Dir::Down);
+            let done = set_property(host, level, pos, "facing", next.name());
+            pipes::connect_around(host, level, dim, pos);
+            done
+        }
         _ => false,
     }
 }
@@ -473,6 +541,9 @@ pub fn inspect(
             ))
             .append(Text::literal(" —")),
     ];
+    if let Some(line) = super::rust::line(host, level, dim, pos, block) {
+        lines.push(line);
+    }
     let (part, reading, wheel, slipping) = with_level(dim, |l| {
         (
             l.mech.part(pos).cloned(),
@@ -663,7 +734,7 @@ pub fn swap_bearing(
     Some(InteractionResult::Success)
 }
 
-fn hand_slot(host: &dyn mod_api::Host, player: PlayerRef, hand: Hand) -> u32 {
+pub(crate) fn hand_slot(host: &dyn mod_api::Host, player: PlayerRef, hand: Hand) -> u32 {
     match hand {
         Hand::Main => player.selected_slot(host).unwrap_or(0) as u32,
         Hand::Off => 40,
@@ -853,6 +924,8 @@ mod tests {
                     | Block::Firebox
                     | Block::PressureGauge
                     | Block::SightGlass
+                    | Block::CopperRadiator
+                    | Block::IronRadiator
             );
             assert_eq!(repair_cost(b).is_empty(), never_damaged);
         }

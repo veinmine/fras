@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "side": "fras:block/rust_leaking",
+    "end": "fras:block/rust_leaking",
+    "particle": "fras:block/rust_leaking"
+  }
+}

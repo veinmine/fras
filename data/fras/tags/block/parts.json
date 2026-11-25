@@ -29,6 +29,13 @@
     "fras:steam_cylinder",
     "fras:flywheel",
     "fras:pressure_gauge",
-    "fras:sight_glass"
+    "fras:sight_glass",
+    "fras:governor",
+    "fras:furnace_damper",
+    "fras:bellows",
+    "fras:heat_exchanger",
+    "fras:copper_radiator",
+    "fras:iron_radiator",
+    "fras:drain"
   ]
 }

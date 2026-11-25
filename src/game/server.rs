@@ -240,6 +240,8 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
             (l.mech.take_events(), l.mech.take_sync())
         })
     };
+    super::steam::tick_governors(dim);
+    super::rust::ticks(host, level, dim);
     for event in events {
         super::effects::event(host, level, &event);
     }

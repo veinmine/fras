@@ -6,9 +6,11 @@ pub mod blocks;
 pub mod draw;
 pub mod effects;
 pub mod firebox;
+pub mod governor;
 pub mod grinder;
 pub mod parts;
 pub mod pipes;
+pub mod rust;
 pub mod server;
 pub mod shell_model;
 pub mod steam;
@@ -39,11 +41,15 @@ pub struct Keys {
     pub copper_ingot: ItemKey,
     pub copper_nugget: ItemKey,
     pub iron_plate: ItemKey,
+    pub leather: ItemKey,
+    pub paint: ItemKey,
+    pub rust_flakes: ItemKey,
     pub smoke: ParticleKey,
     pub crit: ParticleKey,
     pub cloud: ParticleKey,
     pub ember: ParticleKey,
     pub wisp: ParticleKey,
+    pub drip: ParticleKey,
 }
 
 pub static KEYS: OnceLock<Keys> = OnceLock::new();
@@ -179,8 +185,30 @@ mod tests {
             ));
         }
         // Literal keys in the sources.
-        for m in steam::MODES {
+        for m in steam::MODES
+            .iter()
+            .chain(rust::ON_CHOICES.iter())
+            .chain(rust::SPEED_CHOICES.iter())
+        {
             keys.push(m.to_string());
+        }
+        for i in crate::PAINTED {
+            keys.push(format!("item.fras.painted_{i}"));
+        }
+        for c in ["steam", "waterlogged", "water", "rain"] {
+            keys.push(format!("fras.rust.cause.{c}"));
+        }
+        for st in ["clean", "spotty", "rusty", "leaking", "painted"] {
+            keys.push(format!("fras.rust.stage.{st}"));
+        }
+        keys.push("fras.jam.rusted".into());
+        keys.push("tooltip.fras.painted".into());
+        for c in ["water", "steam", "hot_water", "exhaust", "empty"] {
+            keys.push(format!("fras.content.{c}"));
+        }
+        for s in ["rust", "rust_speed"] {
+            keys.push(format!("fras.settings.{s}"));
+            keys.push(format!("fras.settings.{s}.tooltip"));
         }
         for file in [
             "tools.rs",
@@ -190,6 +218,8 @@ mod tests {
             "steam_inspect.rs",
             "pipes.rs",
             "firebox.rs",
+            "governor.rs",
+            "rust.rs",
         ] {
             let src =
                 std::fs::read_to_string(format!("{}/src/game/{file}", env!("CARGO_MANIFEST_DIR")))

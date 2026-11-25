@@ -43,10 +43,18 @@ pub enum Block {
     Flywheel,
     PressureGauge,
     SightGlass,
+    // ---- 0.3: regulation and cooling ----
+    Governor,
+    FurnaceDamper,
+    Bellows,
+    HeatExchanger,
+    CopperRadiator,
+    IronRadiator,
+    Drain,
 }
 
 impl Block {
-    pub const ALL: [Block; 29] = [
+    pub const ALL: [Block; 36] = [
         Block::ShaftWood,
         Block::ShaftIron,
         Block::Bearing,
@@ -76,6 +84,13 @@ impl Block {
         Block::Flywheel,
         Block::PressureGauge,
         Block::SightGlass,
+        Block::Governor,
+        Block::FurnaceDamper,
+        Block::Bellows,
+        Block::HeatExchanger,
+        Block::CopperRadiator,
+        Block::IronRadiator,
+        Block::Drain,
     ];
 
     /// The path of its id (`fras:<name>`).
@@ -110,6 +125,13 @@ impl Block {
             Block::Flywheel => "flywheel",
             Block::PressureGauge => "pressure_gauge",
             Block::SightGlass => "sight_glass",
+            Block::Governor => "governor",
+            Block::FurnaceDamper => "furnace_damper",
+            Block::Bellows => "bellows",
+            Block::HeatExchanger => "heat_exchanger",
+            Block::CopperRadiator => "copper_radiator",
+            Block::IronRadiator => "iron_radiator",
+            Block::Drain => "drain",
         }
     }
 
@@ -140,6 +162,8 @@ impl Block {
             Block::Grinder => Kind::Grinder,
             Block::Flywheel => Kind::Flywheel,
             Block::Pump => Kind::Pump,
+            Block::Governor => Kind::Governor,
+            Block::Bellows => Kind::Bellows,
             _ => return None,
         })
     }
@@ -156,6 +180,7 @@ impl Block {
                 | Block::Firebox
                 | Block::PressureGauge
                 | Block::SightGlass
+                | Block::Governor
         )
     }
 
@@ -183,8 +208,61 @@ impl Block {
             Block::Pump => PlantKind::Pump,
             Block::SteamCylinder => PlantKind::Cylinder,
             Block::Flywheel => PlantKind::Flywheel,
+            Block::Governor => PlantKind::Governor,
+            Block::FurnaceDamper => PlantKind::Damper,
+            Block::Bellows => PlantKind::Bellows,
+            Block::HeatExchanger => PlantKind::Exchanger,
+            Block::CopperRadiator => PlantKind::Radiator { copper: true },
+            Block::IronRadiator => PlantKind::Radiator { copper: false },
+            Block::Drain => PlantKind::Drain,
+            Block::Grinder => PlantKind::Grinder,
             _ => return None,
         })
+    }
+
+    /// Whether it rusts (rust spec 3): iron parts.
+    pub fn rusts(self) -> bool {
+        matches!(
+            self,
+            Block::ShaftIron
+                | Block::Bearing
+                | Block::Clutch
+                | Block::BevelGearIron
+                | Block::Gearbox
+                | Block::IronPipe
+                | Block::ManualValve
+                | Block::RedstoneValve
+                | Block::SteamRelease
+                | Block::EmergencyValve
+                | Block::Governor
+                | Block::IronBoiler
+                | Block::StorageTank
+                | Block::SteamCylinder
+                | Block::Flywheel
+                | Block::Pump
+                | Block::HeatExchanger
+                | Block::IronRadiator
+                | Block::FurnaceDamper
+        )
+    }
+
+    /// Its rust stage from its block state (clean for parts that don't rust).
+    pub fn rust_stage(self, get: &dyn Fn(&str) -> Option<String>) -> crate::sim::rust::Stage {
+        use crate::sim::rust::Stage;
+        if !self.rusts() {
+            return Stage::Clean;
+        }
+        get("rust")
+            .as_deref()
+            .and_then(Stage::from_name)
+            .unwrap_or(Stage::Clean)
+    }
+
+    /// Whether the plant draws it in `steam_draw` (the steam parts that move
+    /// or show a reading); the grinder is a plant part but drawn as a machine.
+    pub fn steam_drawn(self) -> bool {
+        (self.is_plant() && self != Block::Grinder)
+            || matches!(self, Block::PressureGauge | Block::SightGlass)
     }
 
     pub fn is_shell(self) -> bool {
@@ -248,8 +326,31 @@ impl Block {
                 spec.dir = axis().positive();
                 spec.reverse = get_bool(nbt, "reverse");
             }
+            Block::Governor => {
+                spec.dir = axis().positive();
+                spec.target = crate::sim::steam::govern::clean_target(
+                    get_f64(nbt, "target").unwrap_or(crate::sim::steam::govern::DEFAULT_TARGET),
+                );
+                spec.sens = get_i32(nbt, "sens")
+                    .unwrap_or(crate::sim::steam::govern::DEFAULT_SENS as i32)
+                    .clamp(1, 5) as u8;
+            }
+            Block::FurnaceDamper => {
+                spec.dir = dir("facing", Dir::North);
+                spec.set = get_f64(nbt, "set").unwrap_or(crate::sim::steam::damper::DEFAULT_SET);
+                spec.powered = flag("powered");
+            }
+            Block::HeatExchanger => {
+                spec.dir = dir("facing", Dir::Up);
+                spec.wet = flag("waterlogged");
+            }
+            Block::Bellows | Block::CopperRadiator | Block::IronRadiator | Block::Drain => {
+                spec.dir = dir("facing", Dir::North);
+            }
+            Block::Grinder => spec.dir = dir("facing", Dir::North),
             _ => {}
         }
+        spec.rust = self.rust_stage(get);
         Some(spec)
     }
 
@@ -308,6 +409,9 @@ impl Block {
                 }
             }
             Block::Crank | Block::Grinder | Block::Pump => Shape::Socket(dir("facing", Dir::North)),
+            Block::Governor => Shape::Socket(dir("socket", Dir::Up)),
+            // The nozzle faces the firebox; the socket is the opposite face.
+            Block::Bellows => Shape::Socket(dir("facing", Dir::North).opposite()),
             Block::Flywheel => Shape::Inline(
                 get("axis")
                     .as_deref()
@@ -326,6 +430,9 @@ impl Block {
         }
         if matches!(self, Block::Pulley | Block::LargePulley) {
             spec.belt = belt(nbt);
+        }
+        if self == Block::Grinder {
+            spec.cooled = get_bool(nbt, "cooled");
         }
         Some(spec)
     }
@@ -531,6 +638,13 @@ pub const CLIENT_KEYS: &[&str] = &[
     "reverse",
     "fill",
     "content",
+    // 0.3
+    "ball",
+    "lever",
+    "brpm",
+    "cooled",
+    "target",
+    "sens",
 ];
 
 #[cfg(test)]

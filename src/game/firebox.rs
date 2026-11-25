@@ -116,10 +116,29 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             }
         }
     }
+    // A damped fire burns slower; a banked one (dampers shut) holds
+    // (regulation spec 4.3). Bellows never change the burn time.
+    let factor = with_level(dim, |l| l.steam.works.burn_factor(pos));
     if burn > 0 && !paused {
-        burn -= 1;
+        let owed = with_level(dim, |l| {
+            let f = l.steam.burn_frac.entry(pos).or_insert(0.0);
+            *f += factor;
+            let whole = f.floor();
+            *f -= whole;
+            whole as i32
+        });
+        burn = (burn - owed).max(0);
     }
     let lit = burn > 0;
+    let banked = lit && factor <= 0.0;
+    if let Some(level) = host.level(dim) {
+        let was = super::server::property(&*host, level, pos, "banked").as_deref() == Some("true");
+        if was != banked {
+            with_level(dim, |l| {
+                l.steam.banked.insert(pos, banked);
+            });
+        }
+    }
     steam::set_heat(dim, pos, if lit { kw } else { 0.0 });
     let boilers = with_level(dim, |l| l.steam.works.firebox_boilers(pos)) as i32;
     if lit != (old_burn > 0) {

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PCP",
+    "C C",
+    "PCP"
+  ],
+  "key": {
+    "P": "fras:iron_plate",
+    "C": "fras:copper_pipe"
+  },
+  "result": {
+    "id": "fras:heat_exchanger",
+    "count": 1
+  }
+}

@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "rust=clean": {
       "model": "fras:block/flywheel"
+    },
+    "rust=spotty": {
+      "model": "fras:block/flywheel_rust_spotty"
+    },
+    "rust=rusty": {
+      "model": "fras:block/flywheel_rust_rusty"
+    },
+    "rust=leaking": {
+      "model": "fras:block/flywheel_rust_leaking"
+    },
+    "rust=painted": {
+      "model": "fras:block/flywheel_rust_painted"
     }
   }
 }

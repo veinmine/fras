@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:iron_ingot",
+  "block": "bearing",
+  "components": {
+    "minecraft:block_state": {
+      "rust": "painted"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:iron_ingot",
+  "block": "manual_valve",
+  "components": {
+    "minecraft:block_state": {
+      "rust": "painted"
+    }
+  }
+}

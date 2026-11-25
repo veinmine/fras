@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:steam_release"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_steam_release",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:steam_release",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:steam_release"
+            }
+          ]
         }
       ],
       "condition": {

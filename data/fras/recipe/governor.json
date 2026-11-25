@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I I",
+    " S ",
+    "PVP"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "fras:iron_shaft",
+    "P": "fras:iron_plate",
+    "V": "fras:manual_valve"
+  },
+  "result": {
+    "id": "fras:governor",
+    "count": 1
+  }
+}

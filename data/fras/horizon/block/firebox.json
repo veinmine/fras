@@ -17,19 +17,26 @@
     },
     "lit": {
       "type": "boolean"
+    },
+    "banked": {
+      "type": "boolean"
     }
   },
   "default_state": {
     "facing": "north",
-    "lit": "false"
+    "lit": "false",
+    "banked": "false"
   },
   "state_light": {
     "properties": [
-      "lit"
+      "lit",
+      "banked"
     ],
     "values": {
-      "true": 13,
-      "false": 0
+      "true,false": 13,
+      "true,true": 7,
+      "false,false": 0,
+      "false,true": 0
     }
   }
 }

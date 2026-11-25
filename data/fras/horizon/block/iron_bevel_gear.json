@@ -3,6 +3,14 @@
   "properties": {
     "hardness": 3.0,
     "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
     "requires_tool": false
   },
   "state_properties": {
@@ -30,11 +38,22 @@
     },
     "tee": {
       "type": "boolean"
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
     }
   },
   "default_state": {
     "input": "west",
-    "output": "south"
+    "output": "south",
+    "rust": "clean"
   },
   "shapes": {
     "default": [

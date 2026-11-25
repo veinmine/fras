@@ -46,7 +46,7 @@ impl Stage {
         matches!(self, Stage::Spotty | Stage::Rusty | Stage::Leaking)
     }
 
-    fn next(self) -> Stage {
+    pub fn next(self) -> Stage {
         match self {
             Stage::Clean => Stage::Spotty,
             Stage::Spotty => Stage::Rusty,

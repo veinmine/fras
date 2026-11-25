@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "rust=clean": {
       "model": "fras:block/iron_bevel_gear"
+    },
+    "rust=spotty": {
+      "model": "fras:block/iron_bevel_gear_rust_spotty"
+    },
+    "rust=rusty": {
+      "model": "fras:block/iron_bevel_gear_rust_rusty"
+    },
+    "rust=leaking": {
+      "model": "fras:block/iron_bevel_gear_rust_leaking"
+    },
+    "rust=painted": {
+      "model": "fras:block/iron_bevel_gear_rust_painted"
     }
   }
 }

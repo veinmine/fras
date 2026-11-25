@@ -1,0 +1,11 @@
+{
+  "type": "fras:grinding",
+  "ingredient": "fras:rust_flakes",
+  "results": [
+    {
+      "id": "fras:red_oxide_pigment"
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 3.0
+}
