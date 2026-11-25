@@ -54,7 +54,8 @@ the "well-tuned factory runs itself" of pillar 2.
 - The governor is a **steam pipe part with a shaft socket**: an iron valve body on a pipe axis, like the
   manual valve (spec 3, 6.1), with a vertical spindle carrying two flyballs. Pipes connect on its two axis
   faces; the **shaft socket** is on one of the four faces across the axis (top by default, set by placement
-  facing an adjacent shaft as for machines, rotated with the wrench among those four).
+  facing an adjacent shaft as for machines). The wrench doesn't rotate it, since its right-click sets the
+  sensitivity (3.4): to move the socket, break and replace the governor.
 - It is a **machine end point** in the rotational network (rotational spec 9.3): working range 0 to 192 RPM,
   load 1 Nm while turning, inertia 2, iron friction *(tune)*. Over 192 RPM it overspeeds and jams like any
   part. Direction doesn't matter.
@@ -99,8 +100,14 @@ The governor senses the speed `s = |ω|` at its own socket (after any gearing be
 | **Target** | 8 to 192 RPM in steps of 8, at the governor's socket | 64 RPM |
 | **Sensitivity** | 1 to 5: band 32, 16, 8, 4, 2 RPM | 1 (band 32: steady, droops) |
 
-- **Wrench right-click opens a small settings screen** with − / + buttons for each value, the current
-  speed, the ball position and the throttle as a bar. Sneak-right-click inspects as everywhere.
+- **No screen** (the wrench never opens one, as on every other FRAS part). The settings are clicks, like the
+  manual valve and the emergency valve:
+  - **Target:** right-click with an empty hand raises it 8 RPM, sneak-right-click lowers it 8 RPM (stopping at 8
+    and 192), with the manual valve's squeak.
+  - **Sensitivity:** wrench right-click cycles it 1 → 2 → 3 → 4 → 5 → 1, as the wrench cycles the emergency
+    valve's set pressure.
+  - Each click shows the new value on the action bar ("Target 72 RPM", "Sensitivity 3: band 8 RPM").
+    Sneak-right-click with the wrench inspects as everywhere, with the speed, ball position and throttle.
 - The default is the steady, sloppy setting, so a first governor never surprises; tightening it is the tuning
   game.
 
@@ -237,7 +244,7 @@ firebox roars louder and throws more sparks while blown.
 - **Firebox** (added to spec 2, 11): heat now including boost and damper ("Coal: 1000 kW × 1.5 bellows × 40%
   damper = 600 kW"), burn rate.
 - **Engine** (added): throttle from governors, "throttled to 35%".
-- Tooltips: "Throttles the steam to the engines downstream. Set target and sensitivity with the wrench."
+- Tooltips: "Throttles the steam to the engines downstream. Hand clicks set the target, the wrench the sensitivity."
   "Turns the fire down as pressure nears its setting. Redstone shuts it." "Blows a firebox: up to 50% more
   heat from the same fuel."
 
@@ -275,8 +282,8 @@ As spec 2, 12: wrench right-click on a jammed part, materials from the inventory
 - Order in `level_tick_post`: rotational solve → governors integrate their balls (every tick) → every 4 ticks
   the steam step reads each governor's `g`, each damper's `h` and each bellows' `b`, then steps boilers and
   routes (spec 2, 14.1).
-- The governor's settings screen is a mod menu like the grinder's, with no slots: two pairs of buttons sent to
-  the server as menu button clicks.
+- The governor's settings are block-entity fields changed by the same use-item / use-without-item hooks as the
+  manual and emergency valves (`pipes.rs`); no menu.
 - Routing (spec 3, 5) already builds a tree from the sources; each consumer gets a throttle factor, the product
   of the `g` of governors on its path, computed at rebuild (the path) and each step (the product).
 
@@ -409,9 +416,9 @@ Each item states what this spec assumes. Reply by number; anything skipped stays
    default (1) is steady but droops. OK, or should the default be a middle setting that hunts a little?
 3. **G3. A governor that stops turning opens wide** (3.7), as a real one with a broken belt. *Alternative:* it
    shuts (fail safe), which removes a classic hazard but also one way to learn.
-4. **G4. Settings on a screen** opened by the wrench (3.4). *Alternative:* no screen: wrench clicks cycle the
-   target and empty-hand clicks cycle the sensitivity (sneak-wrench is already inspection), as the manual
-   valve and emergency valve do.
+4. **G4. Decided (Marcin, 2026-11-25): no screen,** because the wrench doesn't open screens on any other
+   machine. Empty-hand clicks raise and lower the target, wrench clicks cycle the sensitivity (3.4); the
+   socket is set by placement only.
 5. **G5. Governors throttle vents behind them too** (3.2), with an overlay warning. *Alternative:* only cylinders
    are throttled.
 6. **G6. The damper attaches to the boiler** and scales all its fireboxes (4.1). *Alternative:* one damper per
