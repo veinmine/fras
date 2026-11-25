@@ -4,14 +4,18 @@
 //! - `pool`: a steam network's steam, capacity and pressure, joining and splitting;
 //! - `engine`: the cylinder's curve, steam demand and fill (9.1, 9.2);
 //! - `fail`: rated pressures, warning timers, rupture power, the steam cloud (6, 7);
-//! - `fuel`: the firebox's heat-rate table (3.1).
+//! - `fuel`: the firebox's heat-rate table (3.1);
+//! - `govern`, `damper`, `bellows`: regulation (regulation spec 3 to 5).
 //!
 //! The numbers marked *(tune)* in the spec are collected here.
 
+pub mod bellows;
 pub mod boiler;
+pub mod damper;
 pub mod engine;
 pub mod fail;
 pub mod fuel;
+pub mod govern;
 pub mod pool;
 
 /// Ticks between two steam steps.
@@ -29,6 +33,8 @@ pub const SHELL_KJ: f64 = 10.0;
 pub const BOILING: f64 = 100.0;
 /// Where a boiler starts, and the temperature of feed water.
 pub const AMBIENT: f64 = 20.0;
+/// Hot water's fixed temperature (cooling spec 7.1).
+pub const HOT_WATER: f64 = 90.0;
 
 /// One boiler block's water, mB.
 pub const BOILER_WATER: f64 = 1000.0;

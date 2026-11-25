@@ -472,6 +472,10 @@ pub fn plant_saved(nbt: &Compound) -> Option<PlantSaved> {
             .as_deref()
             .and_then(Content::from_name),
         formation,
+        ball: get_f64(nbt, "ball").unwrap_or(d.ball),
+        ball_v: get_f64(nbt, "ball_v").unwrap_or(d.ball_v),
+        buffer: get_f64(nbt, "buffer").unwrap_or(d.buffer),
+        opening: get_f64(nbt, "opening").unwrap_or(d.opening),
     })
 }
 
@@ -484,6 +488,10 @@ pub fn plant_fields(s: &PlantSaved) -> Compound {
     put_f64(&mut c, "steam", s.steam);
     put_f64(&mut c, "ptimer", s.timer);
     put_str(&mut c, "content", s.content.map_or("", Content::name));
+    put_f64(&mut c, "ball", s.ball);
+    put_f64(&mut c, "ball_v", s.ball_v);
+    put_f64(&mut c, "buffer", s.buffer);
+    put_f64(&mut c, "opening", s.opening);
     let (min, size) = s
         .formation
         .map_or((Pos::new(0, 0, 0), [0, 0, 0]), |f| (f.min, f.size));

@@ -42,6 +42,14 @@ fn kind_name(kind: Kind) -> Text {
         Kind::Firebox => "firebox",
         Kind::Pump => "pump",
         Kind::Flywheel => "flywheel",
+        Kind::Governor => "governor",
+        Kind::Damper => "furnace_damper",
+        Kind::Bellows => "bellows",
+        Kind::Exchanger => "heat_exchanger",
+        Kind::Radiator { copper: true } => "copper_radiator",
+        Kind::Radiator { copper: false } => "iron_radiator",
+        Kind::Drain => "drain",
+        Kind::Grinder => "grinder",
     };
     Text::translate(format!("block.fras.{name}"), vec![])
 }

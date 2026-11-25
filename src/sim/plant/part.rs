@@ -4,7 +4,8 @@ use crate::sim::fluid::{self, Content};
 use crate::sim::geom::{Axis, Dir};
 use crate::sim::multi::ShellKind;
 use crate::sim::multi::shape::Cuboid;
-use crate::sim::steam::{AMBIENT, fail};
+use crate::sim::rust::Stage;
+use crate::sim::steam::{AMBIENT, fail, govern};
 
 /// Pipe materials.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -32,12 +33,58 @@ pub enum Kind {
     Firebox,
     Pump,
     Flywheel,
+    // ---- 0.3 ----
+    /// A steam pipe part with a shaft socket (regulation spec 3).
+    Governor,
+    /// On a boiler's outer face (regulation spec 4).
+    Damper,
+    /// Against a firebox (regulation spec 5).
+    Bellows,
+    /// Heat exchanger, the condenser too (cooling spec 5).
+    Exchanger,
+    /// On a heat exchanger's side face (cooling spec 6).
+    Radiator {
+        copper: bool,
+    },
+    /// Dumps surplus water or hot water (cooling spec 8).
+    Drain,
+    /// The grinder, for its water cooling (cooling spec 9).
+    Grinder,
 }
 
 impl Kind {
     /// Parts of a pipe network that carry flow.
     pub fn is_pipe(self) -> bool {
-        matches!(self, Kind::Pipe(_) | Kind::Valve { .. })
+        matches!(self, Kind::Pipe(_) | Kind::Valve { .. } | Kind::Governor)
+    }
+
+    /// Parts that turn with a rotational network linked to the plant.
+    pub fn is_rot(self) -> bool {
+        matches!(
+            self,
+            Kind::Flywheel | Kind::Pump | Kind::Governor | Kind::Bellows | Kind::Grinder
+        )
+    }
+
+    /// What its leaking stage does (rust spec 6); `None` for parts that
+    /// don't rust. `Leak::Steam` here means a fluid leak: steam on a steam
+    /// network or vessel, a drip of whatever else it carries or holds.
+    pub fn leak(self) -> Option<crate::sim::rust::Leak> {
+        use crate::sim::multi::ShellKind;
+        use crate::sim::rust::Leak;
+        Some(match self {
+            Kind::Pipe(PipeMat::Iron)
+            | Kind::Valve { .. }
+            | Kind::Vent { .. }
+            | Kind::Governor
+            | Kind::Exchanger
+            | Kind::Cylinder
+            | Kind::Shell(ShellKind::IronBoiler | ShellKind::Tank) => Leak::Steam,
+            Kind::Pump | Kind::Flywheel => Leak::Jam,
+            Kind::Radiator { copper: false } => Leak::NoCooling,
+            Kind::Damper => Leak::Stick,
+            _ => return None,
+        })
     }
 
     /// The throughput of a pipe part fully open, mB/s.
@@ -45,7 +92,7 @@ impl Kind {
         match self {
             Kind::Pipe(PipeMat::Copper) => fluid::COPPER_PIPE,
             Kind::Pipe(PipeMat::Iron) => fluid::IRON_PIPE,
-            Kind::Valve { .. } | Kind::Vent { .. } => fluid::VALVE,
+            Kind::Valve { .. } | Kind::Vent { .. } | Kind::Governor => fluid::VALVE,
             Kind::Dome => fluid::DOME,
             _ => 0.0,
         }
@@ -57,7 +104,7 @@ impl Kind {
             Kind::Shell(k) => k.rating(),
             Kind::Pipe(PipeMat::Copper) => fail::COPPER_PIPE,
             Kind::Pipe(PipeMat::Iron) => fail::IRON_PIPE,
-            Kind::Valve { .. } | Kind::Vent { .. } => fail::VALVE,
+            Kind::Valve { .. } | Kind::Vent { .. } | Kind::Governor => fail::VALVE,
             Kind::Cylinder => fail::CYLINDER,
             _ => return None,
         })
@@ -81,6 +128,15 @@ pub struct Spec {
     pub damaged: bool,
     /// Flywheel: the reversing gear.
     pub reverse: bool,
+    /// Governor: target speed (RPM at its socket) and sensitivity (1 to 5).
+    pub target: f64,
+    pub sens: u8,
+    /// Damper: powered by redstone (shut).
+    pub powered: bool,
+    /// Heat exchanger: waterlogged.
+    pub wet: bool,
+    /// Its rust stage (rust spec 5).
+    pub rust: Stage,
 }
 
 impl Spec {
@@ -93,7 +149,16 @@ impl Spec {
             set: crate::sim::fluid::valve::DEFAULT_SET,
             damaged: false,
             reverse: false,
+            target: govern::DEFAULT_TARGET,
+            sens: govern::DEFAULT_SENS,
+            powered: false,
+            wet: false,
+            rust: Stage::Clean,
         }
+    }
+
+    pub fn leaking(&self) -> bool {
+        self.rust.leaking()
     }
 
     pub fn with_dir(mut self, dir: Dir) -> Spec {
@@ -144,6 +209,8 @@ impl Spec {
         b.set = 0.0;
         a.reverse = false;
         b.reverse = false;
+        (a.target, a.sens, a.powered, a.wet, a.rust) = (0.0, 0, false, false, Stage::Clean);
+        (b.target, b.sens, b.powered, b.wet, b.rust) = (0.0, 0, false, false, Stage::Clean);
         if matches!(a.kind, Kind::Vent { .. }) {
             a.opening = 0.0;
             b.opening = 0.0;
@@ -167,6 +234,13 @@ pub struct Saved {
     pub content: Option<Content>,
     /// The multiblock it was part of when saved.
     pub formation: Option<Cuboid>,
+    /// Governor: its balls (position, RPM, and speed).
+    pub ball: f64,
+    pub ball_v: f64,
+    /// Heat exchanger and grinder: the outlet buffer, mB.
+    pub buffer: f64,
+    /// Damper: its opening, 0 to 1.
+    pub opening: f64,
 }
 
 impl Default for Saved {
@@ -178,6 +252,10 @@ impl Default for Saved {
             timer: 0.0,
             content: None,
             formation: None,
+            ball: 0.0,
+            ball_v: 0.0,
+            buffer: 0.0,
+            opening: 1.0,
         }
     }
 }
