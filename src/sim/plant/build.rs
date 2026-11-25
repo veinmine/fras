@@ -768,15 +768,31 @@ impl Works {
                 nodes.extend(src.iter().copied());
             }
         }
+        // Cooled machines route first, exchangers last: a machine that can't
+        // get its hot water out loses cooling, an exchanger only lets
+        // exhaust vent.
+        let rank = |node: usize| match net.sources.iter().find(|(_, n)| *n == node) {
+            Some((End::CoolOut(_), _)) => 0,
+            Some((End::ExOut(_), _)) => 2,
+            _ => 1,
+        };
+        plain_sources.sort_by_key(|&n| (rank(n), net.graph.key[n]));
         match net.content {
             Some(c) if liquid => {
                 let _ = c;
                 net.tree = route::tree(&net.graph, &plain_sources);
                 net.tank_tree = route::tree(&net.graph, &tank_sources);
+                net.source_trees = plain_sources
+                    .iter()
+                    .map(|&s| route::tree(&net.graph, &[s]))
+                    .collect();
             }
-            Some(_) => {
+            Some(c) => {
                 let all: Vec<usize> = net.sources.iter().map(|(_, n)| *n).collect();
                 net.tree = route::tree(&net.graph, &all);
+                if c == Content::Exhaust {
+                    net.source_trees = all.iter().map(|&s| route::tree(&net.graph, &[s])).collect();
+                }
             }
             None => {}
         }

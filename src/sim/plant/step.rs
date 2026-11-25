@@ -495,21 +495,20 @@ impl Works {
                 };
                 groups[i].push((t, nodes.clone()));
             }
-            let tree = net.tree.clone();
+            let trees = net.source_trees.clone();
             let tank_tree = net.tank_tree.clone();
             let mut total_flow = vec![0.0; cap.len()];
-            // Leaks take what passes, then boilers (hot feed first: each
-            // network is one content), cooled machines and exchangers, tanks,
-            // and drains only what is left (cooling spec 7.4).
-            let passes: [(&route::Tree, usize); 7] = [
-                (&tree, 0),
-                (&tree, 1),
-                (&tank_tree, 1),
-                (&tree, 2),
-                (&tank_tree, 2),
-                (&tree, 3),
-                (&tree, 4),
-            ];
+            // Leaks take what passes, then boilers (hot feed first: hot water
+            // networks go first), cooled machines and exchangers, tanks, and
+            // drains only what is left (cooling spec 7.4). Each source routes
+            // on its own tree, one after another.
+            let mut passes: Vec<(&route::Tree, usize)> = Vec::new();
+            for g in 0..5 {
+                passes.extend(trees.iter().map(|t| (t, g)));
+                if g == 1 || g == 2 {
+                    passes.push((&tank_tree, g));
+                }
+            }
             for (tree, g) in passes {
                 let takers = &groups[g];
                 if takers.is_empty() {
@@ -684,9 +683,9 @@ impl Works {
                     _ => None,
                 })
                 .collect();
-            let tree = net.tree.clone();
+            let trees = net.source_trees.clone();
             let mut total_flow = vec![0.0; cap.len()];
-            for takers in [&leaks, &exs] {
+            for (tree, takers) in trees.iter().flat_map(|t| [(t, &leaks), (t, &exs)]) {
                 if takers.is_empty() {
                     continue;
                 }
@@ -696,7 +695,7 @@ impl Works {
                     .enumerate()
                     .map(|(i, (_, n))| (i, n.clone()))
                     .collect();
-                let (got, flow) = route_spread(&tree, &cap, &pairs, &demand);
+                let (got, flow) = route_spread(tree, &cap, &pairs, &demand);
                 for (u, f) in flow.iter().enumerate() {
                     cap[u] = (cap[u] - f).max(0.0);
                     total_flow[u] += f;
