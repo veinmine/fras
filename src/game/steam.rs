@@ -67,6 +67,8 @@ pub struct Steam {
     pub scalding: HashSet<Pos>,
     /// Fireboxes whose banked state changed.
     pub banked: BTreeMap<Pos, bool>,
+    /// Each firebox's banked state as last set on its block.
+    pub banked_known: HashMap<Pos, bool>,
     /// Each firebox's fractional burn time owed (a damped fire burns slower).
     pub burn_frac: HashMap<Pos, f64>,
     /// Grinders' cooled state as last told to the rotational network.
@@ -463,17 +465,34 @@ const SAVE_SLOTS: u64 = 100 / STEP_TICKS;
 fn shell_saves(works: &Works, slot: u64) -> Vec<(Pos, Compound)> {
     let mut out = Vec::new();
     for q in shell_blocks(works) {
-        let h = (q.x as i64).wrapping_mul(73_856_093)
-            ^ (q.y as i64).wrapping_mul(19_349_663)
-            ^ (q.z as i64).wrapping_mul(83_492_791);
-        if h.rem_euclid(SAVE_SLOTS as i64) as u64 != slot {
+        if save_slot(q) != slot {
             continue;
         }
         if let Some(s) = works.saved(q) {
             out.push((q, blocks::plant_fields(&s)));
         }
     }
+    // Governors, dampers, exchangers and cooled grinders keep their state
+    // too (regulation spec 8, cooling spec 12), in the same slots.
+    use crate::sim::plant::Kind;
+    for kind in [Kind::Governor, Kind::Damper, Kind::Exchanger, Kind::Grinder] {
+        for q in works.parts_of(kind) {
+            if save_slot(q) != slot {
+                continue;
+            }
+            if let Some(s) = works.saved(q) {
+                out.push((q, blocks::regulation_fields(&s)));
+            }
+        }
+    }
     out
+}
+
+fn save_slot(q: Pos) -> u64 {
+    let h = (q.x as i64).wrapping_mul(73_856_093)
+        ^ (q.y as i64).wrapping_mul(19_349_663)
+        ^ (q.z as i64).wrapping_mul(83_492_791);
+    h.rem_euclid(SAVE_SLOTS as i64) as u64
 }
 
 fn shell_blocks(works: &Works) -> Vec<Pos> {
@@ -1161,6 +1180,7 @@ pub fn forget(dim: Dim, pos: Pos) {
         l.steam.fires.remove(&pos);
         // A grinder placed here next starts uncooled: tell the network again.
         l.steam.cooled.remove(&pos);
+        l.steam.banked_known.remove(&pos);
     });
 }
 

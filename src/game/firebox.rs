@@ -117,28 +117,29 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
         }
     }
     // A damped fire burns slower; a banked one (dampers shut) holds
-    // (regulation spec 4.3). Bellows never change the burn time.
-    let factor = with_level(dim, |l| l.steam.works.burn_factor(pos));
-    if burn > 0 && !paused {
-        let owed = with_level(dim, |l| {
+    // (regulation spec 4.3). Bellows never change the burn time. One visit
+    // to the level's state per tick (criterion 17).
+    let (owed, banked_now) = with_level(dim, |l| {
+        let factor = l.steam.works.burn_factor(pos);
+        let owed = if burn > 0 && !paused {
             let f = l.steam.burn_frac.entry(pos).or_insert(0.0);
             *f += factor;
             let whole = f.floor();
             *f -= whole;
             whole as i32
-        });
-        burn = (burn - owed).max(0);
-    }
+        } else {
+            0
+        };
+        (owed, factor <= 0.0)
+    });
+    burn = (burn - owed).max(0);
     let lit = burn > 0;
-    let banked = lit && factor <= 0.0;
-    if let Some(level) = host.level(dim) {
-        let was = super::server::property(&*host, level, pos, "banked").as_deref() == Some("true");
-        if was != banked {
-            with_level(dim, |l| {
-                l.steam.banked.insert(pos, banked);
-            });
+    let banked = lit && banked_now;
+    with_level(dim, |l| {
+        if l.steam.banked_known.insert(pos, banked) != Some(banked) {
+            l.steam.banked.insert(pos, banked);
         }
-    }
+    });
     steam::set_heat(dim, pos, if lit { kw } else { 0.0 });
     let boilers = with_level(dim, |l| l.steam.works.firebox_boilers(pos)) as i32;
     if lit != (old_burn > 0) {

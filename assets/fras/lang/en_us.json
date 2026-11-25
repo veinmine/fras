@@ -337,6 +337,9 @@
   "fras.rust.painted": "Painted: never rusts",
   "fras.rust.rusted_through": "Rusted through: jammed. Scrape with an iron plate to repair",
   "fras.rust.leaking": "Leaking %s mB/s. Scrape with an iron plate to repair",
+  "fras.rust.stuck": "Rusted through: stuck where it is. Scrape with an iron plate to repair",
+  "fras.rust.no_cooling": "Rusted through: no cooling. Scrape with an iron plate to repair",
+  "fras.rust.off": "%s. Rust is off",
   "fras.rust.rusting": "%s. Rusting: %s. %s in about %s days",
   "fras.rust.not_exposed": "%s. Not exposed"
 }

@@ -30,8 +30,16 @@ pub const DATA_SLOTS: usize = 7;
 
 /// Menu data and look, every tick.
 pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
-    let dim = host.dimension();
     let pos = Pos::from_array(event.pos);
+    // Every 4th tick, spread by position: the screen and the look don't need
+    // more, and 50 governors ticking every tick cost ~0.08 ms per tick.
+    let ticks = super::server::with(|s| s.ticks);
+    let spread = (pos.x ^ pos.z).rem_euclid(4) as u64;
+    if !(ticks + spread).is_multiple_of(4) {
+        *event.reply = BlockEntityTickReply::Unchanged;
+        return;
+    }
+    let dim = host.dimension();
     let (info, look) = with_level(dim, |l| {
         (
             l.steam.works.governor_info(pos),

@@ -263,6 +263,10 @@ pub fn line(
                 with_level(dim, |l| l.mech.part(pos).and_then(|p| p.jam)) == Some(Jam::Rusted);
             if jam {
                 Text::translate("fras.rust.rusted_through", vec![])
+            } else if block == Block::FurnaceDamper {
+                Text::translate("fras.rust.stuck", vec![])
+            } else if block == Block::IronRadiator {
+                Text::translate("fras.rust.no_cooling", vec![])
             } else {
                 Text::translate(
                     "fras.rust.leaking",
@@ -295,6 +299,7 @@ pub fn line(
                         ],
                     )
                 }
+                (Some(_), false) => Text::translate("fras.rust.off", vec![name]),
                 _ => Text::translate("fras.rust.not_exposed", vec![name]),
             }
         }
