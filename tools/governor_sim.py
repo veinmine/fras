@@ -11,7 +11,7 @@ when the load drops. Not used by the build; run it by hand when retuning.
 ACCEL, DT, STEP_TICKS = 40.0, 0.05, 4
 STALL_PER_BAR, TOP_PER_BAR = 16.0, 32.0
 FLYWHEEL, LINE = 90.0, 10.0  # inertia: the shipped flywheel, and the rest of a line
-WN, ZETA = 1.0, 0.2  # flyball natural frequency (rad/s) and damping
+WN, ZETA = 1.0, 0.6  # flyball natural frequency (rad/s) and damping
 BANDS = [32, 16, 8, 4, 2]  # sensitivity 1..5
 
 

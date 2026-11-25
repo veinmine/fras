@@ -3,7 +3,9 @@
 
 /// Flyball natural frequency, rad/s, and damping ratio *(tune)*.
 pub const WN: f64 = 1.0;
-pub const ZETA: f64 = 0.2;
+/// 0.6, not the spec's 0.2: with 0.2 sensitivity 1 hunted ±10 RPM in game at
+/// target 64 and 5 bar (docs/development.md, "Where 0.3 differs").
+pub const ZETA: f64 = 0.6;
 /// Target speed range and step, RPM at the socket.
 pub const TARGET_MIN: f64 = 8.0;
 pub const TARGET_MAX: f64 = 192.0;
@@ -123,7 +125,18 @@ mod tests {
     /// rotational solver's step every tick and the throttle every 4 ticks.
     /// Returns (time, speed) samples.
     fn rig(sens: u8, flywheels: f64, load: impl Fn(f64) -> f64, seconds: f64) -> Vec<(f64, f64)> {
-        let p = 4.0;
+        rig_at(4.0, 90.0, sens, flywheels, load, seconds)
+    }
+
+    /// The rig at another pressure and target.
+    fn rig_at(
+        p: f64,
+        target: f64,
+        sens: u8,
+        flywheels: f64,
+        load: impl Fn(f64) -> f64,
+        seconds: f64,
+    ) -> Vec<(f64, f64)> {
         let inertia = FLYWHEEL_INERTIA * flywheels + 10.0;
         let mut w: f64 = 0.0;
         let mut balls = Balls::default();
@@ -134,7 +147,7 @@ mod tests {
             let t = n as f64 * dt;
             balls.step(w, dt);
             if (n as u64).is_multiple_of(STEP_TICKS) {
-                g = throttle(balls.x, 90.0, band(sens));
+                g = throttle(balls.x, target, band(sens));
             }
             let stall = engine::stall(p, 1.0) * g;
             let top = engine::top(p);
@@ -162,21 +175,20 @@ mod tests {
         )
     }
 
-    /// Spec 3.5's table, within ±2 RPM: (sensitivity, flywheels, low, high).
+    /// Spec 3.5's table as retuned with `ZETA` 0.6, within ±2 RPM:
+    /// (sensitivity, flywheels, low, high). At the spec's rig hunting now
+    /// starts at sensitivity 4 with one flywheel, and a second steadies it.
     #[test]
     fn the_tuning_table() {
         let table = [
             (1, 1.0, 71.0, 71.0),
             (1, 3.0, 71.0, 71.0),
-            (2, 1.0, 72.0, 82.0),
-            (2, 2.0, 79.0, 79.0),
-            (3, 1.0, 74.0, 84.0),
-            (3, 2.0, 82.0, 85.0),
-            (3, 3.0, 84.0, 84.0),
-            (4, 1.0, 75.0, 86.0),
-            (4, 3.0, 85.0, 87.0),
-            (5, 1.0, 76.0, 87.0),
-            (5, 2.0, 84.0, 88.0),
+            (2, 1.0, 79.0, 79.0),
+            (3, 1.0, 84.0, 84.0),
+            (4, 1.0, 84.0, 88.5),
+            (4, 2.0, 86.7, 86.7),
+            (5, 1.0, 85.0, 89.5),
+            (5, 2.0, 87.0, 89.0),
         ];
         for (sens, fw, lo, hi) in table {
             let trace = rig(sens, fw, |_| 16.0, 300.0);
@@ -196,8 +208,31 @@ mod tests {
         let drop = |t: f64| if t < 200.0 { 16.0 } else { 0.0 };
         let one = span(&rig(4, 1.0, drop, 230.0), 200.0, 230.0).1;
         let two = span(&rig(4, 2.0, drop, 230.0), 200.0, 230.0).1;
-        assert!((one - 98.0).abs() <= 2.5, "{one}");
+        assert!((one - 96.0).abs() <= 2.0, "{one}");
         assert!(two < one - 2.0, "{one} vs {two}");
+    }
+
+    /// The default never hunts: sensitivity 1 on one flywheel is steady from
+    /// 2 to 6 bar, targets 32 to 128 and loads up to 24 Nm (it hunted ±10 RPM
+    /// in game at target 64 and 5 bar with the spec's damping of 0.2).
+    #[test]
+    fn sensitivity_one_is_steady_everywhere() {
+        for p in [2.0, 4.0, 5.5, 6.0] {
+            for target in [32.0, 64.0, 90.0, 128.0] {
+                for load in [0.0, 8.0, 16.0, 24.0] {
+                    let (a, b) = span(&rig_at(p, target, 1, 1.0, |_| load, 300.0), 250.0, 300.0);
+                    assert!(
+                        b - a < 1.0,
+                        "{p} bar, target {target}, {load} Nm: {a:.1} to {b:.1}"
+                    );
+                }
+            }
+        }
+        // Sensitivity 4 still hunts there, and a second flywheel calms it.
+        let one = span(&rig_at(5.5, 64.0, 4, 1.0, |_| 16.0, 300.0), 250.0, 300.0);
+        let two = span(&rig_at(5.5, 64.0, 4, 2.0, |_| 16.0, 300.0), 250.0, 300.0);
+        assert!(one.1 - one.0 > 10.0, "{one:?}");
+        assert!(two.1 - two.0 < 0.6 * (one.1 - one.0), "{one:?} vs {two:?}");
     }
 
     #[test]
