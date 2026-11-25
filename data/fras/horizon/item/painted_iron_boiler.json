@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "iron_boiler",
+  "block": "fras:iron_boiler",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

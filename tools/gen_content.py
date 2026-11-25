@@ -1123,7 +1123,7 @@ def regulation_items():
     for name in RUSTING:
         items[f"painted_{name}"] = {
             "template": "minecraft:iron_ingot",
-            "block": name,
+            "block": f"{NS}:{name}",
             "components": {"minecraft:block_state": {"rust": "painted"}},
         }
     return items
@@ -1165,8 +1165,8 @@ def main():
     # The grinder's menu: input slot 0, results 1-4 (players only take from
     # those), data slots [progress, rpm, status, max].
     write(f"data/{NS}/horizon/menu/grinder.json", {"slots": 5, "data_slots": 4, "results": [1, 2, 3, 4]})
-    # The governor's: no slots, data [target, sens, speed, ball, throttle, engines, swing].
-    write(f"data/{NS}/horizon/menu/governor.json", {"slots": 0, "data_slots": 7})
+    # The governor's: one hidden slot (menus need one), data [target, sens, speed, ball, throttle, engines, swing].
+    write(f"data/{NS}/horizon/menu/governor.json", {"slots": 1, "data_slots": 7})
     items = dict(ITEMS)
     items.update(regulation_items())
     for name, decl in items.items():

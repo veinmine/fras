@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "gearbox",
+  "block": "fras:gearbox",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

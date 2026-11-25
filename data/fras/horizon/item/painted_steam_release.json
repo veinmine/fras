@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "steam_release",
+  "block": "fras:steam_release",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

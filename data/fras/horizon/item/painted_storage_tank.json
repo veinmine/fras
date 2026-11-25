@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "storage_tank",
+  "block": "fras:storage_tank",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

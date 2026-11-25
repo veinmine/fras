@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "furnace_damper",
+  "block": "fras:furnace_damper",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

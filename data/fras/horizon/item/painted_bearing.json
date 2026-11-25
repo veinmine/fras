@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "bearing",
+  "block": "fras:bearing",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

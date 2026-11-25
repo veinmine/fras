@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "iron_bevel_gear",
+  "block": "fras:iron_bevel_gear",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

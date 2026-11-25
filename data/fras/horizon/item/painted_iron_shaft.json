@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "iron_shaft",
+  "block": "fras:iron_shaft",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

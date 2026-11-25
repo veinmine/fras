@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "emergency_valve",
+  "block": "fras:emergency_valve",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

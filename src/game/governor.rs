@@ -13,11 +13,12 @@ use super::server::with_level;
 use crate::sim::geom::Pos;
 use crate::sim::steam::govern;
 
-/// No slots: the menu only carries data [target, sensitivity, speed × 10,
-/// ball × 10, throttle ‰, engines, swing × 10].
+/// One hidden slot that no face reaches (Horizon's menus need at least one):
+/// the menu only carries data [target, sensitivity, speed × 10, ball × 10,
+/// throttle ‰, engines, swing × 10].
 pub fn container() -> ModContainer {
     ModContainer {
-        slots: 0,
+        slots: 1,
         faces: [vec![], vec![], vec![], vec![], vec![], vec![]],
         inputs: vec![],
         outputs: vec![],
@@ -70,12 +71,12 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
     }
 }
 
-/// A screen with no slots and no inventory below.
+/// A screen with its one slot hidden and no inventory below.
 pub fn screen(_: &mut ScreenEvent<'_>) -> Option<mod_api::Screen> {
     Some(mod_api::Screen {
         width: 176.0,
         height: 96.0,
-        slots: vec![],
+        slots: vec![None],
         inventory_y: 1000.0,
         inventory_x: 8.0,
         own_labels: false,
