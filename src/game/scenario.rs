@@ -19,6 +19,71 @@ use crate::sim::geom::Pos;
 
 pub const NAMES: [&str; 2] = ["ore_line", "test_engine"];
 
+const BELT: &str = "fras:conveyor_belt[facing=east]";
+const ENGINE: &str = "fras:creative_engine[facing=south]";
+
+/// The ore line's blocks, relative to its origin (belts at y 0 and -1).
+const ORE_LINE: &[([i32; 3], &str)] = &[
+    // Feed: chest → hopper → belt 1 (y 0, x 0..7) → grinder (x 8).
+    ([0, 2, 0], "minecraft:chest"),
+    ([0, 1, 0], "minecraft:hopper[facing=down]"),
+    ([0, 0, 0], BELT),
+    ([1, 0, 0], BELT),
+    ([2, 0, 0], BELT),
+    ([3, 0, 0], BELT),
+    ([4, 0, 0], BELT),
+    ([5, 0, 0], BELT),
+    ([6, 0, 0], BELT),
+    ([7, 0, 0], BELT),
+    ([3, 0, -1], ENGINE),
+    ([8, 0, 0], "fras:grinder[facing=north]"),
+    ([8, 0, -1], ENGINE),
+    // The grinder pushes down onto belt 2 (y -1, x 7..15). It starts under
+    // belt 1's last block: starting under the grinder would make it belt
+    // 1's diagonal neighbour, and the two would join into one sloped line
+    // that skips the grinder (logistics 3.1).
+    ([7, -1, 0], BELT),
+    ([8, -1, 0], BELT),
+    ([9, -1, 0], BELT),
+    ([10, -1, 0], BELT),
+    ([11, -1, 0], BELT),
+    ([12, -1, 0], BELT),
+    ([13, -1, 0], BELT),
+    ([14, -1, 0], BELT),
+    ([15, -1, 0], BELT),
+    ([13, -1, -1], ENGINE),
+    // The washer rides over belt 2 at x 11, water piped from a creative
+    // source on its south side.
+    ([11, 0, 0], "fras:washer[facing=north]"),
+    ([11, 0, -1], ENGINE),
+    ([11, 0, 1], "fras:copper_pipe[north=true,south=true]"),
+    ([11, 0, 2], "fras:creative_water_source"),
+    // The trommel at x 16-17, its outlets into chests.
+    (
+        [16, -1, 0],
+        "fras:trommel[facing=east,part=start,socket=north]",
+    ),
+    (
+        [17, -1, 0],
+        "fras:trommel[facing=east,part=end,socket=north]",
+    ),
+    ([16, -1, -1], ENGINE),
+    ([16, -2, 0], "minecraft:chest"),
+    ([17, -2, 0], "minecraft:chest"),
+    ([18, -1, 0], "minecraft:chest"),
+];
+
+/// The ore line's engines: where, RPM, reversed. Positive rotation about
+/// +z runs an east-heading belt west (`belt::drive_sign`), so the belt
+/// drives turn the other way.
+const ORE_LINE_ENGINES: [([i32; 3], f64, bool); 5] = [
+    ([3, 0, -1], 64.0, true),
+    ([13, -1, -1], 64.0, true),
+    ([8, 0, -1], 64.0, false),
+    ([11, 0, -1], 64.0, false),
+    ([16, -1, -1], 64.0, false),
+];
+
 fn run(host: &mut dyn ServerHost, dim: Dim, line: &str) -> bool {
     host.commands()
         .run_command(&format!("execute in {dim} run {line}"))
@@ -91,68 +156,15 @@ fn ore_line(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) -> St
             o.z + 2
         ),
     );
-    let belt = "fras:conveyor_belt[facing=east]";
-    let engine = "fras:creative_engine[facing=south]";
-    // Feed: chest → hopper → belt 1 (y+0, x 0..7) → grinder (x 8).
-    set(host, dim, o, 0, 2, 0, "minecraft:chest");
-    set(host, dim, o, 0, 1, 0, "minecraft:hopper[facing=down]");
-    for x in 0..8 {
-        set(host, dim, o, x, 0, 0, belt);
+    for (at, block) in ORE_LINE {
+        set(host, dim, o, at[0], at[1], at[2], block);
     }
-    set(host, dim, o, 3, 0, -1, engine);
-    set(host, dim, o, 8, 0, 0, "fras:grinder[facing=north]");
-    set(host, dim, o, 8, 0, -1, engine);
-    // The grinder pushes down onto belt 2 (y-1, x 8..15); the washer rides
-    // over it at x 11.
-    for x in 8..16 {
-        set(host, dim, o, x, -1, 0, belt);
-    }
-    set(host, dim, o, 13, -1, -1, engine);
-    set(host, dim, o, 11, 0, 0, "fras:washer[facing=north]");
-    set(host, dim, o, 11, 0, -1, engine);
-    // Water for the washer: a pipe from a creative water source on its
-    // south side.
-    set(
-        host,
-        dim,
-        o,
-        11,
-        0,
-        1,
-        "fras:copper_pipe[north=true,south=true]",
-    );
-    set(host, dim, o, 11, 0, 2, "fras:creative_water_source");
-    // The trommel at x 16-17, its outlets into chests.
-    set(
-        host,
-        dim,
-        o,
-        16,
-        -1,
-        0,
-        "fras:trommel[facing=east,part=start,socket=north]",
-    );
-    set(
-        host,
-        dim,
-        o,
-        17,
-        -1,
-        0,
-        "fras:trommel[facing=east,part=end,socket=north]",
-    );
-    set(host, dim, o, 16, -1, -1, engine);
-    set(host, dim, o, 16, -2, 0, "minecraft:chest");
-    set(host, dim, o, 17, -2, 0, "minecraft:chest");
-    set(host, dim, o, 18, -1, 0, "minecraft:chest");
-    for e in [
-        [3, 0, -1],
-        [8, 0, -1],
-        [13, -1, -1],
-        [11, 0, -1],
-        [16, -1, -1],
-    ] {
-        setting(host, level, o, e, "c_rpm", 64.0);
+    for (at, rpm, rev) in ORE_LINE_ENGINES {
+        setting(host, level, o, at, "c_rpm", rpm);
+        let p = Pos::new(o.x + at[0], o.y + at[1], o.z + at[2]);
+        let mut c = mod_api::Compound::new();
+        blocks::put_bool(&mut c, "c_rev", rev);
+        server::merge(host, level, p, c);
     }
     run(
         host,
@@ -197,8 +209,9 @@ fn ore_line(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) -> St
     )
 }
 
-/// A single-cylinder engine on 4 bar steam driving 32 Nm (expect about
-/// 64 RPM: steam spec 9, 64 Nm stall and 128 RPM top at 4 bar).
+/// A single-cylinder engine on 4 bar steam driving 32 Nm (steam spec 9:
+/// 64 Nm stall and 128 RPM top at 4 bar, so 64 RPM on the load alone; the
+/// shaft and tachometer's friction, about 2 Nm, bring it to about 60).
 fn test_engine(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) -> String {
     // The flywheel's hub at o, its plane north-south (axis x).
     let o = Pos::new(at.x + 3, at.y + 2, at.z);
@@ -226,7 +239,7 @@ fn test_engine(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) ->
     setting(host, level, o, [0, 0, 4], "c_bar", 4.0);
     format!(
         "fras: test_engine built: flywheel at {} {} {}, load bank (32 Nm) at {} {} {}. \
-         Expect about 64 RPM: /fras dump {} {} {} part",
+         Expect about 60 RPM: /fras dump {} {} {} part",
         o.x,
         o.y,
         o.z,
@@ -237,4 +250,47 @@ fn test_engine(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) ->
         o.y,
         o.z
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sim::belt::{BeltBlock, chain, drive_sign};
+    use crate::sim::geom::Dir;
+
+    fn belt_at(p: Pos) -> Option<BeltBlock> {
+        ORE_LINE
+            .iter()
+            .find(|(a, b)| *b == BELT && Pos::new(a[0], a[1], a[2]) == p)
+            .map(|_| BeltBlock { heading: Dir::East })
+    }
+
+    #[test]
+    fn ore_line_belts_are_two_lines_around_the_grinder() {
+        let one = chain(Pos::new(0, 0, 0), &belt_at);
+        assert_eq!(one.first(), Some(&Pos::new(0, 0, 0)));
+        assert_eq!(one.last(), Some(&Pos::new(7, 0, 0)));
+        let two = chain(Pos::new(8, -1, 0), &belt_at);
+        assert!(
+            two.iter().all(|p| p.y == -1),
+            "belt 2 joined belt 1: {two:?}"
+        );
+        assert_eq!(two.last(), Some(&Pos::new(15, -1, 0)));
+    }
+
+    #[test]
+    fn ore_line_belt_drives_run_the_belts_east() {
+        for (at, rpm, rev) in ORE_LINE_ENGINES {
+            let drives_belt = ORE_LINE
+                .iter()
+                .any(|(b, k)| *k == BELT && b[0] == at[0] && b[1] == at[1] && b[2] == at[2] + 1);
+            if drives_belt {
+                let w = if rev { -rpm } else { rpm };
+                assert!(
+                    drive_sign(Dir::East) * w > 0.0,
+                    "engine at {at:?} runs its belt west"
+                );
+            }
+        }
+    }
 }

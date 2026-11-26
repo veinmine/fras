@@ -971,6 +971,24 @@ fn trommel_tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>)
 pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     let work = with_level(dim, |l| std::mem::take(&mut l.machines.trommels));
     for (pos, placed) in work {
+        let half = |q: Pos| -> Option<(bool, Dir)> {
+            if block_at(&*host, level, q) != Some(Block::Trommel) {
+                return None;
+            }
+            let f = property(&*host, level, q, "facing")
+                .as_deref()
+                .and_then(Dir::from_name)?;
+            Some((
+                property(&*host, level, q, "part").as_deref() == Some("end"),
+                f,
+            ))
+        };
+        if !placed {
+            if let Some((q, drop)) = trommel_orphan(pos, &half) {
+                let _ = level.destroy_block(host, q.to_array(), drop, None, false);
+            }
+            continue;
+        }
         let Some(facing) = property(&*host, level, pos, "facing")
             .as_deref()
             .and_then(Dir::from_name)
@@ -978,55 +996,52 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             continue;
         };
         let part = property(&*host, level, pos, "part");
-        if placed {
-            if part.as_deref() != Some("start") {
-                continue;
-            }
-            let ahead = pos.offset(facing);
-            if block_at(&*host, level, ahead) == Some(Block::Trommel) {
-                continue;
-            }
-            let Some(state) = level.block_state(&*host, pos.to_array()) else {
-                continue;
-            };
-            let end = {
-                let states = host.block_states();
-                state.with(&states, "part", "end").ok()
-            };
-            if let Some(end) = end {
-                let _ = level.set_block(
-                    host,
-                    ahead.to_array(),
-                    end,
-                    mod_api::BlockUpdateFlags::NEIGHBORS | mod_api::BlockUpdateFlags::CLIENTS,
-                );
-            }
-        } else {
-            // `pos` was broken; its facing is gone with it, so look both ways
-            // for the other half.
-            for d in Dir::HORIZONTAL {
-                let q = pos.offset(d);
-                if block_at(&*host, level, q) != Some(Block::Trommel) {
-                    continue;
-                }
-                let qf = property(&*host, level, q, "facing")
-                    .as_deref()
-                    .and_then(Dir::from_name);
-                let qpart = property(&*host, level, q, "part");
-                let partner = match (qpart.as_deref(), qf) {
-                    (Some("end"), Some(f)) => q.offset(f.opposite()),
-                    (_, Some(f)) => q.offset(f),
-                    _ => continue,
-                };
-                if partner == pos {
-                    // The end gives nothing: the start drops the item.
-                    let drop = qpart.as_deref() != Some("end");
-                    let _ = level.destroy_block(host, q.to_array(), drop, None, false);
-                }
-            }
+        if part.as_deref() != Some("start") {
+            continue;
         }
-        let _ = facing;
+        let ahead = pos.offset(facing);
+        if block_at(&*host, level, ahead) == Some(Block::Trommel) {
+            continue;
+        }
+        let Some(state) = level.block_state(&*host, pos.to_array()) else {
+            continue;
+        };
+        let end = {
+            let states = host.block_states();
+            state.with(&states, "part", "end").ok()
+        };
+        if let Some(end) = end {
+            let _ = level.set_block(
+                host,
+                ahead.to_array(),
+                end,
+                mod_api::BlockUpdateFlags::NEIGHBORS | mod_api::BlockUpdateFlags::CLIENTS,
+            );
+        }
     }
+}
+
+/// The other half to break, and whether it drops the item, when the
+/// trommel half at `pos` was broken; `half` reads a block as a trommel half
+/// (is it the end, its facing). Nothing when `pos` holds a trommel again:
+/// the break is stale (it was replaced before the queue ran, as a scenario
+/// rebuild does), and the new trommel must stay.
+fn trommel_orphan(pos: Pos, half: &dyn Fn(Pos) -> Option<(bool, Dir)>) -> Option<(Pos, bool)> {
+    if half(pos).is_some() {
+        return None;
+    }
+    // `pos`'s facing is gone with it, so look both ways for the other half.
+    Dir::HORIZONTAL.into_iter().find_map(|d| {
+        let q = pos.offset(d);
+        let (end, f) = half(q)?;
+        let partner = if end {
+            q.offset(f.opposite())
+        } else {
+            q.offset(f)
+        };
+        // The end gives nothing: the start drops the item.
+        (partner == pos).then_some((q, !end))
+    })
 }
 
 /// A trommel half was placed or broken.
@@ -1232,4 +1247,43 @@ pub fn open(host: &mut dyn ServerHost, click: &BlockClick<'_>) -> InteractionRes
         };
     }
     super::grinder::open(host, click)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    fn world(halves: &[(Pos, bool, Dir)]) -> impl Fn(Pos) -> Option<(bool, Dir)> + use<> {
+        let m: HashMap<Pos, (bool, Dir)> = halves.iter().map(|(p, e, f)| (*p, (*e, *f))).collect();
+        move |p| m.get(&p).copied()
+    }
+
+    #[test]
+    fn breaking_a_trommel_half_breaks_the_other() {
+        let start = Pos::new(0, 0, 0);
+        let end = Pos::new(1, 0, 0);
+        // The start broke: the end goes, dropping nothing.
+        let w = world(&[(end, true, Dir::East)]);
+        assert_eq!(trommel_orphan(start, &w), Some((end, false)));
+        // The end broke: the start goes and drops the trommel.
+        let w = world(&[(start, false, Dir::East)]);
+        assert_eq!(trommel_orphan(end, &w), Some((start, true)));
+    }
+
+    #[test]
+    fn a_stale_break_leaves_a_rebuilt_trommel_alone() {
+        let start = Pos::new(0, 0, 0);
+        let end = Pos::new(1, 0, 0);
+        let w = world(&[(start, false, Dir::East), (end, true, Dir::East)]);
+        assert_eq!(trommel_orphan(start, &w), None);
+        assert_eq!(trommel_orphan(end, &w), None);
+    }
+
+    #[test]
+    fn a_neighbouring_trommel_is_not_a_partner() {
+        // Another trommel's end beside the broken block, facing away.
+        let w = world(&[(Pos::new(0, 0, 1), true, Dir::East)]);
+        assert_eq!(trommel_orphan(Pos::new(0, 0, 0), &w), None);
+    }
 }

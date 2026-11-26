@@ -29,10 +29,11 @@ it built and where:
 
 - `ore_line`: the 0.4 reference ore line (machines spec 10): a chest with raw iron and copper and a hopper
   feeding a belt → grinder → belt with a washer above it in belt mode (water by copper pipe from a creative
-  source) → trommel → chests for fines, mediums and oversize. Creative engines at 64 RPM drive the belts and
-  machines. Expect dusts in the fines chest.
+  source) → trommel → chests for fines, mediums and oversize. Creative engines at 64 RPM drive the belts (reversed, so
+  the east-heading belts run east) and machines. Expect dusts in the fines chest.
 - `test_engine`: one flywheel and steam cylinder on 4 bar creative steam, an iron shaft through a tachometer
-  to a creative load bank at 32 Nm. Expect about 64 RPM.
+  to a creative load bank at 32 Nm. Expect about 60 RPM (64 on the load alone, less about 2 Nm of drivetrain
+  friction).
 
 ## Fast-forward
 

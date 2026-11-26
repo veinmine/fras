@@ -382,7 +382,32 @@ fn pos_json(p: Pos) -> Value {
 }
 
 fn nbt_json(c: &Compound) -> Value {
-    Value::String(format!("{c:?}"))
+    Value::Object(
+        c.iter()
+            .map(|(k, v)| (String::from_utf16_lossy(&k.0), tag_json(v)))
+            .collect(),
+    )
+}
+
+/// An NBT tag as readable JSON: names and strings decoded, floats as
+/// numbers (not their bits).
+fn tag_json(t: &mod_api::Tag) -> Value {
+    use mod_api::Tag;
+    match t {
+        Tag::End => Value::Null,
+        Tag::Byte(v) => json!(v),
+        Tag::Short(v) => json!(v),
+        Tag::Int(v) => json!(v),
+        Tag::Long(v) => json!(v),
+        Tag::Float(bits) => json!(f32::from_bits(*bits)),
+        Tag::Double(bits) => json!(f64::from_bits(*bits)),
+        Tag::ByteArray(v) => json!(v),
+        Tag::String(s) => Value::String(String::from_utf16_lossy(&s.0)),
+        Tag::List(v) => Value::Array(v.iter().map(tag_json).collect()),
+        Tag::Compound(c) => nbt_json(c),
+        Tag::IntArray(v) => json!(v),
+        Tag::LongArray(v) => json!(v),
+    }
 }
 
 /// The JSON state at `pos`: its block, rotational part and network, belt
@@ -943,4 +968,19 @@ fn perf_json() -> Value {
             "belt_lines": lines,
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mod_api::Tag;
+
+    #[test]
+    fn nbt_dumps_as_readable_json() {
+        let mut c = Compound::new();
+        blocks::put_f64(&mut c, "needle", 59.5);
+        c.insert("v".into(), Tag::Int(1));
+        c.insert("name".into(), Tag::String("hi".into()));
+        assert_eq!(nbt_json(&c), json!({"needle": 59.5, "v": 1, "name": "hi"}));
+    }
 }
