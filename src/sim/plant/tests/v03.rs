@@ -239,6 +239,76 @@ fn bellows_boost_the_heat_and_load_the_shaft() {
     assert_eq!(w.bellows_target(b), Some(p(0, -1, 0)));
 }
 
+/// A bellows counts on any face of a firebox, its mouth included.
+#[test]
+fn bellows_count_on_any_face_even_the_mouth() {
+    let world = World::default();
+    for mouth in [Dir::North, Dir::South, Dir::East, Dir::West] {
+        for face in [Dir::North, Dir::South, Dir::East, Dir::West] {
+            let mut w = Works::new();
+            boiler(&mut w, ShellKind::IronBoiler);
+            let fire = p(0, -1, 0);
+            w.insert(fire, Spec::new(Kind::Firebox).with_dir(mouth), None);
+            w.set_heat(fire, COAL);
+            let b = fire.offset(face);
+            if w.parts.contains_key(&b) {
+                continue;
+            }
+            w.insert(b, Spec::new(Kind::Bellows).with_dir(face.opposite()), None);
+            w.step(&world);
+            assert_eq!(
+                w.bellows_target(b),
+                Some(fire),
+                "mouth {mouth:?}, face {face:?}"
+            );
+        }
+    }
+}
+
+/// A bellows pulls its full load only while its fire burns wide open: less
+/// as the dampers close, none when banked.
+#[test]
+fn bellows_load_follows_the_burn_rate() {
+    let world = World::default();
+    let mut w = Works::new();
+    boiler(&mut w, ShellKind::IronBoiler);
+    fireboxes(&mut w, 1);
+    let fire = p(0, -1, 0);
+    let b = p(-1, -1, 0);
+    w.insert(b, Spec::new(Kind::Bellows).with_dir(Dir::East), None);
+    let d = p(-1, 1, 0);
+    let mut ds = Spec::new(Kind::Damper).with_dir(Dir::West);
+    ds.powered = true;
+    w.insert(d, ds, None);
+    let load = |w: &Works| {
+        w.bellows_loads()
+            .into_iter()
+            .find(|(q, _)| *q == b)
+            .unwrap()
+            .1
+    };
+    let mut partly = false;
+    for _ in 0..30 {
+        w.set_rot(
+            b,
+            Rot {
+                omega: 64.0,
+                ..Rot::default()
+            },
+        );
+        w.step(&world);
+        let burn = w.burn_factor(fire);
+        assert!(
+            (load(&w) - bellows::LOAD * burn).abs() < 1e-9,
+            "burn {burn}"
+        );
+        partly |= burn > 0.1 && burn < 0.9;
+    }
+    assert!(partly, "the damper never passed half way");
+    assert_eq!(w.burn_factor(fire), 0.0);
+    assert_eq!(load(&w), 0.0);
+}
+
 #[test]
 fn save_and_reload_keep_ball_settings_and_openings() {
     let world = World::default();

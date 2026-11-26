@@ -204,10 +204,11 @@ moves. The firebox's own glow and roar follow `h` (4.3).
 ### 5.1 Block and placement
 
 - A shaft-driven pair of leather bellows on a wooden frame: **nozzle** on one face, **shaft socket** on the
-  opposite face. Placed against a firebox, the nozzle faces it (any firebox face but its mouth). Wood and
+  opposite face. Placed against a firebox, the nozzle faces it (any firebox face, its mouth included). Wood and
   leather: it never rusts.
-- A machine end point: working range 16 to 128 RPM, load 6 Nm while blowing, inertia 4, wooden friction
-  *(tune)*. It blows (and pulls its load) only while its firebox is burning and not banked; otherwise it idles.
+- A machine end point: working range 16 to 128 RPM, load 6 Nm while blowing a fire at full burn, inertia 4,
+  wooden friction *(tune)*. The load follows the fire's burn rate: 6 Nm × the dampers' mean opening `h`, so a
+  bellows on a fire the damper is throttling costs little (a throttled fire needs less air). It blows (and pulls its load) only while its firebox is burning and not banked; otherwise it idles.
   Above 128 RPM it overspeeds and jams.
 - One bellows per firebox counts; a second does nothing (the overlay says so).
 
@@ -235,7 +236,8 @@ firebox roars louder and throws more sparks while blown.
   throttles (count), warnings ("not turning: throttle wide open", "emergency valve behind the governor",
   "hunting: speed swinging ±5 RPM" when the last 10 s swung more than half the band).
 - **Damper:** set pressure, network pressure, opening %, "banked", "shut by redstone".
-- **Bellows:** speed and working range, boost %, "firebox not burning", "a second bellows does nothing".
+- **Bellows:** speed and working range, boost %, load, "firebox not burning", "a second bellows does nothing",
+  and while a damper throttles its fire "damper h% open: the fire has heat to spare, so the boost only saves fuel".
 - **Firebox** (added to spec 2, 11): heat now including boost and damper ("Coal: 1000 kW × 1.5 bellows × 40%
   damper = 600 kW"), burn rate.
 - **Engine** (added): throttle from governors, "throttled to 35%".
