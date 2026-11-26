@@ -1321,6 +1321,23 @@ FACTORY_ITEMS = {
 }
 
 
+def slotted(model):
+    """Face textures must name a slot (`#t0`), not a texture: a literal path renders as the missing texture."""
+    slots = dict(model.get("textures", {}))
+    names = {v: k for k, v in slots.items() if not v.startswith("#")}
+    for e in model.get("elements", []):
+        for face in e.get("faces", {}).values():
+            t = face.get("texture", "")
+            if t and not t.startswith("#"):
+                if t not in names:
+                    names[t] = f"t{len(names)}"
+                    slots[names[t]] = t
+                face["texture"] = "#" + names[t]
+    if slots:
+        model["textures"] = slots
+    return model
+
+
 def factory_models():
     m = {}
     log, log_end = "minecraft:block/stripped_oak_log", "minecraft:block/stripped_oak_log_top"
@@ -1409,7 +1426,7 @@ def factory_models():
         m[f"item/{name}"] = {"parent": f"{NS}:block/{name}"}
     for name in FACTORY_ITEMS:
         m[f"item/{name}"] = {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{name}"}}
-    return m
+    return {k: slotted(v) for k, v in m.items()}
 
 
 def factory_blockstate(name):

@@ -2,7 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "belt": "minecraft:block/brown_wool",
-    "particle": "minecraft:block/brown_wool"
+    "particle": "minecraft:block/brown_wool",
+    "t1": "minecraft:block/stripped_spruce_log"
   },
   "elements": [
     {
@@ -18,22 +19,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "south": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "east": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "west": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "up": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "down": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         }
       }
     },
@@ -50,22 +51,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "south": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "east": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "west": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "up": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         },
         "down": {
-          "texture": "minecraft:block/stripped_spruce_log"
+          "texture": "#t1"
         }
       }
     },

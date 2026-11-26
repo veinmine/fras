@@ -17,22 +17,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "south": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "east": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "west": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "up": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "down": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         }
       }
     },
@@ -49,22 +49,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "south": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "east": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "west": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "up": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "down": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         }
       }
     },
@@ -81,22 +81,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "south": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "east": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "west": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "up": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "down": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         }
       }
     },
@@ -113,22 +113,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "south": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "east": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "west": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "up": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "down": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         }
       }
     },
@@ -145,22 +145,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         },
         "south": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         },
         "east": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         },
         "west": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         },
         "up": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         },
         "down": {
-          "texture": "minecraft:block/iron_chain"
+          "texture": "#t1"
         }
       }
     },
@@ -177,22 +177,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "south": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "east": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "west": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "up": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         },
         "down": {
-          "texture": "minecraft:block/spruce_planks"
+          "texture": "#particle"
         }
       }
     }
