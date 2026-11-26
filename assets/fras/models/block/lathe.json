@@ -2,7 +2,7 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "minecraft:block/iron_block",
-    "t1": "minecraft:block/polished_andesite"
+    "t0": "minecraft:block/polished_andesite"
   },
   "elements": [
     {
@@ -114,22 +114,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "south": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "east": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "west": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "up": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "down": {
-          "texture": "#t1"
+          "texture": "#t0"
         }
       }
     },
@@ -146,22 +146,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "south": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "east": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "west": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "up": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "down": {
-          "texture": "#t1"
+          "texture": "#t0"
         }
       }
     }

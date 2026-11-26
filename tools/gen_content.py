@@ -5,6 +5,7 @@ generate). Run from the repository root: python3 tools/gen_content.py
 
 Hand-written files (lang, textures, grinding recipes) are left alone.
 """
+import copy
 import json
 import os
 
@@ -1323,6 +1324,7 @@ FACTORY_ITEMS = {
 
 def slotted(model):
     """Face textures must name a slot (`#t0`), not a texture: a literal path renders as the missing texture."""
+    model = copy.deepcopy(model)  # models share element dicts; rewriting them in place leaks slots across models
     slots = dict(model.get("textures", {}))
     names = {v: k for k, v in slots.items() if not v.startswith("#")}
     for e in model.get("elements", []):
@@ -1330,7 +1332,10 @@ def slotted(model):
             t = face.get("texture", "")
             if t and not t.startswith("#"):
                 if t not in names:
-                    names[t] = f"t{len(names)}"
+                    i = 0
+                    while f"t{i}" in slots:
+                        i += 1
+                    names[t] = f"t{i}"
                     slots[names[t]] = t
                 face["texture"] = "#" + names[t]
     if slots:

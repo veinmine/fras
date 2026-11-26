@@ -2,8 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "minecraft:block/iron_bars",
-    "t1": "minecraft:block/stripped_spruce_log",
-    "t2": "minecraft:block/iron_block"
+    "t0": "minecraft:block/stripped_spruce_log",
+    "t1": "minecraft:block/iron_block"
   },
   "elements": [
     {
@@ -19,22 +19,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "south": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "east": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "west": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "up": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "down": {
-          "texture": "#t1"
+          "texture": "#t0"
         }
       }
     },
@@ -51,22 +51,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "south": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "east": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "west": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "up": {
-          "texture": "#t1"
+          "texture": "#t0"
         },
         "down": {
-          "texture": "#t1"
+          "texture": "#t0"
         }
       }
     },
@@ -83,22 +83,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#t2"
+          "texture": "#t1"
         },
         "south": {
-          "texture": "#t2"
+          "texture": "#t1"
         },
         "east": {
-          "texture": "#t2"
+          "texture": "#t1"
         },
         "west": {
-          "texture": "#t2"
+          "texture": "#t1"
         },
         "up": {
-          "texture": "#t2"
+          "texture": "#t1"
         },
         "down": {
-          "texture": "#t2"
+          "texture": "#t1"
         }
       }
     },
