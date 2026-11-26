@@ -55,6 +55,17 @@ pub fn clear() {
 
 /// Read one recipe file's JSON.
 pub fn parse(id: &str, json: &mod_api::serde_json::Value) -> Result<Recipe, String> {
+    parse_for(id, json, grind::DEFAULT_LOAD, 0.0)
+}
+
+/// Read one recipe file's JSON for a machine with its own default load and
+/// water (machines spec 2.1: one format for every machine).
+pub fn parse_for(
+    id: &str,
+    json: &mod_api::serde_json::Value,
+    default_load: f64,
+    default_water: f64,
+) -> Result<Recipe, String> {
     let ingredient = match &json["ingredient"] {
         mod_api::serde_json::Value::String(s) => match s.strip_prefix('#') {
             Some(tag) => grind::Ingredient::Tag(tag.into()),
@@ -86,8 +97,8 @@ pub fn parse(id: &str, json: &mod_api::serde_json::Value) -> Result<Recipe, Stri
         count: json["count"].as_u64().unwrap_or(1) as u32,
         results,
         revolutions: json["revolutions"].as_f64().ok_or("no revolutions")?,
-        load: json["load"].as_f64().unwrap_or(grind::DEFAULT_LOAD),
-        water: json["water"].as_f64().unwrap_or(0.0),
+        load: json["load"].as_f64().unwrap_or(default_load),
+        water: json["water"].as_f64().unwrap_or(default_water),
     };
     grind::validate(&recipe)?;
     Ok(recipe)
@@ -122,9 +133,9 @@ pub fn item_key(host: &dyn Host, id: &str) -> Option<ItemKey> {
     host.item_key(&Identifier::parse(id).ok()?)
 }
 
-struct HostItems<'a> {
-    host: &'a dyn Host,
-    tags: &'a HashMap<String, Ingredient>,
+pub(crate) struct HostItems<'a> {
+    pub(crate) host: &'a dyn Host,
+    pub(crate) tags: &'a HashMap<String, Ingredient>,
 }
 
 impl Items for HostItems<'_> {
@@ -144,13 +155,13 @@ impl Items for HostItems<'_> {
 
 // ---- The tick --------------------------------------------------------------------
 
-fn stack_of(host: &dyn Host, s: &Option<ItemStack>) -> Option<Stack> {
+pub(crate) fn stack_of(host: &dyn Host, s: &Option<ItemStack>) -> Option<Stack> {
     s.as_ref()
         .map(|s| Stack::new(&s.item().id(host), s.count()))
 }
 
 /// A small random source for chance rolls.
-fn random() -> f64 {
+pub(crate) fn random() -> f64 {
     use std::sync::atomic::{AtomicU64, Ordering};
     static STATE: AtomicU64 = AtomicU64::new(0x9E37_79B9_7F4A_7C15);
     let mut x = STATE.load(Ordering::Relaxed);
@@ -251,10 +262,14 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
         };
     }
 
-    // Every 8 ticks: push one item down out of the chute (spec 5.1).
+    // Every 8 ticks: push one item down out of the chute (spec 5.1), and
+    // pull in items tossed on top (machines spec 9).
     let tick = server::with(|s| s.ticks);
     if (tick + pos.x as u64 + pos.z as u64).is_multiple_of(grind::TRANSFER_EVERY) {
         push_down(host, level, pos, &mut event.entity.items);
+        super::machines::pull_tossed(host, level, pos, &mut event.entity.items[0], &|h, s| {
+            grindable(h, s)
+        });
     }
 
     // Menu data: progress ‰, RPM × 10, status, max RPM.

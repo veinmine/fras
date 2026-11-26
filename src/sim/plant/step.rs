@@ -52,6 +52,7 @@ enum Liquid {
     Tank(usize),
     Drain(Pos),
     Void(Pos),
+    Wash(Pos),
 }
 
 impl Works {
@@ -450,6 +451,14 @@ impl Works {
         }
     }
 
+    /// The content of the network a washer's port sits on, if it is a liquid one.
+    fn wash_net_content(&self, g: Pos) -> Option<Content> {
+        self.nets
+            .iter()
+            .find(|n| n.consumers.iter().any(|(e, _)| *e == End::Wash(g)))
+            .and_then(|n| n.content)
+    }
+
     /// What a grinder can take in now, mB/s.
     fn cool_intake(&self, g: Pos) -> f64 {
         let Some(c) = self.cooling.get(&g) else {
@@ -539,6 +548,7 @@ impl Works {
                 let (i, t) = match e {
                     End::Feed(si) => (1, Liquid::Feed(*si)),
                     End::CoolIn(g) => (2, Liquid::Cool(*g)),
+                    End::Wash(g) => (2, Liquid::Wash(*g)),
                     End::ExIn(x) => (2, Liquid::Ex(*x)),
                     End::Tank(si) => (3, Liquid::Tank(*si)),
                     End::Drain(q) => (4, Liquid::Drain(*q)),
@@ -661,6 +671,14 @@ impl Works {
             Liquid::Leak(_) => LEAK_RATE,
             Liquid::Feed(si) | Liquid::Tank(si) => room(si),
             Liquid::Cool(g) => self.cool_intake(g),
+            Liquid::Wash(g) => {
+                let (room, holds) = self.wash_demand.get(&g).copied().unwrap_or((0.0, None));
+                let got = self.washed.get(&g).map_or(0.0, |w| w.1 / DT);
+                match (holds, self.wash_net_content(g)) {
+                    (Some(h), Some(c)) if h != c => 0.0,
+                    _ => (room - got).max(0.0),
+                }
+            }
             Liquid::Ex(x) => self.ex_intake(x),
             Liquid::Drain(q) => {
                 if self.parts.get(&q).is_some_and(|p| p.spec.damaged) {
@@ -697,6 +715,11 @@ impl Works {
                 }
             }
             Liquid::Ex(x) => self.ex_take(x, got),
+            Liquid::Wash(g) => {
+                let e = self.washed.entry(g).or_insert((c, 0.0));
+                e.0 = c;
+                e.1 += got * DT;
+            }
             Liquid::Drain(q) => {
                 let e = self.drains.entry(q).or_insert((c, 0.0));
                 e.1 += got;

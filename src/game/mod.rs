@@ -2,6 +2,7 @@
 //!
 //! No mixins: everything here goes through the mod API's hooks and parts.
 
+pub mod belts;
 pub mod blocks;
 pub mod creative;
 pub mod draw;
@@ -9,6 +10,7 @@ pub mod effects;
 pub mod firebox;
 pub mod governor;
 pub mod grinder;
+pub mod machines;
 pub mod parts;
 pub mod pipes;
 pub mod readout;

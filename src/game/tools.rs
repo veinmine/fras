@@ -158,6 +158,12 @@ pub fn repair_cost(block: Block) -> Vec<(&'static str, u32)> {
         | Block::CreativeWater
         | Block::CreativeDrain
         | Block::CreativeFirebox => vec![],
+        // 0.4 (logistics 3.5, 8.2; machines 13.1; progression 4.4). A belt
+        // takes leather or wool, which `belts::repair` handles itself.
+        Block::ConveyorBelt | Block::Diverter => vec![("minecraft:leather", 1)],
+        Block::BucketElevator => vec![("minecraft:iron_nugget", 2)],
+        Block::IronPulley | Block::LargeIronPulley => vec![("minecraft:iron_nugget", 1)],
+        b => b.machine().map(|m| m.repair().to_vec()).unwrap_or_default(),
     }
 }
 
@@ -181,10 +187,13 @@ pub fn cost_text(cost: &[(&str, u32)]) -> Text {
         if i > 0 {
             t = t.append(Text::literal(", "));
         }
-        let name = id.replace(':', ".");
+        let key = match id.strip_prefix('#') {
+            Some(tag) => format!("fras.tag.{}", tag.replace(':', ".")),
+            None => format!("item.{}", id.replace(':', ".")),
+        };
         t = t
             .append(Text::literal(format!("{n} × ")))
-            .append(Text::translate(format!("item.{name}"), vec![]));
+            .append(Text::translate(key, vec![]));
     }
     t
 }
@@ -276,29 +285,75 @@ fn repair_plant(
     InteractionResult::Success
 }
 
+/// The player's stacks that count as `id`: an item, or a tag FRAS's costs
+/// name (`#minecraft:planks`, `#minecraft:wool`, read by the item's name).
+pub(crate) fn carried_id(
+    host: &dyn mod_api::Host,
+    player: PlayerRef,
+    id: &str,
+) -> Vec<(u32, ItemStack)> {
+    let suffix = match id {
+        "#minecraft:planks" => Some("_planks"),
+        "#minecraft:wool" => Some("_wool"),
+        _ => None,
+    };
+    match suffix {
+        Some(suffix) => player
+            .inventory_slots(host)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|(_, s)| {
+                let name = s.item().id(host);
+                name.starts_with("minecraft:") && name.ends_with(suffix)
+            })
+            .collect(),
+        None => cost_key(id).map_or_else(Vec::new, |k| carried(host, player, k)),
+    }
+}
+
+/// Take `count` of what `id` names from the player. False (and nothing
+/// taken) if they don't have that many.
+pub(crate) fn take_id(host: &mut dyn ServerHost, player: PlayerRef, id: &str, count: u32) -> bool {
+    let slots = carried_id(&*host, player, id);
+    if slots.iter().map(|(_, s)| s.count()).sum::<u32>() < count {
+        return false;
+    }
+    let mut left = count;
+    for (slot, stack) in slots {
+        if left == 0 {
+            break;
+        }
+        let n = stack.count().min(left);
+        left -= n;
+        let _ = player.set_inventory_slot(host, slot, stack.shrink(n));
+    }
+    true
+}
+
 /// Take a part's repair cost from the player (nothing in creative). False,
 /// with a message, if they don't carry it.
 fn pay(host: &mut dyn ServerHost, player: PlayerRef, block: Block) -> bool {
-    let cost = repair_cost(block);
+    pay_cost(host, player, &repair_cost(block))
+}
+
+/// Take `cost` from the player (nothing in creative). False, with a
+/// message, if they don't carry it.
+pub(crate) fn pay_cost(host: &mut dyn ServerHost, player: PlayerRef, cost: &[(&str, u32)]) -> bool {
     if !creative(&*host, player) {
         let missing = cost.iter().any(|(id, n)| {
-            cost_key(id).is_none_or(|k| {
-                carried(&*host, player, k)
-                    .iter()
-                    .map(|(_, s)| s.count())
-                    .sum::<u32>()
-                    < *n
-            })
+            carried_id(&*host, player, id)
+                .iter()
+                .map(|(_, s)| s.count())
+                .sum::<u32>()
+                < *n
         });
         if missing {
-            let line = Text::translate("fras.repair.missing", vec![cost_text(&cost)]);
+            let line = Text::translate("fras.repair.missing", vec![cost_text(cost)]);
             bar(host, player, line);
             return false;
         }
-        for (id, n) in &cost {
-            if let Some(k) = cost_key(id) {
-                take(host, player, k, *n);
-            }
+        for (id, n) in cost {
+            take_id(host, player, id, *n);
         }
     }
     true

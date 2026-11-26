@@ -45,6 +45,21 @@ fn with_prop(level: &dyn LevelHost, state: BlockState, key: &str, value: &str) -
         .unwrap_or(state)
 }
 
+/// The horizontal side with a FRAS shaft-like part whose axis points at
+/// `pos` (a machine's socket goes there, grinder spec 5.1).
+fn socket_toward_shaft(level: &dyn LevelHost, pos: Pos) -> Option<Dir> {
+    Dir::HORIZONTAL.into_iter().find(|d| {
+        let Some(s) = level.block_state(pos.offset(*d).to_array()) else {
+            return false;
+        };
+        let (name, props) = state_props(level, s);
+        name.starts_with("fras:")
+            && props
+                .iter()
+                .any(|(k, v)| k == "axis" && v == d.axis().name())
+    })
+}
+
 // ---- Block hooks -------------------------------------------------------------
 
 /// The block side of a part: placement, use, neighbours, changes.
@@ -68,7 +83,9 @@ impl BlockPart for BlockHooks {
             | Block::Bearing
             | Block::Clutch
             | Block::Pulley
-            | Block::LargePulley => {
+            | Block::LargePulley
+            | Block::IronPulley
+            | Block::LargeIronPulley => {
                 // Placed against a face, it lies along that face's axis.
                 state = set(state, "axis", face.axis().name());
             }
@@ -88,6 +105,41 @@ impl BlockPart for BlockHooks {
             }
             Block::Crank => state = set(state, "facing", face.opposite().name()),
             Block::Tachometer => state = set(state, "facing", face.name()),
+            Block::Washer | Block::TripHammer | Block::Lathe | Block::Sawmill => {
+                // As the grinder (machines spec 2.4).
+                let socket =
+                    socket_toward_shaft(level, pos_of(ctx.pos)).unwrap_or(facing.opposite());
+                state = set(state, "facing", socket.name());
+            }
+            // ---- 0.4: belts (logistics 3.1, 8.1, 9) ----
+            Block::ConveyorBelt => state = set(state, "facing", facing.name()),
+            Block::Diverter => {
+                state = set(state, "facing", facing.name());
+                state = set(state, "flap", "left");
+            }
+            Block::BucketElevator => state = set(state, "facing", facing.name()),
+            Block::Trommel => {
+                // Two blocks, like a bed: the drum runs away from the player
+                // and needs the block in front free (machines spec 8.2).
+                let pos = pos_of(ctx.pos);
+                let ahead = pos.offset(facing);
+                let free = level.block_state(ahead.to_array()).is_some_and(|s| {
+                    let (name, _) = state_props(level, s);
+                    matches!(
+                        name.as_str(),
+                        "minecraft:air" | "minecraft:cave_air" | "minecraft:short_grass"
+                    )
+                });
+                if !free {
+                    return Some(None);
+                }
+                state = set(state, "facing", facing.name());
+                state = set(state, "part", "start");
+                let socket = socket_toward_shaft(level, pos)
+                    .filter(|d| d.axis() != facing.axis())
+                    .unwrap_or(facing.clockwise());
+                state = set(state, "socket", socket.name());
+            }
             Block::Grinder => {
                 // Facing an adjacent shaft-like part whose axis points at it,
                 // else facing the player (grinder spec 5.1).

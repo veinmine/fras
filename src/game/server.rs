@@ -68,6 +68,12 @@ pub struct Level {
     pub motor_ramps: HashMap<Pos, f64>,
     /// Gauges' histories for their screens.
     pub histories: HashMap<Pos, super::readout::History>,
+    /// Belts, bucket elevators and diverters (0.4).
+    pub belts: super::belts::Belts,
+    /// Belt machines over a belt, by machine position.
+    pub belt_jobs: HashMap<Pos, super::machines::BeltJob>,
+    /// Work queued for the 0.4 machines.
+    pub machines: super::machines::Queue,
 }
 
 #[derive(Default)]
@@ -283,6 +289,8 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         super::effects::event(host, level, &event);
     }
     super::steam::after_rot(host, level, dim, ticks);
+    super::machines::queued(host, level, dim);
+    super::belts::tick(host, level, dim);
     if ticks % 10 == 0 {
         super::effects::warnings(host, level, dim);
     }
