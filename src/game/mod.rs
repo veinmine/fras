@@ -2,6 +2,7 @@
 //!
 //! No mixins: everything here goes through the mod API's hooks and parts.
 
+pub mod belt_draw;
 pub mod belts;
 pub mod blocks;
 pub mod creative;

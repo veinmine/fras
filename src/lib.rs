@@ -73,6 +73,12 @@ impl Hooks for Fras {
             if block == Block::Grinder {
                 r.block_container(&key, game::grinder::container());
             }
+            if block.is_machine04() {
+                r.block_container(&key, game::machines::container(block));
+            }
+            if block.is_belt() || block == Block::BucketElevator {
+                r.block_container(&key, game::belts::inbox());
+            }
             if block == Block::Firebox {
                 r.block_container(&key, game::firebox::container());
             }
@@ -95,6 +101,16 @@ impl Hooks for Fras {
         r.menu_part("fras:firebox", game::firebox::FuelSlot);
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
+        for m in crate::sim::machine::Machine::ALL {
+            if m == crate::sim::machine::Machine::Grinder {
+                continue;
+            }
+            if let Some(kind) = m.recipe_type() {
+                r.register_recipe_type(kind);
+                r.register_raw_recipe_serializer(kind, kind);
+            }
+            r.menu_part(&format!("fras:{}", m.name()), game::machines::InputSlot(m));
+        }
         let wrench = r.item_key("fras:wrench");
         let leather_belt = r.item_key("fras:leather_belt");
         r.item_part(wrench, game::tools::Wrench);
@@ -177,12 +193,14 @@ impl Hooks for Fras {
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::machines::clear();
         game::firebox::clear();
     }
 
     fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::machines::clear();
         game::firebox::clear();
     }
 
@@ -229,6 +247,7 @@ impl Hooks for Fras {
     fn tags_updated(&self, host: HostSide<'_>, _: &mut TagsUpdatedEvent) {
         if let HostSide::Server(host) = host {
             game::grinder::load(&*host);
+            game::machines::load(&*host);
             game::firebox::load(&*host);
         }
     }
@@ -261,6 +280,16 @@ impl Hooks for Fras {
     }
 
     /// After each level's tick: run its networks.
+    /// Belt items are written to their blocks when the level saves
+    /// (logistics 10.2).
+    fn level_save(&self, host: &mut dyn ServerHost, event: &mut mod_api::LevelSaveEvent<'_>) {
+        if let Some(level) = host.level(event.dimension)
+            && let Some(dim) = game::server::dim_of(&*host, level)
+        {
+            game::belts::save(host, level, dim);
+        }
+    }
+
     fn level_tick_post(&self, host: HostSide, event: &mut LevelTickPostEvent) {
         if let HostSide::Server(host) = host {
             game::server::level_tick(host, event.level);

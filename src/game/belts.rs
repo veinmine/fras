@@ -89,6 +89,8 @@ pub struct Belts {
     pub broken: Vec<Pos>,
     /// Blocks whose chunk unloaded: their line leaves memory.
     pub unloaded: BTreeSet<Pos>,
+    /// Diverters whose redstone input may have changed.
+    pub redstone: BTreeSet<Pos>,
     /// Diverters' comparator pulses: ticks left.
     pub pulses: HashMap<Pos, u32>,
     /// Throughput counters by block (debug tools).
@@ -114,6 +116,7 @@ impl Belts {
     fn absorb(&mut self, other: Belts) {
         self.dirty.extend(other.dirty);
         self.drive_check.extend(other.drive_check);
+        self.redstone.extend(other.redstone);
         self.broken.extend(other.broken);
         self.unloaded.extend(other.unloaded);
         for (pos, saved) in other.restore {
@@ -135,6 +138,18 @@ impl Belts {
     }
 }
 
+/// A belt or elevator block's way in for hoppers: one slot, emptied onto
+/// the line each tick (logistics 4.2).
+pub fn inbox() -> mod_api::ModContainer {
+    mod_api::ModContainer {
+        slots: 1,
+        faces: [vec![0], vec![0], vec![0], vec![0], vec![0], vec![0]],
+        inputs: vec![0],
+        outputs: vec![],
+        menu: None,
+    }
+}
+
 // ---- Hooks' side ---------------------------------------------------------------
 
 /// A belt or elevator block was placed, turned or changed shape.
@@ -152,11 +167,32 @@ pub fn broke(dim: Dim, pos: Pos) {
     });
 }
 
-/// A neighbour changed: a shaft may drive it now, or no more.
-pub fn neighbour(dim: Dim, pos: Pos) {
+/// A neighbour changed: a shaft may drive it now, or no more; a
+/// diverter's redstone may have changed.
+pub fn neighbour(dim: Dim, pos: Pos, diverter: bool) {
     with_level(dim, |l| {
         l.belts.drive_check.insert(pos);
+        if diverter {
+            l.belts.redstone.insert(pos);
+        }
     });
+}
+
+/// Diverters follow their redstone (logistics 9).
+fn diverters(host: &mut dyn ServerHost, level: LevelRef, belts: &mut Belts) {
+    for pos in std::mem::take(&mut belts.redstone) {
+        if block_at(&*host, level, pos) != Some(Block::Diverter) {
+            continue;
+        }
+        let powered = level.has_neighbor_signal(&*host, pos.to_array());
+        super::world::set_property(
+            host,
+            level,
+            pos,
+            "powered",
+            if powered { "true" } else { "false" },
+        );
+    }
 }
 
 /// A belt block's entity loaded: bring back its items (unless its line is
@@ -282,6 +318,7 @@ pub fn tick(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     let mut belts = with_level(dim, |l| std::mem::take(&mut l.belts));
     belts.ticks += 1;
     unload(host, level, &mut belts);
+    diverters(host, level, &mut belts);
     drop_broken(host, level, dim, &mut belts);
     rebuild(host, level, dim, &mut belts);
     check_drives(host, level, dim, &mut belts);
