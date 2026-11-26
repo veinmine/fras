@@ -41,6 +41,10 @@ pub enum Kind {
     Governor,
     /// The bellows (regulation spec 5.1): a machine.
     Bellows,
+    /// Creative: an engine that holds a set speed whatever the load.
+    Motor,
+    /// Creative: a machine that draws a set torque.
+    LoadBank,
 }
 
 /// How a part sits in the world: the faces it connects through.
@@ -149,7 +153,7 @@ impl Spec {
     pub fn inertia(&self) -> f64 {
         match self.kind {
             Kind::Shaft(_) | Kind::Bearing => 1.0,
-            Kind::Clutch | Kind::BevelGear(_) | Kind::Crank => 2.0,
+            Kind::Clutch | Kind::BevelGear(_) | Kind::Crank | Kind::Motor | Kind::LoadBank => 2.0,
             Kind::Pulley { large } => {
                 if large {
                     4.0
@@ -174,7 +178,12 @@ impl Spec {
     pub fn friction(&self) -> f64 {
         match self.kind {
             Kind::Shaft(_) | Kind::Bearing => 0.0025,
-            Kind::Clutch | Kind::BevelGear(_) | Kind::Pulley { .. } | Kind::Crank => 0.005,
+            Kind::Clutch
+            | Kind::BevelGear(_)
+            | Kind::Pulley { .. }
+            | Kind::Crank
+            | Kind::Motor
+            | Kind::LoadBank => 0.005,
             Kind::Gearbox => 0.01,
             Kind::WaterWheel
             | Kind::Grinder
@@ -238,13 +247,16 @@ impl Spec {
     }
 
     pub fn is_source(&self) -> bool {
-        matches!(self.kind, Kind::Crank | Kind::WaterWheel | Kind::Flywheel)
+        matches!(
+            self.kind,
+            Kind::Crank | Kind::WaterWheel | Kind::Flywheel | Kind::Motor
+        )
     }
 
     pub fn is_machine(&self) -> bool {
         matches!(
             self.kind,
-            Kind::Grinder | Kind::Pump | Kind::Governor | Kind::Bellows
+            Kind::Grinder | Kind::Pump | Kind::Governor | Kind::Bellows | Kind::LoadBank
         )
     }
 
@@ -288,6 +300,42 @@ pub const FLYWHEEL_INERTIA: f64 = 90.0;
 /// Crank: stall torque and top speed.
 pub const CRANK_STALL: f64 = 16.0;
 pub const CRANK_TOP: f64 = 32.0;
+/// The creative engine: its stall torque (so it holds its speed under any
+/// load a shaft carries: 128 Nm sags it 0.16 RPM at 128 RPM), its fastest
+/// setting, and how fast it changes speed (RPM per second), so spinning up
+/// doesn't shear the line with the torque that accelerates it.
+pub const MOTOR_STALL: f64 = 100_000.0;
+pub const MOTOR_MAX: f64 = 256.0;
+pub const MOTOR_RAMP: f64 = 32.0;
+/// The creative engine's push for this tick: its speed setting `target`
+/// (signed RPM: negative turns the other way), approached from `ramp` (the
+/// speed it was set to last tick) at `MOTOR_RAMP`. Returns the new ramp;
+/// `motor_drive` turns it into a drive.
+pub fn motor_ramp(ramp: f64, target: f64, dt: f64) -> f64 {
+    let step = MOTOR_RAMP * dt;
+    let target = target.clamp(-MOTOR_MAX, MOTOR_MAX);
+    if (target - ramp).abs() <= step {
+        target
+    } else {
+        ramp + step * (target - ramp).signum()
+    }
+}
+
+/// The drive of a creative engine set to `ramp` (signed RPM): none at 0.
+pub fn motor_drive(ramp: f64) -> super::Drive {
+    if ramp.abs() < 1e-6 {
+        super::Drive::default()
+    } else {
+        super::Drive {
+            stall: MOTOR_STALL,
+            top: ramp.abs(),
+            dir: ramp.signum(),
+        }
+    }
+}
+
+/// The load bank's largest setting, Nm.
+pub const LOAD_BANK_MAX: f64 = 512.0;
 /// Water wheel: torque per flowing block, its cap, top speed.
 pub const WHEEL_PER_BLOCK: f64 = 8.0;
 pub const WHEEL_MAX: f64 = 32.0;

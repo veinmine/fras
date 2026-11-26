@@ -509,6 +509,16 @@ impl Works {
         self.drains.get(&pos).copied()
     }
 
+    /// What a creative source gave last step, mB/s.
+    pub fn source_gave(&self, pos: Pos) -> f64 {
+        self.gave.get(&pos).copied().unwrap_or(0.0)
+    }
+
+    /// What a creative drain took last step.
+    pub fn void_flow(&self, pos: Pos) -> Option<(Content, f64)> {
+        self.voids.get(&pos).copied()
+    }
+
     /// Drains dumping now.
     pub fn drains(&self) -> Vec<(Pos, Content, f64)> {
         self.drains

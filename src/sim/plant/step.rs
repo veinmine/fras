@@ -17,6 +17,9 @@ use crate::sim::steam::{
     self, AMBIENT, DT, HOT_WATER, VENT_RATE, bellows, damper, engine, fail, govern,
 };
 
+/// What a creative drain takes at most, mB/s: more than any pipe carries.
+const VOID: f64 = 1.0e6;
+
 /// The warning timer kinds of pipe parts on a steam network.
 pub(crate) fn timer_kind(kind: Kind) -> Option<u8> {
     Some(match kind {
@@ -48,6 +51,7 @@ enum Liquid {
     Ex(Pos),
     Tank(usize),
     Drain(Pos),
+    Void(Pos),
 }
 
 impl Works {
@@ -59,9 +63,14 @@ impl Works {
         self.update_governors();
         self.update_dampers();
         self.heat_boilers();
+        self.gave.clear();
+        self.voids.clear();
         self.prepare_cooling();
         self.feed_water();
         self.route_steam();
+        // After the steam is drawn, so its networks end each step at its
+        // pressure (as gauges and engines read them).
+        self.creative_steam();
         self.route_exhaust();
         self.finish_cooling();
         self.check_failures();
@@ -285,6 +294,41 @@ impl Works {
         }
     }
 
+    // ---- Creative sources ------------------------------------------------------
+
+    /// Creative steam sources top their networks up to their pressure, at
+    /// most at their rate.
+    fn creative_steam(&mut self) {
+        for pi in 0..self.steam.len() {
+            if self.plant_paused(self.steam[pi].plant) {
+                continue;
+            }
+            let mut sources: Vec<Pos> = Vec::new();
+            for &ni in &self.steam[pi].nets {
+                for (e, _) in &self.nets[ni].sources {
+                    if let End::Source(q, Content::Steam) = e
+                        && !sources.contains(q)
+                    {
+                        sources.push(*q);
+                    }
+                }
+            }
+            sources.sort();
+            for q in sources {
+                let Some(part) = self.parts.get(&q) else {
+                    continue;
+                };
+                let (bar, rate) = (part.spec.set.max(0.0), part.spec.amount.max(0.0));
+                let pool = &mut self.steam[pi].pool;
+                let room = (bar * pool.capacity - pool.steam).max(0.0);
+                let add = (rate * DT).min(room);
+                pool.steam += add;
+                self.steam[pi].steam_in += add / DT;
+                *self.gave.entry(q).or_default() += add / DT;
+            }
+        }
+    }
+
     // ---- Cooling (cooling spec 5, 6 and 9) ---------------------------------------
 
     /// Each exchanger's inlet, power and intake for this step, and each
@@ -474,6 +518,7 @@ impl Works {
                         }
                     }
                     End::CoolOut(g) if c == Content::HotWater => self.parts[g].saved.buffer / DT,
+                    End::Source(q, sc) if *sc == c => self.parts[q].spec.amount.max(0.0),
                     _ => 0.0,
                 };
             }
@@ -491,6 +536,7 @@ impl Works {
                     End::ExIn(x) => (2, Liquid::Ex(*x)),
                     End::Tank(si) => (3, Liquid::Tank(*si)),
                     End::Drain(q) => (4, Liquid::Drain(*q)),
+                    End::Void(q) => (4, Liquid::Void(*q)),
                     _ => continue,
                 };
                 groups[i].push((t, nodes.clone()));
@@ -549,6 +595,7 @@ impl Works {
                             p.saved.buffer = (p.saved.buffer - f * DT).max(0.0);
                         }
                     }
+                    End::Source(q, _) => *self.gave.entry(q).or_default() += f,
                     _ => {}
                 }
             }
@@ -616,6 +663,7 @@ impl Works {
                     DRAIN
                 }
             }
+            Liquid::Void(_) => VOID,
         }
     }
 
@@ -645,6 +693,10 @@ impl Works {
             Liquid::Ex(x) => self.ex_take(x, got),
             Liquid::Drain(q) => {
                 let e = self.drains.entry(q).or_insert((c, 0.0));
+                e.1 += got;
+            }
+            Liquid::Void(q) => {
+                let e = self.voids.entry(q).or_insert((c, 0.0));
                 e.1 += got;
             }
         }
@@ -680,6 +732,7 @@ impl Works {
                 .iter()
                 .filter_map(|(e, n)| match e {
                     End::ExIn(x) => Some((Liquid::Ex(*x), n.clone())),
+                    End::Void(q) => Some((Liquid::Void(*q), n.clone())),
                     _ => None,
                 })
                 .collect();

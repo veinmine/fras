@@ -50,6 +50,12 @@ pub enum Kind {
     Drain,
     /// The grinder, for its water cooling (cooling spec 9).
     Grinder,
+    // ---- Creative ----
+    /// An endless source of steam (up to a set pressure), water or hot water
+    /// (`Spec::fluid`) at a set rate (`Spec::amount`), on every face.
+    Source,
+    /// Takes any water, hot water or exhaust, without limit, on every face.
+    Void,
 }
 
 impl Kind {
@@ -137,6 +143,10 @@ pub struct Spec {
     pub wet: bool,
     /// Its rust stage (rust spec 5).
     pub rust: Stage,
+    /// Creative source: what it gives (`set` is a steam source's pressure).
+    pub fluid: Option<Content>,
+    /// Creative source: its rate, mB/s.
+    pub amount: f64,
 }
 
 impl Spec {
@@ -154,6 +164,8 @@ impl Spec {
             powered: false,
             wet: false,
             rust: Stage::Clean,
+            fluid: None,
+            amount: 0.0,
         }
     }
 
@@ -209,6 +221,8 @@ impl Spec {
         b.set = 0.0;
         a.reverse = false;
         b.reverse = false;
+        a.amount = 0.0;
+        b.amount = 0.0;
         (a.target, a.sens, a.powered, a.wet, a.rust) = (0.0, 0, false, false, Stage::Clean);
         (b.target, b.sens, b.powered, b.wet, b.rust) = (0.0, 0, false, false, Stage::Clean);
         if matches!(a.kind, Kind::Vent { .. }) {

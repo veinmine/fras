@@ -148,6 +148,11 @@ pub enum End {
     /// A grinder's cooling inlet (water) and hot water outlet.
     CoolIn(Pos),
     CoolOut(Pos),
+    // ---- Creative ----
+    /// A creative source of the content it gives.
+    Source(Pos, Content),
+    /// A creative drain.
+    Void(Pos),
 }
 
 impl End {
@@ -160,7 +165,13 @@ impl End {
             End::Pump(_) | End::CoolIn(_) => Some(Content::Water),
             End::CoolOut(_) => Some(Content::HotWater),
             End::Exhaust(_) => Some(Content::Exhaust),
-            End::Feed(_) | End::Tank(_) | End::ExIn(_) | End::ExOut(_) | End::Drain(_) => None,
+            End::Source(_, c) => Some(c),
+            End::Feed(_)
+            | End::Tank(_)
+            | End::ExIn(_)
+            | End::ExOut(_)
+            | End::Drain(_)
+            | End::Void(_) => None,
         }
     }
 
@@ -169,6 +180,7 @@ impl End {
     pub fn accepts(self, c: Content) -> bool {
         match self {
             End::Feed(_) | End::Drain(_) => c.is_liquid(),
+            End::Void(_) => c != Content::Steam,
             End::ExIn(_) => matches!(c, Content::Exhaust | Content::HotWater),
             End::Tank(_) => c != Content::Exhaust,
             // An outlet never mixes: on another content its exchanger stops.
@@ -188,7 +200,9 @@ impl End {
             | End::ExOut(q)
             | End::Drain(q)
             | End::CoolIn(q)
-            | End::CoolOut(q) => Some(q),
+            | End::CoolOut(q)
+            | End::Source(q, _)
+            | End::Void(q) => Some(q),
             End::Domes(_) | End::Feed(_) | End::Tank(_) => None,
         }
     }
@@ -358,6 +372,10 @@ pub struct Works {
     pub(crate) exchangers: HashMap<Pos, ExState>,
     pub(crate) cooling: HashMap<Pos, CoolState>,
     pub(crate) drains: BTreeMap<Pos, (Content, f64)>,
+    /// Creative sources: what each gave last step, mB/s.
+    pub(crate) gave: BTreeMap<Pos, f64>,
+    /// Creative drains: what each took last step and of what, mB/s.
+    pub(crate) voids: BTreeMap<Pos, (Content, f64)>,
     /// Leaking parts losing something now: what and how much (mB/s).
     pub(crate) leaks: BTreeMap<Pos, (Content, f64)>,
     /// Flywheels and pumps whose rotational networks the plant holds paused.

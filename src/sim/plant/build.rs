@@ -420,6 +420,8 @@ impl Works {
                 }
             }
             Kind::Pump => (face == s.dir.opposite()).then_some(Role::Fit(End::Pump(pos))),
+            Kind::Source => s.fluid.map(|c| Role::Fit(End::Source(pos, c))),
+            Kind::Void => Some(Role::Fit(End::Void(pos))),
             Kind::Dome => {
                 let &si = self.shell_of.get(&pos.offset(Dir::Down))?;
                 let sh = &self.shells[si];
@@ -540,6 +542,8 @@ impl Works {
                     | Kind::Exchanger
                     | Kind::Drain
                     | Kind::Grinder
+                    | Kind::Source
+                    | Kind::Void
             )
         });
         for f in fittings {
@@ -592,7 +596,7 @@ impl Works {
         }
         for (e, _) in &net.ends {
             match e {
-                End::Vent(v) | End::Cylinder(v) | End::Pump(v) => {
+                End::Vent(v) | End::Cylinder(v) | End::Pump(v) | End::Source(v, _) | End::Void(v) => {
                     self.net_of.insert(*v, index);
                 }
                 End::ExIn(v) => self.ex_nets.entry(*v).or_default().0 = Some(index),
@@ -731,6 +735,7 @@ impl Works {
                 }
                 (End::CoolOut(_), Some(Content::HotWater)) => Some(UNLIMITED),
                 (End::Exhaust(_), Some(Content::Exhaust)) => Some(UNLIMITED),
+                (End::Source(_, c), Some(n)) if c == n => Some(UNLIMITED),
                 _ => None,
             };
             let nodes: Vec<usize> = if direct {
@@ -755,6 +760,7 @@ impl Works {
                 (End::Feed(_) | End::Tank(_) | End::Drain(_), Some(c)) => c.is_liquid(),
                 (End::CoolIn(_), Some(Content::Water)) => true,
                 (End::ExIn(_), Some(Content::HotWater | Content::Exhaust)) => true,
+                (End::Void(_), Some(c)) => c != Content::Steam,
                 _ => false,
             };
             if consumer {
@@ -910,6 +916,11 @@ impl Works {
                     rate(p.spec.kind, &mut red, &mut red_by);
                     keep_timer(p, &mut timers);
                 }
+                for (e, _) in &net.sources {
+                    if let End::Source(_, Content::Steam) = e {
+                        capacity += crate::sim::steam::SOURCE_STEAM;
+                    }
+                }
                 for (e, _) in &net.consumers {
                     if let End::Vent(q) | End::Cylinder(q) = e {
                         let p = &self.parts[q];
@@ -954,6 +965,8 @@ impl Works {
                     | Kind::Exchanger
                     | Kind::Drain
                     | Kind::Grinder
+                    | Kind::Source
+                    | Kind::Void
             )
         });
         let loose_item: HashMap<Pos, usize> = loose

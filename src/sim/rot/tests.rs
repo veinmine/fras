@@ -1000,3 +1000,48 @@ fn a_pump_counts_its_own_working_minimum() {
     let r = m.reading(p(0, 64, 0)).unwrap();
     assert_eq!(r.min_working, Some(crate::sim::fluid::pump::MIN_RPM));
 }
+
+/// A creative engine driving `n` iron shafts into a load bank of `load` Nm,
+/// ramped toward `target` for `ticks`; returns the highest shear timer seen.
+fn motor_run(m: &mut Mechanics, w: &World, ramp: &mut f64, target: f64, load: f64, ticks: usize) -> f64 {
+    let mut worst: f64 = 0.0;
+    for _ in 0..ticks {
+        *ramp = motor_ramp(*ramp, target, super::solve::DT);
+        m.set_drive(p(0, 64, 0), motor_drive(*ramp));
+        m.set_load(p(11, 64, 0), load);
+        m.tick(w);
+        for x in 1..=10 {
+            worst = worst.max(m.part(p(x, 64, 0)).unwrap().shear_t);
+        }
+    }
+    worst
+}
+
+#[test]
+fn a_creative_engine_holds_its_speed_under_any_load() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    m.insert(p(0, 64, 0), Spec::new(Kind::Motor, Shape::Socket(Dir::East)), None, true);
+    for x in 1..=10 {
+        m.insert(p(x, 64, 0), iron(Axis::X), None, true);
+    }
+    m.insert(p(11, 64, 0), Spec::new(Kind::LoadBank, Shape::Socket(Dir::West)), None, true);
+    let mut ramp = 0.0;
+    // Spinning up at the ramp doesn't strain the iron line.
+    let shear = motor_run(&mut m, &w, &mut ramp, 128.0, 0.0, 200);
+    assert_eq!(shear, 0.0);
+    assert!((rpm(&m, p(5, 64, 0)) - 128.0).abs() < 0.5, "{}", rpm(&m, p(5, 64, 0)));
+    // 100 Nm (under the iron shaft's 128) barely sags it.
+    let shear = motor_run(&mut m, &w, &mut ramp, 128.0, 100.0, 100);
+    assert_eq!(shear, 0.0);
+    assert!((rpm(&m, p(5, 64, 0)) - 128.0).abs() < 0.5);
+    let torque = m.drive_torque(p(0, 64, 0)).unwrap();
+    // The load and the line's friction.
+    assert!((100.0..115.0).contains(&torque), "{torque}");
+    // Reversed, it ramps down through zero and back up the other way.
+    motor_run(&mut m, &w, &mut ramp, -64.0, 10.0, 400);
+    assert!((rpm(&m, p(5, 64, 0)) + 64.0).abs() < 0.5);
+    // Over the shaft's limit, the line shears.
+    motor_run(&mut m, &w, &mut ramp, -64.0, 200.0, 200);
+    assert!((1..=10).any(|x| m.part(p(x, 64, 0)).unwrap().jam == Some(Jam::Shear)));
+}

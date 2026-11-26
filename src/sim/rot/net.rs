@@ -406,6 +406,19 @@ impl Mechanics {
         self.speed(pos).is_some_and(|(_, paused)| !paused)
     }
 
+    /// The torque a source's drive gives now at its local speed, Nm (the
+    /// creative engine's screen; the flows may lag a stiff source).
+    pub fn drive_torque(&self, pos: Pos) -> Option<f64> {
+        let p = self.parts.get(&pos)?;
+        if p.jam.is_some() {
+            return Some(0.0);
+        }
+        let local = self.local(pos);
+        let d = p.drive;
+        let (a, b) = solve::source_line(d.stall, d.top, d.dir, local);
+        Some(a - b * local)
+    }
+
     /// What the tachometer and the wrench overlay show for a part's network.
     pub fn reading(&self, pos: Pos) -> Option<Reading> {
         let p = self.parts.get(&pos)?;
@@ -624,10 +637,14 @@ impl Mechanics {
                 for &i in &sys.sources {
                     let m = &sys.members[i];
                     let d = self.parts[&m.pos].drive;
-                    let (a, b) = solve::source_line(d.stall, d.top, d.dir, m.r * sys.omega);
+                    let local = m.r * sys.omega;
+                    let (a, b) = solve::source_line(d.stall, d.top, d.dir, local);
                     terms.a += m.r * a;
                     terms.b += m.r * m.r * b;
-                    inputs += d.stall * d.dir;
+                    // What it pushes now, not its stall: a stiff source (the
+                    // creative engine) holds its speed, so only its push
+                    // shows a change of load.
+                    inputs += a - b * local;
                 }
                 for &i in &sys.machines {
                     let m = &sys.members[i];
