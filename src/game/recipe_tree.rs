@@ -11,7 +11,7 @@ const ROOT: &str = env!("CARGO_MANIFEST_DIR");
 
 /// A recipe as the tree sees it: what it needs and what it makes.
 struct Node {
-    id: String,
+    _id: String,
     needs: Vec<String>,
     makes: String,
 }
@@ -112,7 +112,7 @@ fn nodes() -> Vec<Node> {
         // A hand hammer used in a recipe comes back: it is a tool.
         for makes in results {
             out.push(Node {
-                id: id.clone(),
+                _id: id.clone(),
                 needs: needs.clone(),
                 makes,
             });

@@ -45,6 +45,17 @@ for those, prefer the word a Polish mechanic would use.
 | Hand Hammer | Młotek | **mod** |
 | Crushed Iron / Copper / Gold | Kruszona ruda żelaza / miedzi / złota | **mod** |
 | Iron / Copper Plate | Żelazna / Miedziana blacha | **mod** |
+| Conveyor Belt | Przenośnik taśmowy | **mod** |
+| Bucket Elevator | Przenośnik kubełkowy | **mod** |
+| Diverter | Zwrotnica | **mod** |
+| Washer | Płuczka | **mod** |
+| Trip Hammer | Młot ogoniasty | **mod**, the historical name |
+| Lathe | Tokarka | **mod** |
+| Sawmill | Trak | **mod**, the period word |
+| Trommel | Przesiewacz bębnowy | **mod** |
+| Iron Pulley | Żelazne koło pasowe | **mod** |
+| Iron Rod / Iron Gear / Rivet | Pręt żelazny / Żelazne koło zębate / Nit | **mod** |
+| Iron / Copper / Gold Dust | Pył żelaza / miedzi / złota | **mod** |
 
 ## Network terms
 
@@ -117,6 +128,13 @@ for those, prefer the word a Polish mechanic would use.
 | painted (Painted Iron Pipe) | pomalowany (Pomalowana żelazna rura) | **mod** |
 | scrape | zeskrobać | **mod** |
 | leak | wyciek | **mod** |
+| belt line | ciąg przenośnika | **mod** |
+| slope | pochylnia | **mod** |
+| drive | napęd | **mod** |
+| boot / head (elevator) | stopa / głowica (przenośnika) | **mod** |
+| strike | uderzenie | **mod** |
+| belt mode | praca na przenośniku | **mod** |
+| fines / mediums / oversize | drobne / średnie / nadziarno | **mod** |
 
 ## Vanilla words FRAS uses
 
