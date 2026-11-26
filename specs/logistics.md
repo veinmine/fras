@@ -403,9 +403,8 @@ Diverter: Zwrotnica.
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
 
-1. **L1. Belts hold their items** in a list per line (4.1), drawn by the line, with no item entities. *Alternative:*
-   real item entities pushed along by the belt (simpler to write, but item entities merge, despawn after 5 minutes,
-   cost a tick each and can't be held under a machine).
+1. **L1. Decided (Marcin, 2026-11-26): belts hold their items** in a list per line (4.1), drawn by the line, with no item
+   entities.
 2. **L2. Lines are straight; corners are side-loads** onto another line (3.1, 5.2). *Alternative:* curved belt blocks,
    which need curved rendering and a 2D path per line.
 3. **L3. An end with nowhere to deliver waits** and the line backs up (5.1), as machines never drop items.
