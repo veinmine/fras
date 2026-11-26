@@ -38,8 +38,8 @@ under it. 0.4 moves items between machines, so a line of machines can run withou
 | **Bucket elevator** | Lifts items straight up | Lifting costs more than carrying |
 | **Diverter** | A redstone flap that pushes items off to the side | Simple routing with redstone and comparators |
 
-Belts also carry items **through** machines: a trip hammer or washer above a belt works on the items riding
-under it (section 7).
+Belts carry items **between** machines; each 0.4 machine has its own built-in belt and works on items passing
+through it (`specs/machines.md` 2.4, revision 1.1).
 
 ---
 
@@ -129,7 +129,7 @@ Overlay: "Jammed: overspeed" or "Jammed: belt overloaded" (shear). Repair with t
 
 | Source | Where the item lands | Rule |
 | --- | --- | --- |
-| **Machine output** pushing down (grinder, washer, trommel outlets, lathe, sawmill) | The block under the machine, at its centre | If there's room within ±0.25 of the centre; otherwise the machine keeps it and retries at its push rate. |
+| **Machine output** (the 0.1 grinder pushing down, trommel outlets; a line machine's output face, as a belt end) | The block under the machine, at its centre | If there's room within ±0.25 of the centre; otherwise the machine keeps it and retries at its push rate. |
 | **Hopper or dropper** pointing into the belt from above or the side | That block's centre | Same room rule; the item capability refuses when there's no room, so the hopper keeps it. |
 | **Another line's end** (section 5.2) | The receiving block's centre, or position 0 when fed from behind | Same room rule. |
 | **Tossed items** landing on the belt | Where they touch, rounded to the nearest free spot | One item every 4 ticks per block *(tune)*, taken from the item entity; the rest of the stack waits on the belt surface and is carried along with it (section 4.4). |
@@ -191,8 +191,8 @@ without changes there. The general rules for every FRAS machine:
 - **Machines push down.** A belt under a machine's chute receives its output (4.2).
 - **Belts insert into machines** through the end hand-off (5.1). Each machine's sided rules apply (for the grinder,
   any face but its socket). A machine that refuses (wrong item, full input) makes the item wait at the belt's end.
-- **Machines above a belt** (the washer and trip hammer) can instead work on the items passing under them
-  (section 7).
+- **Line machines** (machines spec 1.1) take items at their input face from a belt end and hand them on at their output
+  face; nothing works on items riding a conveyor belt (section 7).
 - **0.1 limitation still applies:** a `ModContainer`'s faces are the same for every side in the pinned Horizon
   build (`docs/development.md`, "Where 0.1 differs"), so a belt's hand-off into a machine reaches its input
   through any face. Insertion through the item capability from a belt end is FRAS's own code, so FRAS checks the
@@ -200,26 +200,12 @@ without changes there. The general rules for every FRAS machine:
 
 ---
 
-## 7. Processing on the belt
+## 7. Processing on the belt (withdrawn in machines spec 1.1)
 
-Some machines (the washer and the trip hammer, `specs/machines.md` 3) sit **directly above a flat belt block** and
-work on items riding under them. The belt provides the hook; the machine decides what to do:
-
-1. When an entry reaches the **centre** of a block with a belt machine above it, the line asks the machine whether
-   it takes this item (it has a matching belt recipe, isn't jammed, is in range or at least turning, and has room
-   for byproducts, below).
-2. If yes, the entry **stops at the hold point** and the machine works on it at its normal rate. Entries behind it
-   queue.
-3. When the recipe completes, the entry's item is **replaced in place** by the main result, and any extra results
-   (byproducts, extra rolls) are **inserted right behind it** on the belt, one entry each, at the spacing. A result
-   that doesn't fit (the line behind is full) waits inside the machine and is placed as room appears; the machine
-   doesn't start the next item until it is empty.
-4. The entry is released and moves on. The machine takes the next one.
-
-Items with no recipe for the machine pass under it untouched, so a mixed stream works. A machine that stops
-(too slow, jammed, out of water) holds its entry and the line backs up behind it, as a stuck press would. Only
-recipes that consume **one** item can run on a belt (counts above 1 need the machine's own input slot,
-`specs/machines.md` 2.3).
+1.0 let the washer and trip hammer work on items riding a conveyor belt under them. Machines spec 1.1 replaces this: every
+0.4 machine is a station with its own built-in belt (input on the back, output on the front), fed by a belt line's end
+(5.1) and handing items on at its output like a belt end. Conveyor belts only carry. The hold point and in-place
+replacement described here live on in the machines' built-in belts.
 
 ---
 

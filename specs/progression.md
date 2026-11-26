@@ -108,13 +108,14 @@ lathe, washer, sawmill, trommel, dust smelting (machines spec 13.2); the interme
 | --- | --- | --- |
 | Conveyor belt ×6 | Entry | — |
 | Diverter | Hand-hammered | An iron plate |
-| Trip hammer | Hand-hammered | 3 iron plates, a block of iron |
-| Lathe | Hand-hammered | 2 iron plates, an iron shaft (hand recipe) |
+| Trip hammer | Hand-hammered | 3 iron plates, a block of iron, a conveyor belt |
+| Lathe | Hand-hammered | 2 iron plates, an iron shaft (hand recipe), a conveyor belt |
 | Iron pulley, large iron pulley | Entry | — (iron ingots, an iron shaft; 4.4) |
 | Bucket elevator ×4 | Machine parts | An iron gear |
-| Washer | Machine parts | An iron gear |
-| Sawmill | Machine parts | An iron gear, an iron shaft |
-| Trommel | Machine parts | An iron gear, an iron shaft |
+| Washer | Machine parts | An iron gear, a conveyor belt |
+| Inline grinder | Entry | — (a grinder, a conveyor belt, planks) |
+| Sawmill | Machine parts | An iron gear, an iron shaft, a conveyor belt |
+| Trommel ×3 | Machine parts | An iron gear, an iron shaft |
 
 ### 4.4 Iron pulleys
 
@@ -144,11 +145,11 @@ item is needed before its machine exists.
 3. **First machines:** **lathe** (2 hand-hammered plates) and **trip hammer** (3 hand-hammered plates, a block of iron), on
    the engine's shaft. The lathe needs 128 RPM, which the first engine can't give under load (its top is 128 at 4 bar), so it
    runs off a 2:1 step-up through **iron pulleys** (4.4). Conveyor belts from leather or wool.
-4. **First line:** ingots → lathe → rods; rods → trip hammer → rivets; ingots → trip hammer → plates; plates → lathe → gears.
+4. **First line:** ingots → lathe → rods (fed by hand at first, machines spec 2.6); rods → trip hammer → rivets; ingots → trip hammer → plates; plates → lathe → gears.
    With a belt between them this is the first production line (design doc 6.4).
 5. **Better blocks:** gearbox, iron bevel gears, clutch, governor, damper, tachometer, iron boiler, storage tank, heat
    exchanger, iron shafts at the good yield.
-6. **The ore line:** washer, trommel, bucket elevator, diverter, sawmill; the reference ore line (machines spec 10).
+6. **The ore line:** inline grinder, washer, trommel, bucket elevator, diverter, sawmill; the reference ore line (machines spec 10).
 
 The **gearbox** moves from step 1 to step 5. Before it, ratios come from **pulleys** (large to small, 2:1, entry recipes),
 which is how a mill geared up anyway, and the way to reach the lathe's speed is iron pulleys (4.4); the 0.1 exit criteria that gear a water wheel up 4× still work with two pulley
@@ -199,12 +200,12 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 
 1. **The reference ore line** (machines spec 10), on one governed steam engine with a damper: a chest of 256 raw iron and a
    chest of coal feeding the furnaces by hopper. Left alone for 20 game minutes at a raised tick rate, every raw iron ends up
-   processed: the plate chest holds **between 470 and 555 iron plates** (expected 512 from 256 × 1.5 × 4/3), the medium chest
-   about 38 redstone dust (10% of the crushed ore), nothing waits on a belt, and no item is lost (items in chests + on belts +
+   processed: the plate chest holds **between 470 and 555 iron plates** (expected 512 from 256 × 1.5 × 4/3), the fines carry
+   only dust, nothing waits on a belt, and no item is lost (items in chests + on belts +
    in machines and furnaces account for every input). The main shaft stays within the governor's band around 64 RPM while
    the line runs; when the ore runs out the line idles, belts run empty and the damper banks the fire.
 2. **Backing up recovers:** filling the plate chest stops the trip hammer's belt, which backs up to the furnaces, the trommel,
-   the washer and the grinder in turn, each showing "Output full" or holding its belt entry; emptying the chest restarts
+   the washer and the inline grinder in turn, each showing "Output blocked" or holding its item; emptying the chest restarts
    the whole line without losing an item.
 
 **The factory makes the factory:**
@@ -227,16 +228,18 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 
 **Machines:**
 
-7. **Every recipe** of the washer, trip hammer, lathe, sawmill and trommel works from its input; the washer and trip hammer
-   also work over a belt, letting non-recipe items pass; the washer stops without water and runs on hot water; dust smelts
-   in 5 s in a furnace.
+7. **Every recipe** of the washer, trip hammer, lathe, sawmill and inline grinder works on items fed by belt, hopper and
+   by hand, letting non-recipe items pass; the trommel sorts each default tag to its outlet fed from either end; the washer
+   stops without water and runs on hot water; dust smelts in 5 s in a furnace.
+7a. **Placing:** a two-block machine places as one item and never appears without room for both halves; its drive picks
+   up an adjacent shaft; three trommel blocks in a row form a trommel and power from any long side.
 8. **Ranges and hazards:** each machine below its minimum stops with "Too slow" and its load still drawn; above its maximum it
    warns, jams and is repaired with the wrench; the sawmill blade and the trip hammer hurt a player in survival.
 
 **All of 0.4:**
 
 9. **Pause and reload:** a belt line crossing the simulation distance pauses whole with its items in place; save and reload
-   keep every item on belts and in elevators within 1/16 block of where it was, machine progress, the washer's water and the
+   keep every item on belts, in elevators and in machines' built-in belts within 1/16 block of where it was, machine progress, the washer's water and the
    trommel's drum; breaking a belt drops its items.
 10. **Performance** *(targets)*: 1,000 belt blocks in 16 or more lines carrying 1,000 items, plus 50 machines working, cost
     under **0.15 ms** of the mod's server time per tick on archmage; the client draws 1,000 moving items at under **1.5 ms**
