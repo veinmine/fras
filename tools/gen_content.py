@@ -806,7 +806,7 @@ def steam_recipes():
 
 def steam_data():
     # The firebox's menu: one fuel slot, data [burn, total, kW, boilers].
-    write(f"data/{NS}/horizon/menu/firebox.json", {"slots": 1, "data_slots": 4})
+    write(f"data/{NS}/horizon/menu/firebox.json", {"slots": 1, "data_slots": 6})
     # Scalding (steam spec 8): heat, so fire resistance stops it; armour doesn't.
     write(f"data/{NS}/damage_type/scald.json", {"message_id": f"{NS}.scald", "exhaustion": 0.1, "scaling": "never", "effects": "burning"})
     write("data/minecraft/tags/damage_type/is_fire.json", {"replace": False, "values": [f"{NS}:scald"]})

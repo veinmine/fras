@@ -341,5 +341,8 @@
   "fras.rust.no_cooling": "Przerdzewiała: nie chłodzi. Zeskrob z żelazną blachą, aby naprawić",
   "fras.rust.off": "%s. Rdza wyłączona",
   "fras.rust.rusting": "%s. Rdzewieje: %s. %s za około %s dni",
-  "fras.rust.not_exposed": "%s. Nie rdzewieje tu"
+  "fras.rust.not_exposed": "%s. Nie rdzewieje tu",
+  "fras.firebox.fuel": "Paliwo %s kW",
+  "fras.firebox.bellows": "miech %s",
+  "fras.firebox.damper": "szyber %s"
 }

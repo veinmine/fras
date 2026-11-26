@@ -152,7 +152,18 @@ pub fn read_part(
 /// Merge fields into a block entity's saved data (and send them to clients).
 pub fn merge(host: &mut dyn ServerHost, level: LevelRef, pos: Pos, fields: mod_api::Compound) {
     if let Some(entity) = host.block_entity(level, pos.to_array()) {
+        // Merging reloads the block entity, which zeroes its menu data until
+        // its next tick writes it again: an open screen flashed all zeros.
+        // Put the data back at once.
+        let data = entity
+            .data_slots(&*host)
+            .filter(|d| d.iter().any(|v| *v != 0));
         let _ = entity.merge_data(host, fields);
+        if let Some(data) = data
+            && entity.data_slots(&*host).as_ref() != Some(&data)
+        {
+            let _ = entity.set_data_slots(host, data);
+        }
     }
 }
 

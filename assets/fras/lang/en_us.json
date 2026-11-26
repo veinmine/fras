@@ -294,7 +294,7 @@
   "fras.inspect.throttled": "Throttled to %s%% by a governor",
   "fras.inspect.exhaust": "Exhaust: %s mB/s vented, %s mB/s piped",
   "fras.inspect.exhaust_short": "Not all the exhaust is taken: the heat exchangers are short or their outlet is full",
-  "fras.inspect.exchanger_short": "At full power: exhaust it can\u2019t condense vents at the cylinders",
+  "fras.inspect.exchanger_short": "At full power: exhaust it can’t condense vents at the cylinders",
   "fras.inspect.governor": "Target %s RPM, sensitivity %s (band %s RPM)",
   "fras.inspect.governor_state": "Speed %s RPM, balls at %s RPM, throttle %s%%",
   "fras.inspect.governor_engines": "Throttles %s engine(s)",
@@ -321,7 +321,7 @@
   "fras.inspect.cooled": "Cooled: water %s / %s mB/s, works up to 128 RPM",
   "fras.inspect.cooling_short": "Cooling short: water %s / %s mB/s",
   "fras.inspect.not_cooled": "Not cooled",
-  "fras.inspect.hot_water_stuck": "Hot water can\u2019t get out",
+  "fras.inspect.hot_water_stuck": "Hot water can’t get out",
   "fras.inspect.leaks": "%s leak(s) on this network, losing %s mB/s",
   "fras.governor.target": "Target",
   "fras.governor.sensitivity": "Sensitivity",
@@ -341,5 +341,8 @@
   "fras.rust.no_cooling": "Rusted through: no cooling. Scrape with an iron plate to repair",
   "fras.rust.off": "%s. Rust is off",
   "fras.rust.rusting": "%s. Rusting: %s. %s in about %s days",
-  "fras.rust.not_exposed": "%s. Not exposed"
+  "fras.rust.not_exposed": "%s. Not exposed",
+  "fras.firebox.fuel": "Fuel %s kW",
+  "fras.firebox.bellows": "bellows %s",
+  "fras.firebox.damper": "damper %s"
 }
