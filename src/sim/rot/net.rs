@@ -235,6 +235,9 @@ pub struct Mechanics {
     /// steam and heat spec 14.2), and the networks holding them.
     held: BTreeSet<Pos>,
     held_nets: HashSet<usize>,
+    /// Rigid 1:1 links the game sets between parts that aren't neighbours:
+    /// a belt line's drives turn together (logistics 3.3).
+    ties: HashMap<Pos, BTreeSet<Pos>>,
     /// Rebuilds done (for tests and the profiler).
     pub rebuilds: u64,
 }
@@ -351,6 +354,52 @@ impl Mechanics {
         if let Some(p) = self.parts.get_mut(&pos) {
             p.load = load;
         }
+    }
+
+    /// Tie a group of parts together 1:1 (a belt line's drives, logistics
+    /// 3.3), replacing whatever ties they had. A group of one unties it.
+    /// `cause`: the part a player just joined (it jams if the join is a
+    /// direction conflict, spec 6.5).
+    pub fn set_ties(&mut self, group: &[Pos], cause: Option<Pos>) {
+        let mut touched: BTreeSet<Pos> = group.iter().copied().collect();
+        for p in group {
+            if let Some(old) = self.ties.remove(p) {
+                for q in old {
+                    if let Some(set) = self.ties.get_mut(&q) {
+                        set.remove(p);
+                        if set.is_empty() {
+                            self.ties.remove(&q);
+                        }
+                    }
+                    touched.insert(q);
+                }
+            }
+        }
+        if group.len() > 1 {
+            for p in group {
+                let others: BTreeSet<Pos> = group.iter().copied().filter(|q| q != p).collect();
+                self.ties.insert(*p, others);
+            }
+        }
+        for p in touched {
+            if self.parts.contains_key(&p) {
+                self.dissolve_at(p);
+                self.dirty.insert(p);
+            }
+        }
+        if let Some(c) = cause
+            && self.parts.contains_key(&c)
+        {
+            self.causes.insert(c);
+        }
+    }
+
+    /// The parts tied to `pos`.
+    pub fn ties(&self, pos: Pos) -> Vec<Pos> {
+        self.ties
+            .get(&pos)
+            .map(|s| s.iter().copied().collect())
+            .unwrap_or_default()
     }
 
     /// Repair a jammed part: it rejoins at once (and may shock).
@@ -981,6 +1030,9 @@ impl Mechanics {
             if let Some(b) = self.parts.get(&pos).and_then(|p| p.spec.belt) {
                 seeds.insert(b.partner);
             }
+            if let Some(t) = self.ties.get(&pos) {
+                seeds.extend(t.iter().copied());
+            }
         }
         for &pos in &seeds {
             self.dissolve_at(pos);
@@ -1049,6 +1101,15 @@ impl Mechanics {
         }
         if let Some(belt) = self.belt_of(pos) {
             out.push((belt.b, belt.k, Some(belt)));
+        }
+        if p.jam.is_none()
+            && let Some(tied) = self.ties.get(&pos)
+        {
+            for q in tied {
+                if self.parts.get(q).is_some_and(|o| o.jam.is_none()) {
+                    out.push((*q, 1.0, None));
+                }
+            }
         }
         out
     }

@@ -45,6 +45,22 @@ pub enum Kind {
     Motor,
     /// Creative: a machine that draws a set torque.
     LoadBank,
+    // ---- 0.4 ----
+    /// Iron pulleys: the wooden ones' rules, faster (progression spec 4.4).
+    IronPulley {
+        large: bool,
+    },
+    /// A belt line's drive roller: one per drive (logistics 3.3). `share` is
+    /// the blocks of belt it carries the inertia and friction of.
+    BeltDrive {
+        share: u8,
+    },
+    /// A bucket elevator column, driven at its head (logistics 8).
+    Elevator {
+        height: u8,
+    },
+    /// One of 0.4's machines (machines spec).
+    Machine(crate::sim::machine::Machine),
 }
 
 /// How a part sits in the world: the faces it connects through.
@@ -167,6 +183,20 @@ impl Spec {
             Kind::Pump => 4.0,
             Kind::Governor => crate::sim::steam::govern::INERTIA,
             Kind::Bellows => crate::sim::steam::bellows::INERTIA,
+            Kind::IronPulley { large } => {
+                if large {
+                    6.0
+                } else {
+                    3.0
+                }
+            }
+            Kind::BeltDrive { share } => {
+                crate::sim::belt::INERTIA_PER_BLOCK * f64::from(share.max(1))
+            }
+            Kind::Elevator { height } => {
+                crate::sim::belt::INERTIA_PER_BLOCK * f64::from(height.max(1))
+            }
+            Kind::Machine(m) => m.inertia(),
         }
     }
 
@@ -183,7 +213,15 @@ impl Spec {
             | Kind::Pulley { .. }
             | Kind::Crank
             | Kind::Motor
-            | Kind::LoadBank => 0.005,
+            | Kind::LoadBank
+            | Kind::IronPulley { .. } => 0.005,
+            Kind::BeltDrive { share } => {
+                crate::sim::belt::FRICTION_PER_BLOCK * f64::from(share.max(1))
+            }
+            Kind::Elevator { height } => {
+                crate::sim::belt::FRICTION_PER_BLOCK * f64::from(height.max(1))
+            }
+            Kind::Machine(_) => 0.0125,
             Kind::Gearbox => 0.01,
             Kind::WaterWheel
             | Kind::Grinder
@@ -208,6 +246,10 @@ impl Spec {
             Kind::Flywheel | Kind::Pump => Some(192.0),
             Kind::Governor => Some(crate::sim::steam::govern::MAX_RPM),
             Kind::Bellows => Some(crate::sim::steam::bellows::MAX_RPM),
+            Kind::IronPulley { .. } => Some(IRON_PULLEY_MAX_RPM),
+            Kind::BeltDrive { .. } => Some(crate::sim::belt::MAX_RPM),
+            Kind::Elevator { .. } => Some(crate::sim::belt::ELEVATOR_MAX_RPM),
+            Kind::Machine(m) => Some(m.range().1),
             _ => None,
         }
     }
@@ -221,6 +263,8 @@ impl Spec {
         match self.kind {
             Kind::Shaft(Material::Wood) => Some(32.0),
             Kind::Shaft(Material::Iron) | Kind::Bearing | Kind::Clutch => Some(128.0),
+            // The belt carries 24 Nm between its drives (logistics 3.3).
+            Kind::BeltDrive { .. } => Some(crate::sim::belt::TORQUE_LIMIT),
             _ => None,
         }
     }
@@ -228,7 +272,10 @@ impl Spec {
     /// Supports end a span (spec 5): bearings and every non-shaft part
     /// except pulleys.
     pub fn is_support(&self) -> bool {
-        !matches!(self.kind, Kind::Shaft(_) | Kind::Pulley { .. })
+        !matches!(
+            self.kind,
+            Kind::Shaft(_) | Kind::Pulley { .. } | Kind::IronPulley { .. }
+        )
     }
 
     /// Part of a span: plain shafts and pulleys.
@@ -256,7 +303,14 @@ impl Spec {
     pub fn is_machine(&self) -> bool {
         matches!(
             self.kind,
-            Kind::Grinder | Kind::Pump | Kind::Governor | Kind::Bellows | Kind::LoadBank
+            Kind::Grinder
+                | Kind::Pump
+                | Kind::Governor
+                | Kind::Bellows
+                | Kind::LoadBank
+                | Kind::BeltDrive { .. }
+                | Kind::Elevator { .. }
+                | Kind::Machine(_)
         )
     }
 
@@ -266,6 +320,7 @@ impl Spec {
             Kind::Grinder => Some(GRINDER_MIN_RPM),
             Kind::Pump => Some(crate::sim::fluid::pump::MIN_RPM),
             Kind::Bellows => Some(crate::sim::steam::bellows::MIN_RPM),
+            Kind::Machine(m) => Some(m.range().0),
             _ => None,
         }
     }
@@ -273,7 +328,9 @@ impl Spec {
     /// A pulley's diameter, in small-pulley units.
     pub fn pulley_diameter(&self) -> Option<f64> {
         match self.kind {
-            Kind::Pulley { large } => Some(if large { 2.0 } else { 1.0 }),
+            Kind::Pulley { large } | Kind::IronPulley { large } => {
+                Some(if large { 2.0 } else { 1.0 })
+            }
             _ => None,
         }
     }
@@ -285,6 +342,8 @@ impl Spec {
     }
 }
 
+/// Iron pulleys' top speed (progression spec 4.4).
+pub const IRON_PULLEY_MAX_RPM: f64 = 192.0;
 /// Gearbox: the slow side turns at half the fast side's speed.
 pub const GEARBOX_RATIO: f64 = 0.5;
 /// Constant friction `f` on every part, Nm.

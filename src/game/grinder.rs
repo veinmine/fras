@@ -87,6 +87,7 @@ pub fn parse(id: &str, json: &mod_api::serde_json::Value) -> Result<Recipe, Stri
         results,
         revolutions: json["revolutions"].as_f64().ok_or("no revolutions")?,
         load: json["load"].as_f64().unwrap_or(grind::DEFAULT_LOAD),
+        water: json["water"].as_f64().unwrap_or(0.0),
     };
     grind::validate(&recipe)?;
     Ok(recipe)

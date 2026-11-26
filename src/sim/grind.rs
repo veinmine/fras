@@ -28,6 +28,8 @@ pub struct Recipe {
     pub results: Vec<Output>,
     pub revolutions: f64,
     pub load: f64,
+    /// Water used per run, mB (washing; 0 for the rest: machines spec 2.1).
+    pub water: f64,
 }
 
 /// The default load, Nm.
@@ -127,6 +129,9 @@ pub fn validate(recipe: &Recipe) -> Result<(), String> {
     if recipe.load < 0.0 || !recipe.load.is_finite() {
         return Err(format!("load {}", recipe.load));
     }
+    if recipe.water < 0.0 || !recipe.water.is_finite() {
+        return Err(format!("water {}", recipe.water));
+    }
     Ok(())
 }
 
@@ -223,6 +228,8 @@ pub enum Status {
     TooSlow = 5,
     OutputFull = 6,
     Grinding = 7,
+    /// The washer's tank is short of the recipe's water (machines spec 4.3).
+    NoWater = 8,
     Idle = 0,
 }
 
@@ -240,6 +247,7 @@ impl Status {
             5 => Status::TooSlow,
             6 => Status::OutputFull,
             7 => Status::Grinding,
+            8 => Status::NoWater,
             _ => Status::Idle,
         }
     }
@@ -253,27 +261,30 @@ impl Status {
             Status::TooSlow => "too_slow",
             Status::OutputFull => "output_full",
             Status::Grinding => "grinding",
+            Status::NoWater => "no_water",
             Status::Idle => "idle",
         }
     }
 }
 
-/// What a grinder is doing this tick.
+/// What a machine is doing this tick.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Situation {
     pub jammed: bool,
     pub paused: bool,
     pub rpm: f64,
-    /// Cooling water raises its limit (cooling spec 6).
-    pub cooled: bool,
+    /// Its working range now (cooling may raise the top, cooling spec 6).
+    pub range: (f64, f64),
     /// The input holds a recipe's ingredient and count.
     pub has_recipe: bool,
     /// Its results fit.
     pub fits: bool,
+    /// Enough water for the recipe (always true for dry machines).
+    pub water: bool,
 }
 
 pub fn status(s: &Situation) -> Status {
-    let (min, max) = working_range(s.cooled);
+    let (min, max) = s.range;
     let w = s.rpm.abs();
     if s.jammed {
         Status::Jammed
@@ -285,6 +296,8 @@ pub fn status(s: &Situation) -> Status {
         Status::OutputFull
     } else if !s.has_recipe {
         Status::Idle
+    } else if !s.water {
+        Status::NoWater
     } else if w == 0.0 {
         Status::NoPower
     } else if w < min {
@@ -294,7 +307,7 @@ pub fn status(s: &Situation) -> Status {
     }
 }
 
-/// The grinder's saved work.
+/// The machine's saved work.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Work {
     /// Revolutions done on the current recipe.
@@ -313,6 +326,10 @@ pub struct Tick {
     pub consumed: u32,
     /// Revolutions needed for the current recipe (for the arrow).
     pub needed: f64,
+    /// Water used this tick, mB (at completion).
+    pub water_used: f64,
+    /// A recipe completed this tick.
+    pub completed: bool,
 }
 
 /// One tick of a grinder: its input and outputs, its speed and state.
@@ -330,6 +347,38 @@ pub fn tick(
     items: &dyn Items,
     random: &mut dyn FnMut() -> f64,
 ) -> Tick {
+    let state = MachineState {
+        rpm,
+        jammed,
+        paused,
+        range: working_range(cooled),
+        water: None,
+    };
+    tick_machine(work, input, outputs, &state, recipes, items, random)
+}
+
+/// A machine's speed and state for one tick (machines spec 2).
+#[derive(Clone, Debug, PartialEq)]
+pub struct MachineState {
+    pub rpm: f64,
+    pub jammed: bool,
+    pub paused: bool,
+    pub range: (f64, f64),
+    /// Water in its tank, mB, for machines that use water (`None`: dry).
+    pub water: Option<f64>,
+}
+
+/// One tick of any recipe machine working from its input slot (machines
+/// spec 2.2, 2.3): the grinder's rules with the machine's range and water.
+pub fn tick_machine(
+    work: &mut Work,
+    input: Option<&Stack>,
+    outputs: &mut [Option<Stack>],
+    state: &MachineState,
+    recipes: &[Recipe],
+    items: &dyn Items,
+    random: &mut dyn FnMut() -> f64,
+) -> Tick {
     let recipe = input.and_then(|s| find(recipes, &s.item, items).filter(|r| s.count >= r.count));
     // A different recipe (or none) resets the progress.
     let id = input
@@ -340,35 +389,44 @@ pub fn tick(
         work.progress = 0.0;
     }
     let fits = recipe.is_some_and(|r| fits(&r.max_results(), outputs, items));
+    let water_ok = match (recipe, state.water) {
+        (Some(r), Some(w)) => w + 1e-9 >= r.water,
+        _ => true,
+    };
     let situation = Situation {
-        jammed,
-        paused,
-        rpm,
-        cooled,
+        jammed: state.jammed,
+        paused: state.paused,
+        rpm: state.rpm,
+        range: state.range,
         has_recipe: recipe.is_some(),
         fits,
+        water: water_ok,
     };
     let status = status(&situation);
     let needed = recipe.map_or(0.0, |r| r.revolutions);
-    let has_work = recipe.is_some() && fits && !jammed;
+    let has_work = recipe.is_some() && fits && water_ok && !state.jammed;
     let mut result = Tick {
         load: if has_work { recipe.unwrap().load } else { 0.0 },
         status,
         consumed: 0,
         needed,
+        water_used: 0.0,
+        completed: false,
     };
-    if !has_work || paused {
+    if !has_work || state.paused {
         return result;
     }
     let recipe = recipe.unwrap();
-    let (min, max) = working_range(cooled);
-    work.progress += progress_per_tick(rpm, min, max);
+    let (min, max) = state.range;
+    work.progress += progress_per_tick(state.rpm, min, max);
     if work.progress + 1e-9 >= recipe.revolutions {
         let rolled = recipe.roll(random);
         // The space check used the maximum rolls, so this always fits.
         let _ = insert(&rolled, outputs, items);
         work.progress = 0.0;
         result.consumed = recipe.count;
+        result.water_used = recipe.water;
+        result.completed = true;
     }
     result
 }
@@ -408,6 +466,7 @@ pub fn builtin() -> Vec<Recipe> {
             results,
             revolutions: rev,
             load,
+            water: 0.0,
         };
     let item = |s: &str| Ingredient::Item(s.into());
     let mut v = Vec::new();
@@ -813,9 +872,10 @@ mod tests {
                 jammed,
                 paused,
                 rpm,
-                cooled: false,
+                range: working_range(false),
                 has_recipe,
                 fits,
+                water: true,
             })
         };
         assert_eq!(s(true, true, 200.0, true, false), Status::Jammed);
@@ -826,7 +886,7 @@ mod tests {
         assert_eq!(s(false, false, 5.0, true, true), Status::TooSlow);
         assert_eq!(s(false, false, 50.0, true, true), Status::Grinding);
         assert_eq!(s(false, false, 50.0, false, true), Status::Idle);
-        for code in 0..8 {
+        for code in 0..9 {
             assert_eq!(Status::from_code(code).code(), code);
         }
     }

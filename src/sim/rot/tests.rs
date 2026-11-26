@@ -1066,3 +1066,103 @@ fn a_creative_engine_holds_its_speed_under_any_load() {
     motor_run(&mut m, &w, &mut ramp, -64.0, 200.0, 200);
     assert!((1..=10).any(|x| m.part(p(x, 64, 0)).unwrap().jam == Some(Jam::Shear)));
 }
+
+// ---- 0.4: belt drives tied by their line (logistics spec 3.3) ----
+
+fn belt_drive(face: Dir) -> Spec {
+    Spec::new(Kind::BeltDrive { share: 8 }, Shape::Socket(face))
+}
+
+/// A crank at (x0, 64, z) facing south, a shaft, and a belt drive on the
+/// shaft's south end (the drive's axis is z: a belt heading east or west).
+fn driven(m: &mut Mechanics, x: i32) -> (Pos, Pos) {
+    let c = p(x, 64, 0);
+    m.insert(c, crank(Dir::South), None, true);
+    m.insert(p(x, 64, 1), wood(Axis::Z), None, true);
+    let d = p(x, 64, 2);
+    m.insert(d, belt_drive(Dir::North), None, true);
+    (c, d)
+}
+
+#[test]
+fn a_belt_line_ties_its_drives_into_one_network() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    let (c1, d1) = driven(&mut m, 0);
+    // The second drive has no source of its own: a machine on it.
+    let d2 = p(8, 64, 2);
+    m.insert(d2, belt_drive(Dir::North), None, true);
+    m.insert(p(8, 64, 1), wood(Axis::Z), None, true);
+    m.insert(p(8, 64, 0), grinder(Dir::South), None, true);
+    m.set_ties(&[d1, d2], None);
+    m.set_drive(c1, CRANKING);
+    run(&mut m, &w, 200);
+    assert!(rpm(&m, d2) > 10.0, "{}", rpm(&m, d2));
+    assert!((rpm(&m, d1) - rpm(&m, d2)).abs() < 1e-9);
+    assert!(rpm(&m, p(8, 64, 0)).abs() > 10.0);
+    // Untied, the far side coasts down.
+    m.set_ties(&[d1], None);
+    m.set_ties(&[d2], None);
+    run(&mut m, &w, 300);
+    assert!(rpm(&m, d2).abs() < 0.5);
+}
+
+#[test]
+fn drives_turning_opposite_ways_jam_when_the_line_joins_them() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    let (c1, d1) = driven(&mut m, 0);
+    let (c2, d2) = driven(&mut m, 8);
+    m.set_drive(c1, CRANKING);
+    m.set_drive(
+        c2,
+        Drive {
+            dir: -1.0,
+            ..CRANKING
+        },
+    );
+    run(&mut m, &w, 200);
+    m.set_ties(&[d1, d2], Some(d2));
+    run(&mut m, &w, 2);
+    let jammed = [c1, d1, c2, d2, p(0, 64, 1), p(8, 64, 1)]
+        .iter()
+        .any(|q| m.part(*q).unwrap().jam.is_some());
+    assert!(jammed);
+}
+
+#[test]
+fn a_belt_carries_24_nm_between_drives_then_shears() {
+    let w = World::default();
+    let mut m = Mechanics::new();
+    let motor = p(0, 64, 0);
+    m.insert(
+        motor,
+        Spec::new(Kind::Motor, Shape::Socket(Dir::South)),
+        None,
+        true,
+    );
+    m.insert(p(0, 64, 1), iron(Axis::Z), None, true);
+    let d1 = p(0, 64, 2);
+    m.insert(d1, belt_drive(Dir::North), None, true);
+    let d2 = p(8, 64, 2);
+    m.insert(d2, belt_drive(Dir::North), None, true);
+    m.insert(p(8, 64, 1), iron(Axis::Z), None, true);
+    let bank = p(8, 64, 0);
+    m.insert(
+        bank,
+        Spec::new(Kind::LoadBank, Shape::Socket(Dir::South)),
+        None,
+        true,
+    );
+    m.set_ties(&[d1, d2], None);
+    m.set_drive(motor, motor_drive(32.0));
+    m.set_load(bank, 12.0);
+    run(&mut m, &w, 400);
+    assert!(m.part(d2).unwrap().jam.is_none());
+    m.set_load(bank, 60.0);
+    run(&mut m, &w, 400);
+    let sheared = [d1, d2]
+        .iter()
+        .any(|q| m.part(*q).unwrap().jam == Some(Jam::Shear));
+    assert!(sheared);
+}
