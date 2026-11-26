@@ -83,8 +83,32 @@ Not in 0.1 (no hook yet, or left for later):
 | Performance: 50 boilers, 50 engines, 2000 pipes under 0.2 ms per tick; a 2000-pipe rebuild under 2 ms | ~0.46 ms per tick in game (steam step 0.12, shell saves 0.13, block entities 0.20, of which ~0.13 is Horizon copying each block entity's data); rebuild ~0.6 ms alone, ~2.1 ms with the 50-boiler plant in the level | Measured on archmage. A rebuild rebuilds every plant in the level; per-network rebuilds and fewer ticking block entities are left for later. |
 | Hot steam pipe 1 damage per second | 1 damage every half second, like a magma block | At 1 per second a fed player's regeneration cancelled it out in game. |
 
+## Where 0.3 differs from the spec
+
+Tested in game on archmage (exit criteria in section 11 of `specs/regulation.md`):
+
+| Spec | 0.3 | Why |
+| --- | --- | --- |
+| Flyball damping `ζ` 0.2; hunting from sensitivity 2 with one flywheel (regulation 3.5) | `ζ` 0.6: at the spec's rig (4 bar, target 90) hunting starts at sensitivity 4 and a second flywheel steadies it; at 5 bar and target 64 sensitivities 2 to 5 hunt and a second flywheel halves the swing | With 0.2 the default sensitivity 1 hunted ±10 RPM in game at target 64 and 5 bar. With 0.6 sensitivity 1 is steady from 2 to 6 bar, targets 32 to 128, loads up to 24 Nm (unit test). |
+| A load drop keeps the speed at or under the target (criterion 1) | It can overshoot by a few RPM, then settles under the target | Flyball lag; the model in `tools/governor_sim.py` overshoots too. In game at sensitivity 1: peak 63.6 RPM at target 64, settling at 61. |
+| The governor's menu has no slots | One hidden slot that no face reaches | Horizon's menu declarations need 1 to 256 slots. |
+| Pre-painted items place painted parts through their `minecraft:block_state` component | Placement sets `rust=painted` when the held item is a painted variant | The component isn't applied when an item places a mod block. |
+| An idle governed plant banks its fire (criterion 6) | It turns the fire down to the steam the idling engines and the feed still need (about 15% open in the test plant); it banks fully when steam use stops, or by redstone | Heat in equals steam out: idling engines still draw steam. |
+| A rusting part's count is saved with its block on every random tick | Kept in memory, written every 9 counts and on each stage change | A block entity write per random tick cost ~50 µs; a reload loses at most 8 of the 18 counts a stage needs. |
+| Routing: each node fed along one route from the sources (fluids 5) | Water, hot water and exhaust route source by source, each on its own tree, sharing the throughput left; cooled machines first, exchangers last | On one tree two lines from different sources that merge left one source with nowhere to go (a cooled grinder's hot water behind an exchanger's outlet: it lost cooling and jammed). |
+| Hot water feed first (cooling 7.4) within a network | Hot water networks are routed before water networks | A boiler fed both ways could fill from the cold network first, whatever order networks were built in. |
+| Performance: 0.2 plant plus 50 governors, dampers, bellows and exchangers under 0.6 ms per tick | ~0.64 ms of the mod's own time per tick (level work 0.47, fireboxes 0.15, governors 0.02), plus Horizon's block entity copying; the whole server tick went from 1.3 to ~2.2 ms. 2000 rusting parts in rain: 0.021 to 0.026 ms per tick | Measured on archmage with timers around the hooks. Governors refresh menu and look every 4th tick; fireboxes visit the level state once per tick. The steam step itself is ~0.16 ms per tick, the rest of the step (saves, syncs) ~0.15. |
+
+Not in 0.3 yet:
+
+- The cooled grinder test plant reached 116 RPM, not 120 (criterion 10): one boiler's steam at the damper's 5.5 bar was the limit; the grinder runs to 128 cooled.
+- A rusted-through governor or damper shows only its rust line in the overlay, not its settings.
+
 ## Testing in a game
 
 Use a separate instance (`fras-dev`). Speed things up: `/tp` to the test site instead of walking, and
 `/tick rate 100` (or `/tick sprint`) while waiting for spin-up, coasting, warnings or grinding. The exit
-criteria are in section 13 of `specs/rotational-network.md`.
+criteria are in section 13 of `specs/rotational-network.md` (0.1), section 11 of `specs/regulation.md` (0.3).
+Start the client with `offscreen` when its window isn't visible (a hidden window gets no frames, so the
+game stalls). For rust, `/gamerule random_tick_speed 300` and rain; feed test boilers from a big tank
+(`fill … fras:storage_tank{pv:1,water:4000d,content:"water"}`) or they run dry and burst.
