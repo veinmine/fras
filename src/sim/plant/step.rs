@@ -156,14 +156,16 @@ impl Works {
             if self.plant_of(b).is_some_and(|p| self.plant_paused(p)) {
                 continue;
             }
-            let blowing = self
+            // It works as hard as its fire burns: full load wide open, less
+            // as the dampers close.
+            let load = self
                 .bellows_of
                 .iter()
                 .find(|(_, x)| **x == b)
                 .and_then(|(f, _)| self.fires.get(f))
-                .is_some_and(|f| f.kw > 0.0 && f.damper > 0.0 && f.boost > 0.0);
-            self.bellows_loads
-                .insert(b, if blowing { bellows::LOAD } else { 0.0 });
+                .filter(|f| f.kw > 0.0 && f.damper > 0.0 && f.boost > 0.0)
+                .map_or(0.0, |f| bellows::load(f.damper));
+            self.bellows_loads.insert(b, load);
         }
     }
 

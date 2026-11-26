@@ -388,11 +388,25 @@ pub fn lines(
                         };
                         out.push(red(tr(key, vec![])));
                     }
-                    Some(f) => {
-                        if w.fire(f).is_none_or(|f| f.kw <= 0.0) {
-                            out.push(tr("fras.inspect.bellows_cold", vec![]));
+                    Some(f) => match w.fire(f) {
+                        Some(f) if f.kw > 0.0 => {
+                            let load = w
+                                .bellows_loads()
+                                .into_iter()
+                                .find(|(q, _)| *q == pos)
+                                .map_or(0.0, |(_, l)| l);
+                            out.push(tr("fras.inspect.bellows_load", vec![num(load)]));
+                            // Dampers throttling: the fire has heat to spare, so
+                            // the boost only saves fuel.
+                            if f.boost > 0.0 && f.damper < 1.0 - 1e-6 {
+                                out.push(tr(
+                                    "fras.inspect.bellows_spare",
+                                    vec![num(f.damper * 100.0)],
+                                ));
+                            }
                         }
-                    }
+                        _ => out.push(tr("fras.inspect.bellows_cold", vec![])),
+                    },
                 }
             }
             Block::HeatExchanger => {

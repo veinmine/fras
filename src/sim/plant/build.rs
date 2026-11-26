@@ -253,13 +253,12 @@ impl Works {
                 self.shells[si].dampers.push(d);
             }
         }
-        // Each firebox's bellows: the first by position, not on its mouth.
+        // Each firebox's bellows: the first by position, on any face.
         for b in self.sorted_parts(|s| s.kind == Kind::Bellows) {
             let nozzle = self.parts[&b].spec.dir;
             let fire = b.offset(nozzle);
             if let Some(f) = self.parts.get(&fire)
                 && f.spec.kind == Kind::Firebox
-                && f.spec.dir != nozzle.opposite()
             {
                 self.bellows_of.entry(fire).or_insert(b);
             }

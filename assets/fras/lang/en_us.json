@@ -310,6 +310,8 @@
   "fras.inspect.bellows_second": "A second bellows on this firebox does nothing",
   "fras.inspect.bellows_no_firebox": "Not facing a firebox",
   "fras.inspect.bellows_cold": "Firebox not burning",
+  "fras.inspect.bellows_load": "Load %s Nm (follows the fire's burn rate)",
+  "fras.inspect.bellows_spare": "Damper %s%% open: the fire has heat to spare, so the boost only saves fuel",
   "fras.inspect.exchanger": "Power %s kW (%s copper, %s iron radiators)",
   "fras.inspect.exchanger_flow": "Taking %s: %s / %s mB/s",
   "fras.inspect.exchanger_idle": "Idle: nothing comes in",

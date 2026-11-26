@@ -310,6 +310,8 @@
   "fras.inspect.bellows_second": "Drugi miech na tym palenisku nic nie daje",
   "fras.inspect.bellows_no_firebox": "Nie jest skierowany na palenisko",
   "fras.inspect.bellows_cold": "Palenisko się nie pali",
+  "fras.inspect.bellows_load": "Obciążenie %s Nm (zależy od tempa spalania)",
+  "fras.inspect.bellows_spare": "Szyber otwarty w %s%%: ogień ma nadmiar ciepła, więc dmuchanie tylko oszczędza paliwo",
   "fras.inspect.exchanger": "Moc %s kW (chłodnice miedziane: %s, żelazne: %s)",
   "fras.inspect.exchanger_flow": "Przyjmuje: %s, %s / %s mB/s",
   "fras.inspect.exchanger_idle": "Bezczynny: nic nie wpływa",
