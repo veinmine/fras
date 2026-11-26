@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "redstone_valve",
+  "block": "fras:redstone_valve",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

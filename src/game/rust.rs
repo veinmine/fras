@@ -84,6 +84,29 @@ pub fn exposure(host: &dyn mod_api::Host, level: LevelRef, dim: Dim, pos: Pos) -
     }
 }
 
+/// Exposure for a random tick: only the weight matters, so it stops at the
+/// first trigger found, cheapest and heaviest first.
+fn exposure_quick(host: &dyn mod_api::Host, level: LevelRef, dim: Dim, pos: Pos) -> Exposure {
+    let mut e = Exposure::default();
+    if with_level(dim, |l| l.steam.scalding.contains(&pos)) {
+        e.steam = true;
+    } else if server::property(host, level, pos, "waterlogged").as_deref() == Some("true") {
+        e.waterlogged = true;
+    } else {
+        let up = pos.offset(Dir::Up).to_array();
+        e.rain = level.is_raining_at(host, up) == Some(true)
+            && level.can_see_sky(host, up) == Some(true);
+        if !e.rain {
+            e.touching_water = Dir::ALL.into_iter().any(|d| {
+                level
+                    .fluid_state(host, pos.offset(d).to_array())
+                    .is_some_and(|f| f.amount > 0 && f.fluid.id(host).ends_with("water"))
+            });
+        }
+    }
+    e
+}
+
 /// A part's stage from the level.
 pub fn stage(host: &dyn mod_api::Host, level: LevelRef, pos: Pos, block: Block) -> Stage {
     block.rust_stage(&|k| server::property(host, level, pos, k))
@@ -100,14 +123,14 @@ pub fn ticks(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
         if matches!(was, Stage::Painted | Stage::Leaking) {
             continue;
         }
-        let exp = exposure(&*host, level, dim, pos);
-        let nbt = host
-            .block_entity(level, pos.to_array())
-            .and_then(|e| e.data(&*host))
-            .unwrap_or_default();
-        let count = blocks::get_i32(&nbt, "rust_n").unwrap_or(0).max(0) as u32;
+        let exp = exposure_quick(&*host, level, dim, pos);
+        let count = count_of(&*host, level, dim, pos);
         let (now, count2) = rust::tick(was, count, exp, on(), speed());
-        if count2 != count {
+        with_level(dim, |l| l.steam.rust_counts.insert(pos, count2));
+        // The count lives in memory; the block entity is written only every
+        // SAVE_EVERY counts and on a stage change (criterion 17: a merge per
+        // random tick cost ~50 µs).
+        if count2 != count && (now != was || count2.is_multiple_of(SAVE_EVERY)) {
             let mut c = mod_api::Compound::new();
             blocks::put_i32(&mut c, "rust_n", count2 as i32);
             server::merge(host, level, pos, c);
@@ -116,6 +139,22 @@ pub fn ticks(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             set_stage(host, level, dim, pos, block, now);
         }
     }
+}
+
+/// Counts between writes of a part's rust count to its block entity: a reload
+/// loses at most this many minus one.
+const SAVE_EVERY: u32 = 9;
+
+/// A part's rust count: from memory, else from its block entity.
+fn count_of(host: &dyn mod_api::Host, level: LevelRef, dim: Dim, pos: Pos) -> u32 {
+    if let Some(n) = with_level(dim, |l| l.steam.rust_counts.get(&pos).copied()) {
+        return n;
+    }
+    let nbt = host
+        .block_entity(level, pos.to_array())
+        .and_then(|e| e.data(host))
+        .unwrap_or_default();
+    blocks::get_i32(&nbt, "rust_n").unwrap_or(0).max(0) as u32
 }
 
 /// Set a part's stage: its look, its leak or jam.
@@ -187,6 +226,7 @@ pub fn scrape(
             let mut c = mod_api::Compound::new();
             blocks::put_i32(&mut c, "rust_n", 0);
             server::merge(host, level, pos, c);
+            with_level(dim, |l| l.steam.rust_counts.insert(pos, 0));
             set_stage(host, level, dim, pos, block, Stage::Clean);
             effects::sound(host, level, pos, "minecraft:item.axe.scrape", 1.0, 0.8);
             super::tools::bar(host, player, Text::translate("fras.rust.scraped", vec![]));
@@ -263,6 +303,10 @@ pub fn line(
                 with_level(dim, |l| l.mech.part(pos).and_then(|p| p.jam)) == Some(Jam::Rusted);
             if jam {
                 Text::translate("fras.rust.rusted_through", vec![])
+            } else if block == Block::FurnaceDamper {
+                Text::translate("fras.rust.stuck", vec![])
+            } else if block == Block::IronRadiator {
+                Text::translate("fras.rust.no_cooling", vec![])
             } else {
                 Text::translate(
                     "fras.rust.leaking",
@@ -272,11 +316,7 @@ pub fn line(
         }
         _ => {
             let exp = exposure(host, level, dim, pos);
-            let nbt = host
-                .block_entity(level, pos.to_array())
-                .and_then(|e| e.data(host))
-                .unwrap_or_default();
-            let count = blocks::get_i32(&nbt, "rust_n").unwrap_or(0).max(0) as u32;
+            let count = count_of(host, level, dim, pos);
             match (exp.cause(), on()) {
                 (Some(cause), true) => {
                     let days =
@@ -295,6 +335,7 @@ pub fn line(
                         ],
                     )
                 }
+                (Some(_), false) => Text::translate("fras.rust.off", vec![name]),
                 _ => Text::translate("fras.rust.not_exposed", vec![name]),
             }
         }

@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "iron_radiator",
+  "block": "fras:iron_radiator",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

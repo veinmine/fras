@@ -102,9 +102,11 @@ impl Hooks for Fras {
             let key = r.item_key(&format!("{ID}:{item}"));
             r.item_part(key, game::tools::Tooltip(item));
         }
+        let mut painted = Vec::new();
         for item in PAINTED {
             let key = r.item_key(&format!("{ID}:painted_{item}"));
             r.item_part(key, game::tools::Tooltip("painted"));
+            painted.push(key);
         }
         let setting = mod_api::SettingSpec::choice(
             game::steam::SETTING,
@@ -152,6 +154,7 @@ impl Hooks for Fras {
             iron_plate: r.item_key("fras:iron_plate"),
             leather: r.item_key("minecraft:leather"),
             paint,
+            painted,
             rust_flakes: r.item_key("fras:rust_flakes"),
             smoke: r.particle_key("minecraft:smoke"),
             crit: r.particle_key("minecraft:crit"),

@@ -409,6 +409,42 @@ fn a_boiler_fed_hot_water_keeps_boiling() {
     assert!(w.shells[bi].boiled > 0.0);
 }
 
+#[test]
+fn hot_feed_comes_before_cold_feed_on_another_face() {
+    // The water tank north of the boiler, whose network sorts first, the hot
+    // water tank east of it (tank_feed): the boiler still takes hot feed first.
+    let world = World::default();
+    let mut w = Works::new();
+    tank_feed(&mut w, Content::HotWater);
+    let cold = Saved {
+        water: 1000.0,
+        content: Some(Content::Water),
+        ..Saved::default()
+    };
+    w.insert(
+        p(0, 0, -4),
+        Spec::new(Kind::Shell(ShellKind::Tank)),
+        Some(cold),
+    );
+    for z in -3..0 {
+        pipe(&mut w, p(0, 0, z), &[Dir::North, Dir::South]);
+    }
+    w.step(&world);
+    let bi = w.shell_of[&p(0, 0, 0)];
+    let cap = w.shells[bi].water_capacity();
+    w.shells[bi].water = cap - 20.0;
+    let level = |w: &Works, at: Pos| w.shells[w.shell_of[&at]].water;
+    let (hot_before, cold_before) = (level(&w, p(5, 0, 0)), level(&w, p(0, 0, -4)));
+    w.step(&world);
+    let hot_gave = hot_before - level(&w, p(5, 0, 0));
+    let cold_gave = cold_before - level(&w, p(0, 0, -4));
+    assert!(
+        (hot_gave - 20.0).abs() < 1e-6,
+        "hot {hot_gave}, cold {cold_gave}"
+    );
+    assert!(cold_gave.abs() < 1e-6, "hot {hot_gave}, cold {cold_gave}");
+}
+
 /// A grinder at (10,0,0), socket east, fed from a water tank on its west and
 /// draining hot water north (when `drain`).
 fn cooled_grinder(w: &mut Works, water: f64, drain: bool) -> Pos {
@@ -453,6 +489,47 @@ fn a_grinder_with_water_through_it_is_cooled() {
     let (content, f) = w.drain_flow(p(10, 0, -2)).unwrap();
     assert_eq!(content, Content::HotWater);
     assert!(f > 0.0);
+}
+
+#[test]
+fn two_grinders_whose_hot_water_lines_merge_both_stay_cooled() {
+    // Grinder A at (10,0,0) with its outlet north, grinder B at (10,0,-4)
+    // with its outlet south, each fed from its own tank; the outlets meet at
+    // (10,0,-2) and run east into a drain. Routed on one tree, the junction
+    // went to one grinder and the other's hot water had nowhere to go.
+    let world = World::default();
+    let mut w = Works::new();
+    let a = cooled_grinder(&mut w, 1000.0, false);
+    let saved = Saved {
+        water: 1000.0,
+        content: Some(Content::Water),
+        ..Saved::default()
+    };
+    w.insert(
+        p(7, 0, -4),
+        Spec::new(Kind::Shell(ShellKind::Tank)),
+        Some(saved),
+    );
+    pipe(&mut w, p(8, 0, -4), &[Dir::West, Dir::East]);
+    pipe(&mut w, p(9, 0, -4), &[Dir::West, Dir::East]);
+    let b = p(10, 0, -4);
+    w.insert(b, Spec::new(Kind::Grinder).with_dir(Dir::East), None);
+    pipe(&mut w, p(10, 0, -2), &[Dir::South, Dir::North, Dir::East]);
+    pipe(&mut w, p(10, 0, -3), &[Dir::North, Dir::South]);
+    w.insert(
+        p(11, 0, -2),
+        Spec::new(Kind::Drain).with_dir(Dir::West),
+        None,
+    );
+    w.set_cool_demand(a, 11.0);
+    w.set_cool_demand(b, 11.0);
+    for _ in 0..((cool::BUFFER / 11.0 / DT) as usize + 20) {
+        w.step(&world);
+    }
+    assert!(w.cooled(a), "a {:?}", w.cooling_info(a));
+    assert!(w.cooled(b), "b {:?}", w.cooling_info(b));
+    let (_, f) = w.drain_flow(p(11, 0, -2)).unwrap();
+    assert!((f - 22.0).abs() < 0.5, "drain {f}");
 }
 
 #[test]

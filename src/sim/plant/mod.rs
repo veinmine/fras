@@ -214,6 +214,10 @@ pub struct Net {
     /// from the sources that aren't tanks, and from the tanks.
     pub tree: Tree,
     pub tank_tree: Tree,
+    /// Water, hot water and exhaust: one tree per source that isn't a tank,
+    /// routed one after another, so lines from two sources that merge both
+    /// deliver (`tree` gives each node to one source only).
+    pub source_trees: Vec<Tree>,
     /// Positions next to it in unloaded chunks: it pauses.
     pub frontier: Vec<Pos>,
     pub pool: Option<usize>,

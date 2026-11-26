@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "governor",
+  "block": "fras:governor",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

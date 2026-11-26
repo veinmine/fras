@@ -43,6 +43,11 @@ pub fn iron() -> &'static str {
     RUST.with(|r| r.get()).unwrap_or("block/iron_block")
 }
 
+/// `default`, or the part's rust sprite once it has rusted or been painted.
+pub fn rusted_or(default: &'static str) -> &'static str {
+    RUST.with(|r| r.get()).unwrap_or(default)
+}
+
 fn housing() -> &'static str {
     RUST.with(|r| r.get()).unwrap_or("block/polished_andesite")
 }

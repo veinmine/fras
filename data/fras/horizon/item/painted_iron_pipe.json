@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "iron_pipe",
+  "block": "fras:iron_pipe",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"

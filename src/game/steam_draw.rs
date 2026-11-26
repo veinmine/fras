@@ -343,9 +343,11 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
     spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
     axle(draw, axis, [0.0, 16.0], 2.0, iron(), iron());
     // The rim: 24 texels out, 4 deep, 3 thick across.
+    // Dark iron, rusted or painted with the part (rust spec 7.3).
+    let dark = super::draw::rusted_or(DARK);
     ring(
         draw,
-        DARK,
+        dark,
         CENTER,
         axis,
         20.0,
@@ -373,7 +375,7 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
         let side = add(scale(e1, -t.sin()), scale(e2, t.cos()));
         let from = add(CENTER, scale(dir, 3.0 / 16.0));
         let to = add(CENTER, scale(dir, 21.0 / 16.0));
-        beam(draw, DARK, from, to, side, 2.5, 2.5);
+        beam(draw, dark, from, to, side, 2.5, 2.5);
     }
     // The crank pin, at angle 0 on e1, standing out to the rod's plane.
     let pin = add(CENTER, scale(e1, PIN_R));

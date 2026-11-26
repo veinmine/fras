@@ -491,6 +491,14 @@ impl Works {
         self.cooling.get(&pos).copied()
     }
 
+    /// Whether a cooled machine's hot water buffer is full: its hot water
+    /// can't get out (cooling spec 9.1).
+    pub fn cool_buffer_full(&self, pos: Pos) -> bool {
+        self.parts
+            .get(&pos)
+            .is_some_and(|p| p.saved.buffer >= crate::sim::fluid::cool::BUFFER - 1e-6)
+    }
+
     /// Whether a grinder is cooled now.
     pub fn cooled(&self, pos: Pos) -> bool {
         self.cooling.get(&pos).is_some_and(|c| c.cooled)

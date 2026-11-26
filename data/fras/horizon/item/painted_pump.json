@@ -1,6 +1,6 @@
 {
   "template": "minecraft:iron_ingot",
-  "block": "pump",
+  "block": "fras:pump",
   "components": {
     "minecraft:block_state": {
       "rust": "painted"
