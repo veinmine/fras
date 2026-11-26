@@ -210,6 +210,15 @@ impl BlockPart for BlockHooks {
             // The nozzle (bellows) or pipe face (drain) toward the block it
             // was placed against.
             Block::Bellows | Block::Drain => state = set(state, "facing", face.opposite().name()),
+            // ---- Creative ----
+            // The socket toward the block it was placed against.
+            Block::CreativeEngine | Block::LoadBank => {
+                state = set(state, "facing", face.opposite().name())
+            }
+            Block::CreativeSteam
+            | Block::CreativeWater
+            | Block::CreativeDrain
+            | Block::CreativeFirebox => {}
             Block::Flywheel => {
                 let axis = if face.axis() != Axis::Y {
                     face.axis()
@@ -295,6 +304,7 @@ impl BlockPart for BlockHooks {
                 l.cranks.remove(&pos);
                 l.wheel_torque.remove(&pos);
                 l.tachometers.remove(&pos);
+                l.histories.remove(&pos);
             }
         });
     }
@@ -357,9 +367,7 @@ impl BlockPart for BlockHooks {
                 super::tools::swap_bearing(host, event.click)
             }
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder | Block::Firebox | Block::Governor => {
-                Some(super::grinder::open(host, event.click))
-            }
+            b if b.has_screen() => Some(super::grinder::open(host, event.click)),
             Block::CopperBoiler | Block::IronBoiler | Block::StorageTank => {
                 super::pipes::bucket(host, event.click)
             }
@@ -381,9 +389,7 @@ impl BlockPart for BlockHooks {
     ) -> Option<InteractionResult> {
         match self.0 {
             Block::Crank => Some(crank(host, event.click)),
-            Block::Grinder | Block::Firebox | Block::Governor => {
-                Some(super::grinder::open(host, event.click))
-            }
+            b if b.has_screen() => Some(super::grinder::open(host, event.click)),
             Block::ManualValve | Block::SteamRelease => hand_on_vent(self.0, host, event.click),
             _ => None,
         }
@@ -461,7 +467,8 @@ pub fn takes_item(host: &dyn mod_api::Host, click: &mod_api::BlockClick<'_>) -> 
     };
     match super::server::block_at(host, level, pos_of_array(click.pos)) {
         _ if item == keys.paint => false,
-        Some(Block::Grinder | Block::Crank | Block::Firebox | Block::Governor) => true,
+        Some(Block::Crank) => true,
+        Some(b) if b.has_screen() => true,
         Some(Block::CopperBoiler | Block::IronBoiler | Block::StorageTank) => {
             item == keys.wrench || item == keys.water_bucket || item == keys.bucket
         }
@@ -546,6 +553,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Firebox => super::firebox::tick(host, event),
             Block::Governor => super::governor::tick(host, event),
             Block::PressureGauge | Block::SightGlass => gauge_tick(self.0, host, event),
+            b if b.is_creative() => super::creative::tick(b, host, event),
             _ => *event.reply = BlockEntityTickReply::Unchanged,
         }
     }
@@ -678,6 +686,8 @@ impl BlockEntityPart for EntityHooks {
             Block::Grinder => super::grinder::screen(event),
             Block::Firebox => super::firebox::screen(event),
             Block::Governor => super::governor::screen(event),
+            b if b.is_creative() => super::creative::screen(event),
+            b if super::readout::Readout::of(b).is_some() => super::readout::screen(event),
             _ => None,
         }
     }
@@ -687,7 +697,8 @@ impl BlockEntityPart for EntityHooks {
             Block::Grinder => super::grinder::screen_draw(host, event),
             Block::Firebox => super::firebox::screen_draw(host, event),
             Block::Governor => super::governor::screen_draw(host, event),
-            _ => {}
+            b if b.is_creative() => super::creative::screen_draw(b, host, event),
+            b => super::readout::screen_draw(b, host, event),
         }
     }
 
@@ -698,6 +709,7 @@ impl BlockEntityPart for EntityHooks {
     ) -> Option<i32> {
         match self.0 {
             Block::Governor => super::governor::screen_click(host, event),
+            b if b.is_creative() => super::creative::screen_click(b, host, event),
             _ => None,
         }
     }
@@ -705,6 +717,8 @@ impl BlockEntityPart for EntityHooks {
     fn menu_button(&self, host: &mut dyn ServerHost, event: &mut mod_api::MenuButtonEvent<'_>) {
         if self.0 == Block::Governor {
             super::governor::menu_button(host, event);
+        } else if self.0.is_creative() {
+            super::creative::menu_button(self.0, host, event);
         }
     }
 }
@@ -740,6 +754,15 @@ fn tachometer_tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'
     });
     let signal = comparator(rpm, red);
     let old_signal = with_level(dim, |l| l.tachometers.insert(pos, signal));
+    let data_changed = super::readout::update(
+        dim,
+        pos,
+        super::readout::Readout::Speed,
+        rpm,
+        red,
+        yellow,
+        &mut event.entity.data,
+    );
     let nbt = &event.entity.nbt;
     let shown = blocks::get_f64(nbt, "needle").unwrap_or(-1.0);
     let changed = (shown - rpm).abs() > (0.5f64).max(rpm * 0.03)
@@ -751,7 +774,7 @@ fn tachometer_tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'
         blocks::put_f64(nbt, "red", red);
         blocks::put_f64(nbt, "yellow", yellow);
         host.block_entity_sync(event.pos);
-    } else if old_signal == Some(signal) {
+    } else if old_signal == Some(signal) && !data_changed {
         *event.reply = BlockEntityTickReply::Unchanged;
     }
     // A changed signal is written back (Changed), which updates comparators.
@@ -778,7 +801,7 @@ fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTi
         .unwrap_or(default);
     let part = pos.offset(facing.opposite());
     let nbt = &event.entity.nbt;
-    let (signal, changed) = if block == Block::PressureGauge {
+    let (signal, changed, data_changed) = if block == Block::PressureGauge {
         let g = with_level(dim, |l| l.steam.works.gauge(part));
         let shown = blocks::get_f64(nbt, "bar").unwrap_or(-1.0);
         let changed = (shown - g.bar).abs() > (0.1f64).max(g.bar * 0.03)
@@ -788,7 +811,10 @@ fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTi
             blocks::put_f64(nbt, "bar", g.bar);
             blocks::put_f64(nbt, "red", g.red);
         }
-        (g.signal() as i32, changed)
+        let kind = super::readout::Readout::Pressure;
+        let data =
+            super::readout::update(dim, pos, kind, g.bar, g.red, 0.0, &mut event.entity.data);
+        (g.signal() as i32, changed, data)
     } else {
         let (level_, warn) = with_level(dim, |l| l.steam.works.sight(part)).unwrap_or((0.0, 0));
         let shown = blocks::get_f64(nbt, "level").unwrap_or(-1.0);
@@ -804,12 +830,22 @@ fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTi
         } else {
             ((level_ * 15.0).ceil() as i32).clamp(1, 15)
         };
-        (signal, changed)
+        let kind = super::readout::Readout::Level;
+        let data = super::readout::update(
+            dim,
+            pos,
+            kind,
+            level_,
+            0.0,
+            warn as f64,
+            &mut event.entity.data,
+        );
+        (signal, changed, data)
     };
     let old = with_level(dim, |l| l.steam.signals.insert(pos, signal));
     if changed {
         host.block_entity_sync(event.pos);
-    } else if old == Some(signal) {
+    } else if old == Some(signal) && !data_changed {
         *event.reply = BlockEntityTickReply::Unchanged;
     }
 }

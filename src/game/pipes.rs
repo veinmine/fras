@@ -80,6 +80,20 @@ pub fn offers(
         }
         Block::Pump => (face == dir_prop(host, level, q, "facing", Dir::North).opposite())
             .then_some(Some(Content::Water)),
+        // Creative sources and the drain, on every face.
+        Block::CreativeSteam => Some(Some(Content::Steam)),
+        Block::CreativeWater => {
+            let hot = host
+                .block_entity(level, q.to_array())
+                .and_then(|e| e.data(host))
+                .is_some_and(|nbt| super::blocks::get_bool(&nbt, "c_hot"));
+            Some(Some(if hot {
+                Content::HotWater
+            } else {
+                Content::Water
+            }))
+        }
+        Block::CreativeDrain => Some(None),
         _ => None,
     }
 }

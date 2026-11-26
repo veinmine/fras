@@ -324,6 +324,11 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 stubs(draw, pos, spec, rpm, big);
             }
         }
+        Block::CreativeEngine | Block::LoadBank => {
+            if let Some(spec) = &spec {
+                stubs(draw, pos, spec, rpm, None);
+            }
+        }
         Block::Crank => {
             let Some(Shape::Socket(face)) = spec.as_ref().map(|s| s.shape) else {
                 return;

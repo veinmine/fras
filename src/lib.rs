@@ -79,6 +79,12 @@ impl Hooks for Fras {
             if block == Block::Governor {
                 r.block_container(&key, game::governor::container());
             }
+            if block.is_creative() {
+                r.block_container(&key, game::creative::container(block));
+            }
+            if game::readout::Readout::of(block).is_some() {
+                r.block_container(&key, game::readout::container(block));
+            }
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.

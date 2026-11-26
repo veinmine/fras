@@ -56,7 +56,12 @@ fn a_steam_source_holds_its_pressure_under_load() {
     let gave = w.source_gave(p(0, 3, -1));
     let drawn: f64 = w.engines[0].drawn.iter().sum();
     assert!(gave > 1.0 && (gave - drawn).abs() < 1.0, "{gave} {drawn}");
-    let d = w.drives().into_iter().find(|(q, _)| *q == p(5, 3, 0)).unwrap().1;
+    let d = w
+        .drives()
+        .into_iter()
+        .find(|(q, _)| *q == p(5, 3, 0))
+        .unwrap()
+        .1;
     assert!(d.stall > 0.0);
 }
 
@@ -87,7 +92,12 @@ fn a_steam_source_straight_on_a_cylinder_keeps_a_pressure() {
         None,
     );
     spin(&mut w, &world, 0.0, 2.0);
-    let d = w.drives().into_iter().find(|(q, _)| *q == p(5, 3, 0)).unwrap().1;
+    let d = w
+        .drives()
+        .into_iter()
+        .find(|(q, _)| *q == p(5, 3, 0))
+        .unwrap()
+        .1;
     assert!(d.stall > 0.0, "{d:?}");
 }
 

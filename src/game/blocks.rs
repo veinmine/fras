@@ -51,10 +51,17 @@ pub enum Block {
     CopperRadiator,
     IronRadiator,
     Drain,
+    // ---- Creative (debugging) ----
+    CreativeEngine,
+    LoadBank,
+    CreativeSteam,
+    CreativeWater,
+    CreativeDrain,
+    CreativeFirebox,
 }
 
 impl Block {
-    pub const ALL: [Block; 36] = [
+    pub const ALL: [Block; 42] = [
         Block::ShaftWood,
         Block::ShaftIron,
         Block::Bearing,
@@ -91,6 +98,12 @@ impl Block {
         Block::CopperRadiator,
         Block::IronRadiator,
         Block::Drain,
+        Block::CreativeEngine,
+        Block::LoadBank,
+        Block::CreativeSteam,
+        Block::CreativeWater,
+        Block::CreativeDrain,
+        Block::CreativeFirebox,
     ];
 
     /// The path of its id (`fras:<name>`).
@@ -132,6 +145,12 @@ impl Block {
             Block::CopperRadiator => "copper_radiator",
             Block::IronRadiator => "iron_radiator",
             Block::Drain => "drain",
+            Block::CreativeEngine => "creative_engine",
+            Block::LoadBank => "load_bank",
+            Block::CreativeSteam => "creative_steam_source",
+            Block::CreativeWater => "creative_water_source",
+            Block::CreativeDrain => "creative_drain",
+            Block::CreativeFirebox => "creative_firebox",
         }
     }
 
@@ -164,6 +183,8 @@ impl Block {
             Block::Pump => Kind::Pump,
             Block::Governor => Kind::Governor,
             Block::Bellows => Kind::Bellows,
+            Block::CreativeEngine => Kind::Motor,
+            Block::LoadBank => Kind::LoadBank,
             _ => return None,
         })
     }
@@ -181,7 +202,34 @@ impl Block {
                 | Block::PressureGauge
                 | Block::SightGlass
                 | Block::Governor
+        ) || self.is_creative()
+    }
+
+    /// The creative-only debugging blocks (no recipes).
+    pub fn is_creative(self) -> bool {
+        matches!(
+            self,
+            Block::CreativeEngine
+                | Block::LoadBank
+                | Block::CreativeSteam
+                | Block::CreativeWater
+                | Block::CreativeDrain
+                | Block::CreativeFirebox
         )
+    }
+
+    /// Whether right-clicking it (with anything but the wrench) opens its
+    /// screen.
+    pub fn has_screen(self) -> bool {
+        matches!(
+            self,
+            Block::Grinder
+                | Block::Firebox
+                | Block::Governor
+                | Block::Tachometer
+                | Block::PressureGauge
+                | Block::SightGlass
+        ) || self.is_creative()
     }
 
     /// Whether it is a part of the steam plant (spec 2 to 4).
@@ -216,6 +264,9 @@ impl Block {
             Block::IronRadiator => PlantKind::Radiator { copper: false },
             Block::Drain => PlantKind::Drain,
             Block::Grinder => PlantKind::Grinder,
+            Block::CreativeSteam | Block::CreativeWater => PlantKind::Source,
+            Block::CreativeDrain => PlantKind::Void,
+            Block::CreativeFirebox => PlantKind::Firebox,
             _ => return None,
         })
     }
@@ -261,7 +312,7 @@ impl Block {
     /// Whether the plant draws it in `steam_draw` (the steam parts that move
     /// or show a reading); the grinder is a plant part but drawn as a machine.
     pub fn steam_drawn(self) -> bool {
-        (self.is_plant() && self != Block::Grinder)
+        (self.is_plant() && self != Block::Grinder && !self.is_creative())
             || matches!(self, Block::PressureGauge | Block::SightGlass)
     }
 
@@ -348,6 +399,19 @@ impl Block {
                 spec.dir = dir("facing", Dir::North);
             }
             Block::Grinder => spec.dir = dir("facing", Dir::North),
+            Block::CreativeSteam => {
+                spec.fluid = Some(Content::Steam);
+                spec.amount = get_f64(nbt, "c_rate").unwrap_or(super::creative::DEFAULT_STEAM_RATE);
+                spec.set = get_f64(nbt, "c_bar").unwrap_or(super::creative::DEFAULT_BAR);
+            }
+            Block::CreativeWater => {
+                spec.fluid = Some(if get_bool(nbt, "c_hot") {
+                    Content::HotWater
+                } else {
+                    Content::Water
+                });
+                spec.amount = get_f64(nbt, "c_rate").unwrap_or(super::creative::DEFAULT_WATER_RATE);
+            }
             _ => {}
         }
         spec.rust = self.rust_stage(get);
@@ -408,7 +472,11 @@ impl Block {
                     slow,
                 }
             }
-            Block::Crank | Block::Grinder | Block::Pump => Shape::Socket(dir("facing", Dir::North)),
+            Block::Crank
+            | Block::Grinder
+            | Block::Pump
+            | Block::CreativeEngine
+            | Block::LoadBank => Shape::Socket(dir("facing", Dir::North)),
             Block::Governor => Shape::Socket(dir("socket", Dir::Up)),
             // The nozzle faces the firebox; the socket is the opposite face.
             Block::Bellows => Shape::Socket(dir("facing", Dir::North).opposite()),

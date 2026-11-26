@@ -596,7 +596,11 @@ impl Works {
         }
         for (e, _) in &net.ends {
             match e {
-                End::Vent(v) | End::Cylinder(v) | End::Pump(v) | End::Source(v, _) | End::Void(v) => {
+                End::Vent(v)
+                | End::Cylinder(v)
+                | End::Pump(v)
+                | End::Source(v, _)
+                | End::Void(v) => {
                     self.net_of.insert(*v, index);
                 }
                 End::ExIn(v) => self.ex_nets.entry(*v).or_default().0 = Some(index),

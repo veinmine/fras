@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "fras:block/load_bank"
+    },
+    "facing=up": {
+      "model": "fras:block/load_bank"
+    },
+    "facing=north": {
+      "model": "fras:block/load_bank"
+    },
+    "facing=south": {
+      "model": "fras:block/load_bank"
+    },
+    "facing=west": {
+      "model": "fras:block/load_bank"
+    },
+    "facing=east": {
+      "model": "fras:block/load_bank"
+    }
+  }
+}

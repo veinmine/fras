@@ -36,6 +36,12 @@
     "fras:heat_exchanger",
     "fras:copper_radiator",
     "fras:iron_radiator",
-    "fras:drain"
+    "fras:drain",
+    "fras:creative_engine",
+    "fras:load_bank",
+    "fras:creative_steam_source",
+    "fras:creative_water_source",
+    "fras:creative_drain",
+    "fras:creative_firebox"
   ]
 }

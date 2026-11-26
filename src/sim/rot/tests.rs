@@ -1003,7 +1003,14 @@ fn a_pump_counts_its_own_working_minimum() {
 
 /// A creative engine driving `n` iron shafts into a load bank of `load` Nm,
 /// ramped toward `target` for `ticks`; returns the highest shear timer seen.
-fn motor_run(m: &mut Mechanics, w: &World, ramp: &mut f64, target: f64, load: f64, ticks: usize) -> f64 {
+fn motor_run(
+    m: &mut Mechanics,
+    w: &World,
+    ramp: &mut f64,
+    target: f64,
+    load: f64,
+    ticks: usize,
+) -> f64 {
     let mut worst: f64 = 0.0;
     for _ in 0..ticks {
         *ramp = motor_ramp(*ramp, target, super::solve::DT);
@@ -1021,16 +1028,30 @@ fn motor_run(m: &mut Mechanics, w: &World, ramp: &mut f64, target: f64, load: f6
 fn a_creative_engine_holds_its_speed_under_any_load() {
     let w = World::default();
     let mut m = Mechanics::new();
-    m.insert(p(0, 64, 0), Spec::new(Kind::Motor, Shape::Socket(Dir::East)), None, true);
+    m.insert(
+        p(0, 64, 0),
+        Spec::new(Kind::Motor, Shape::Socket(Dir::East)),
+        None,
+        true,
+    );
     for x in 1..=10 {
         m.insert(p(x, 64, 0), iron(Axis::X), None, true);
     }
-    m.insert(p(11, 64, 0), Spec::new(Kind::LoadBank, Shape::Socket(Dir::West)), None, true);
+    m.insert(
+        p(11, 64, 0),
+        Spec::new(Kind::LoadBank, Shape::Socket(Dir::West)),
+        None,
+        true,
+    );
     let mut ramp = 0.0;
     // Spinning up at the ramp doesn't strain the iron line.
     let shear = motor_run(&mut m, &w, &mut ramp, 128.0, 0.0, 200);
     assert_eq!(shear, 0.0);
-    assert!((rpm(&m, p(5, 64, 0)) - 128.0).abs() < 0.5, "{}", rpm(&m, p(5, 64, 0)));
+    assert!(
+        (rpm(&m, p(5, 64, 0)) - 128.0).abs() < 0.5,
+        "{}",
+        rpm(&m, p(5, 64, 0))
+    );
     // 100 Nm (under the iron shaft's 128) barely sags it.
     let shear = motor_run(&mut m, &w, &mut ramp, 128.0, 100.0, 100);
     assert_eq!(shear, 0.0);

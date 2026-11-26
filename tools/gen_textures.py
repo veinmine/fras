@@ -193,12 +193,137 @@ def rust_block(stage):
     return rows
 
 
+# ---- Creative blocks: a magenta and black hazard border round a dark
+# purple face, so they never pass for real machines. The face carries a mark
+# of what each one is.
+CREATIVE_MARKS = {
+    "side": [],
+    # A gold gear.
+    "engine": [
+        "................",
+        "................",
+        "......g..g......",
+        ".....gggggg.....",
+        "....gg....gg....",
+        "...gg..gg..gg...",
+        "....g.gggg.g....",
+        "....g.gggg.g....",
+        "...gg..gg..gg...",
+        "....gg....gg....",
+        ".....gggggg.....",
+        "......g..g......",
+    ],
+    # A brake: two red pads on a grey disc.
+    "load": [
+        "................",
+        "................",
+        ".....wwwwww.....",
+        "....wwwwwwww....",
+        "...rwwwwwwwwr...",
+        "...rwww..wwwr...",
+        "...rww....wwr...",
+        "...rww....wwr...",
+        "...rwww..wwwr...",
+        "...rwwwwwwwwr...",
+        "....wwwwwwww....",
+        ".....wwwwww.....",
+    ],
+    # A white steam cloud.
+    "steam": [
+        "................",
+        "................",
+        "................",
+        "......ww........",
+        ".....wwww.ww....",
+        "....wwwwwwwww...",
+        "...wwwwwwwwwww..",
+        "...wwwwwwwwwww..",
+        "....wwwwwwwww...",
+        "................",
+        "....w...w...w...",
+        "...w...w...w....",
+    ],
+    # A blue drop.
+    "water": [
+        "................",
+        "................",
+        ".......b........",
+        "......bbb.......",
+        "......bbb.......",
+        ".....bbbbb......",
+        "....bbbbbbb.....",
+        "....bbwbbbb.....",
+        "....bwbbbbb.....",
+        "....bbbbbbb.....",
+        ".....bbbbb......",
+        "......bbb.......",
+    ],
+    # A grate over darkness.
+    "drain": [
+        "................",
+        "................",
+        "...kkkkkkkkkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kwkwkwkwkk...",
+        "...kkkkkkkkkk...",
+        "................",
+    ],
+    # An orange flame.
+    "fire": [
+        "................",
+        "................",
+        ".......o........",
+        "......oo........",
+        "......ooo..o....",
+        ".....oooo.oo....",
+        "....oooyooooo...",
+        "....ooyyyoooo...",
+        "...oooyyyyooo...",
+        "...ooyyyyyyoo...",
+        "....oyyyyyyo....",
+        ".....oooooo.....",
+    ],
+}
+CREATIVE_INK = {
+    "g": (230, 190, 60, 255), "w": (220, 220, 230, 255), "r": (200, 50, 50, 255),
+    "b": (60, 120, 230, 255), "k": (10, 6, 14, 255), "o": (240, 130, 30, 255),
+    "y": (255, 220, 80, 255),
+}
+
+
+def creative_block(mark):
+    rows = []
+    art = CREATIVE_MARKS[mark]
+    art = art + ["." * 16] * (16 - len(art))
+    for y in range(16):
+        row = []
+        for x in range(16):
+            if x in (0, 15) or y in (0, 15):
+                # Hazard border: 2-pixel magenta and black stripes.
+                magenta = ((x + y) // 2) % 2 == 0
+                row.append((230, 40, 200, 255) if magenta else (20, 10, 24, 255))
+            elif x in (1, 14) or y in (1, 14):
+                row.append((70, 20, 90, 255))
+            else:
+                c = art[y][x] if x < len(art[y]) else "."
+                row.append(CREATIVE_INK.get(c, (42, 12, 58, 255)))
+        rows.append(row)
+    return rows
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     block = os.path.join(ROOT, "assets/fras/textures/block")
     os.makedirs(block, exist_ok=True)
     for stage in ["spotty", "rusty", "leaking", "painted"]:
         png(os.path.join(block, f"rust_{stage}.png"), rust_block(stage))
+    for mark in CREATIVE_MARKS:
+        png(os.path.join(block, f"creative_{mark}.png"), creative_block(mark))
     r, d, o = RUST
     png(os.path.join(OUT, "rust_flakes.png"), draw(FLAKES, {"r": r, "d": d, "o": o}))
     png(os.path.join(OUT, "red_oxide_pigment.png"), draw(PIGMENT, {"r": (160, 55, 35, 255), "l": (200, 85, 60, 255), "d": (110, 35, 25, 255)}))

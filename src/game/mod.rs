@@ -3,6 +3,7 @@
 //! No mixins: everything here goes through the mod API's hooks and parts.
 
 pub mod blocks;
+pub mod creative;
 pub mod draw;
 pub mod effects;
 pub mod firebox;
@@ -10,6 +11,7 @@ pub mod governor;
 pub mod grinder;
 pub mod parts;
 pub mod pipes;
+pub mod readout;
 pub mod rust;
 pub mod server;
 pub mod shell_model;
@@ -263,6 +265,8 @@ mod tests {
             "firebox.rs",
             "governor.rs",
             "rust.rs",
+            "creative.rs",
+            "readout.rs",
         ] {
             let src =
                 std::fs::read_to_string(format!("{}/src/game/{file}", env!("CARGO_MANIFEST_DIR")))

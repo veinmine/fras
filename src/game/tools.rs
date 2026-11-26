@@ -152,6 +152,12 @@ pub fn repair_cost(block: Block) -> Vec<(&'static str, u32)> {
         | Block::Firebox
         | Block::PressureGauge
         | Block::SightGlass => vec![],
+        Block::CreativeEngine
+        | Block::LoadBank
+        | Block::CreativeSteam
+        | Block::CreativeWater
+        | Block::CreativeDrain
+        | Block::CreativeFirebox => vec![],
     }
 }
 
