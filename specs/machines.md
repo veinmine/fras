@@ -134,7 +134,7 @@ Water-fed. Everything it makes leaves by the output; the trommel does the sortin
 
 | Input | Results | Revolutions | Water | Load |
 | --- | --- | --- | --- | --- |
-| Crushed iron | 1 iron dust, 1 in 3 a 2nd | 2.5 | 50 mB | 4 Nm |
+| Crushed iron | 1 iron dust, 1 in 3 a 2nd; 10% 1 iron nugget | 2.5 | 50 mB | 4 Nm |
 | Crushed copper | 1 copper dust, 1 in 3 a 2nd; 10% 1 gold nugget | 2.5 | 50 mB | 4 Nm |
 | Crushed gold | 1 gold dust, 1 in 3 a 2nd; 10% 1 copper nugget | 2.5 | 50 mB | 4 Nm |
 | Iron nugget | 1 rust flakes | 64 | 200 mB | 2 Nm |
@@ -142,8 +142,8 @@ Water-fed. Everything it makes leaves by the output; the trommel does the sortin
 All values *(tune)*. Rationale:
 
 - **Grinding and washing double the yield** (M1, decided): 4/3 dust per crushed ore (chance 0.3333 in the recipe file), so
-  the grinder's 1.5× becomes **2×**, plus the byproduct for copper and gold. Iron has no byproduct: 1.0's 10% redstone
-  is gone (1.1, Marcin: a powder in the fines stream clogs the furnaces).
+  the grinder's 1.5× becomes **2×**, plus the byproduct. Iron's byproduct is an iron nugget, replacing 1.0's 10% redstone
+  (1.1, Marcin: a powder in the fines stream clogs the furnaces).
   Tier 2's stamp mill pushes toward 3× (design doc 6.1). Smelting crushed ore directly keeps working.
 - **Dust smelts in half the time** (100 ticks in a furnace, 50 in a blast furnace) to one ingot, with the raw ore's
   XP. A furnace bank keeps up with a washer with fewer furnaces, which matters to an unattended line.
@@ -459,7 +459,7 @@ Fines / mediums / oversize: drobne / średnie / nadziarno.
 
 ## 14. Changes to the design doc
 
-- 6.1: washing gives 4/3 dust per crushed ore (grinding and washing together 2×) plus a 10% nugget for copper and gold; dust smelts in half the time; gold's byproduct is a
+- 6.1: washing gives 4/3 dust per crushed ore (grinding and washing together 2×) plus a 10% nugget; dust smelts in half the time; gold's byproduct is a
   copper nugget.
 - 6.2: the 0.4 machines are line machines with no inventory slots: two blocks tall, the machine on top with a belt
   running through it, a drive below; an inline grinder joins them, and the 0.1 grinder stays for hand feeding. The trip
@@ -511,7 +511,7 @@ hard to place and let crushed ore and redstone into the fines. Decided in the th
 4. The **0.1 grinder stays**; an **inline grinder** is added (6A). The sawmill becomes a line machine too (7A).
 5. Recipes needing more than one item go. Each machine's recipe takes a conveyor belt (18B).
 6. **Washer water** through the top block's left and right sides, or a bucket (16A). **Redstone** is no longer a washing
-   result (12).
+   result (12); crushed iron gives a 10% iron nugget instead.
 7. **Trommel:** three blocks in a row form it like a boiler (20B), so placing never fails; not directional, fed at either
    end; outlets all underneath, counted from the end the item came in (19A); power from any long side face, one at a time,
    picked automatically (9). Fines are sand and dust only; crushed ore and nuggets are medium (12).
