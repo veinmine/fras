@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/washer"
+    },
+    "facing=east": {
+      "model": "fras:block/washer",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fras:block/washer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fras:block/washer",
+      "y": 270
+    }
+  }
+}

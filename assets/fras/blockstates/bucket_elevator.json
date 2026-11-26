@@ -1,0 +1,304 @@
+{
+  "variants": {
+    "drive=none,facing=north,part=single": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=north,facing=north,part=single": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=south,facing=north,part=single": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=west,facing=north,part=single": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=east,facing=north,part=single": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=none,facing=north,part=boot": {
+      "model": "fras:block/bucket_elevator_boot"
+    },
+    "drive=north,facing=north,part=boot": {
+      "model": "fras:block/bucket_elevator_boot"
+    },
+    "drive=south,facing=north,part=boot": {
+      "model": "fras:block/bucket_elevator_boot"
+    },
+    "drive=west,facing=north,part=boot": {
+      "model": "fras:block/bucket_elevator_boot"
+    },
+    "drive=east,facing=north,part=boot": {
+      "model": "fras:block/bucket_elevator_boot"
+    },
+    "drive=none,facing=north,part=casing": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=north,facing=north,part=casing": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=south,facing=north,part=casing": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=west,facing=north,part=casing": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=east,facing=north,part=casing": {
+      "model": "fras:block/bucket_elevator"
+    },
+    "drive=none,facing=north,part=head": {
+      "model": "fras:block/bucket_elevator_head"
+    },
+    "drive=north,facing=north,part=head": {
+      "model": "fras:block/bucket_elevator_head"
+    },
+    "drive=south,facing=north,part=head": {
+      "model": "fras:block/bucket_elevator_head"
+    },
+    "drive=west,facing=north,part=head": {
+      "model": "fras:block/bucket_elevator_head"
+    },
+    "drive=east,facing=north,part=head": {
+      "model": "fras:block/bucket_elevator_head"
+    },
+    "drive=none,facing=east,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=north,facing=east,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=south,facing=east,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=west,facing=east,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=east,facing=east,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=none,facing=east,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 90
+    },
+    "drive=north,facing=east,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 90
+    },
+    "drive=south,facing=east,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 90
+    },
+    "drive=west,facing=east,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 90
+    },
+    "drive=east,facing=east,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 90
+    },
+    "drive=none,facing=east,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=north,facing=east,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=south,facing=east,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=west,facing=east,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=east,facing=east,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 90
+    },
+    "drive=none,facing=east,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 90
+    },
+    "drive=north,facing=east,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 90
+    },
+    "drive=south,facing=east,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 90
+    },
+    "drive=west,facing=east,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 90
+    },
+    "drive=east,facing=east,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 90
+    },
+    "drive=none,facing=south,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=north,facing=south,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=south,facing=south,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=west,facing=south,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=east,facing=south,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=none,facing=south,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 180
+    },
+    "drive=north,facing=south,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 180
+    },
+    "drive=south,facing=south,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 180
+    },
+    "drive=west,facing=south,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 180
+    },
+    "drive=east,facing=south,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 180
+    },
+    "drive=none,facing=south,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=north,facing=south,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=south,facing=south,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=west,facing=south,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=east,facing=south,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 180
+    },
+    "drive=none,facing=south,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 180
+    },
+    "drive=north,facing=south,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 180
+    },
+    "drive=south,facing=south,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 180
+    },
+    "drive=west,facing=south,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 180
+    },
+    "drive=east,facing=south,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 180
+    },
+    "drive=none,facing=west,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=north,facing=west,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=south,facing=west,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=west,facing=west,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=east,facing=west,part=single": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=none,facing=west,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 270
+    },
+    "drive=north,facing=west,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 270
+    },
+    "drive=south,facing=west,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 270
+    },
+    "drive=west,facing=west,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 270
+    },
+    "drive=east,facing=west,part=boot": {
+      "model": "fras:block/bucket_elevator_boot",
+      "y": 270
+    },
+    "drive=none,facing=west,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=north,facing=west,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=south,facing=west,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=west,facing=west,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=east,facing=west,part=casing": {
+      "model": "fras:block/bucket_elevator",
+      "y": 270
+    },
+    "drive=none,facing=west,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 270
+    },
+    "drive=north,facing=west,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 270
+    },
+    "drive=south,facing=west,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 270
+    },
+    "drive=west,facing=west,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 270
+    },
+    "drive=east,facing=west,part=head": {
+      "model": "fras:block/bucket_elevator_head",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "rust=clean": {
+      "model": "fras:block/large_iron_pulley"
+    },
+    "rust=spotty": {
+      "model": "fras:block/large_iron_pulley_rust_spotty"
+    },
+    "rust=rusty": {
+      "model": "fras:block/large_iron_pulley_rust_rusty"
+    },
+    "rust=leaking": {
+      "model": "fras:block/large_iron_pulley_rust_leaking"
+    },
+    "rust=painted": {
+      "model": "fras:block/large_iron_pulley_rust_painted"
+    }
+  }
+}

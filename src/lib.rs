@@ -18,7 +18,7 @@ use game::parts::{BlockHooks, EntityHooks};
 pub const ID: &str = "fras";
 
 /// FRAS's items that are not blocks.
-pub const ITEMS: [&str; 11] = [
+pub const ITEMS: [&str; 17] = [
     "wrench",
     "leather_belt",
     "hand_hammer",
@@ -30,11 +30,18 @@ pub const ITEMS: [&str; 11] = [
     "rust_flakes",
     "red_oxide_pigment",
     "red_oxide_paint",
+    // 0.4 (progression spec 3)
+    "iron_rod",
+    "iron_gear",
+    "rivet",
+    "iron_dust",
+    "copper_dust",
+    "gold_dust",
 ];
 
 /// The rusting blocks, each with a pre-painted item `painted_<name>` that
 /// places it painted (rust spec 7.2).
-pub const PAINTED: [&str; 19] = [
+pub const PAINTED: [&str; 21] = [
     "iron_shaft",
     "bearing",
     "clutch",
@@ -54,6 +61,8 @@ pub const PAINTED: [&str; 19] = [
     "heat_exchanger",
     "iron_radiator",
     "furnace_damper",
+    "iron_pulley",
+    "large_iron_pulley",
 ];
 
 #[derive(Default)]

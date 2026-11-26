@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IGI",
+    "PSP",
+    "PPP"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "fras:iron_gear",
+    "P": "#minecraft:planks",
+    "S": "fras:iron_shaft"
+  },
+  "result": {
+    "id": "fras:sawmill",
+    "count": 1
+  }
+}

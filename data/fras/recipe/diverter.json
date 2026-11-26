@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:conveyor_belt",
+    "fras:iron_plate",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "fras:diverter",
+    "count": 1
+  }
+}

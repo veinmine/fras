@@ -1,0 +1,168 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        3,
+        8,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "south": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "east": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "west": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "up": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "down": {
+          "texture": "minecraft:block/iron_block"
+        }
+      }
+    },
+    {
+      "from": [
+        13,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        8,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "south": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "east": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "west": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "up": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "down": {
+          "texture": "minecraft:block/iron_block"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        8,
+        2
+      ],
+      "to": [
+        15,
+        10,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "south": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "east": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "west": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "up": {
+          "texture": "minecraft:block/iron_block"
+        },
+        "down": {
+          "texture": "minecraft:block/iron_block"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        10,
+        4
+      ],
+      "to": [
+        5,
+        14,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "south": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "east": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "west": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "up": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "down": {
+          "texture": "minecraft:block/polished_andesite"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        10,
+        5
+      ],
+      "to": [
+        14,
+        13,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "south": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "east": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "west": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "up": {
+          "texture": "minecraft:block/polished_andesite"
+        },
+        "down": {
+          "texture": "minecraft:block/polished_andesite"
+        }
+      }
+    }
+  ]
+}

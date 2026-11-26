@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "R",
+    "R"
+  ],
+  "key": {
+    "R": "fras:iron_rod"
+  },
+  "result": {
+    "id": "fras:iron_shaft",
+    "count": 4
+  }
+}

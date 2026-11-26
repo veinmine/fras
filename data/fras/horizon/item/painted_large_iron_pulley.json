@@ -1,0 +1,9 @@
+{
+  "template": "minecraft:iron_ingot",
+  "block": "fras:large_iron_pulley",
+  "components": {
+    "minecraft:block_state": {
+      "rust": "painted"
+    }
+  }
+}

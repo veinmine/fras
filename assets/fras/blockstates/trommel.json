@@ -1,0 +1,132 @@
+{
+  "variants": {
+    "facing=north,part=start,socket=north": {
+      "model": "fras:block/trommel",
+      "y": 90
+    },
+    "facing=north,part=start,socket=south": {
+      "model": "fras:block/trommel",
+      "y": 90
+    },
+    "facing=north,part=start,socket=west": {
+      "model": "fras:block/trommel",
+      "y": 90
+    },
+    "facing=north,part=start,socket=east": {
+      "model": "fras:block/trommel",
+      "y": 90
+    },
+    "facing=north,part=end,socket=north": {
+      "model": "fras:block/trommel_end",
+      "y": 90
+    },
+    "facing=north,part=end,socket=south": {
+      "model": "fras:block/trommel_end",
+      "y": 90
+    },
+    "facing=north,part=end,socket=west": {
+      "model": "fras:block/trommel_end",
+      "y": 90
+    },
+    "facing=north,part=end,socket=east": {
+      "model": "fras:block/trommel_end",
+      "y": 90
+    },
+    "facing=east,part=start,socket=north": {
+      "model": "fras:block/trommel",
+      "y": 180
+    },
+    "facing=east,part=start,socket=south": {
+      "model": "fras:block/trommel",
+      "y": 180
+    },
+    "facing=east,part=start,socket=west": {
+      "model": "fras:block/trommel",
+      "y": 180
+    },
+    "facing=east,part=start,socket=east": {
+      "model": "fras:block/trommel",
+      "y": 180
+    },
+    "facing=east,part=end,socket=north": {
+      "model": "fras:block/trommel_end",
+      "y": 180
+    },
+    "facing=east,part=end,socket=south": {
+      "model": "fras:block/trommel_end",
+      "y": 180
+    },
+    "facing=east,part=end,socket=west": {
+      "model": "fras:block/trommel_end",
+      "y": 180
+    },
+    "facing=east,part=end,socket=east": {
+      "model": "fras:block/trommel_end",
+      "y": 180
+    },
+    "facing=south,part=start,socket=north": {
+      "model": "fras:block/trommel",
+      "y": 270
+    },
+    "facing=south,part=start,socket=south": {
+      "model": "fras:block/trommel",
+      "y": 270
+    },
+    "facing=south,part=start,socket=west": {
+      "model": "fras:block/trommel",
+      "y": 270
+    },
+    "facing=south,part=start,socket=east": {
+      "model": "fras:block/trommel",
+      "y": 270
+    },
+    "facing=south,part=end,socket=north": {
+      "model": "fras:block/trommel_end",
+      "y": 270
+    },
+    "facing=south,part=end,socket=south": {
+      "model": "fras:block/trommel_end",
+      "y": 270
+    },
+    "facing=south,part=end,socket=west": {
+      "model": "fras:block/trommel_end",
+      "y": 270
+    },
+    "facing=south,part=end,socket=east": {
+      "model": "fras:block/trommel_end",
+      "y": 270
+    },
+    "facing=west,part=start,socket=north": {
+      "model": "fras:block/trommel",
+      "y": 0
+    },
+    "facing=west,part=start,socket=south": {
+      "model": "fras:block/trommel",
+      "y": 0
+    },
+    "facing=west,part=start,socket=west": {
+      "model": "fras:block/trommel",
+      "y": 0
+    },
+    "facing=west,part=start,socket=east": {
+      "model": "fras:block/trommel",
+      "y": 0
+    },
+    "facing=west,part=end,socket=north": {
+      "model": "fras:block/trommel_end",
+      "y": 0
+    },
+    "facing=west,part=end,socket=south": {
+      "model": "fras:block/trommel_end",
+      "y": 0
+    },
+    "facing=west,part=end,socket=west": {
+      "model": "fras:block/trommel_end",
+      "y": 0
+    },
+    "facing=west,part=end,socket=east": {
+      "model": "fras:block/trommel_end",
+      "y": 0
+    }
+  }
+}

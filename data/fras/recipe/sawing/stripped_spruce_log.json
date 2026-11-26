@@ -1,0 +1,13 @@
+{
+  "type": "fras:sawing",
+  "ingredient": "minecraft:stripped_spruce_log",
+  "results": [
+    {
+      "id": "minecraft:spruce_planks",
+      "count": 6
+    }
+  ],
+  "revolutions": 4.0,
+  "load": 6.0,
+  "water": 0.0
+}

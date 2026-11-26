@@ -1,0 +1,13 @@
+{
+  "type": "fras:hammering",
+  "ingredient": "fras:iron_rod",
+  "results": [
+    {
+      "id": "fras:rivet",
+      "count": 8
+    }
+  ],
+  "revolutions": 3.0,
+  "load": 8.0,
+  "water": 0.0
+}

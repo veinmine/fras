@@ -1,0 +1,13 @@
+{
+  "type": "fras:turning",
+  "ingredient": "fras:copper_plate",
+  "results": [
+    {
+      "id": "fras:copper_pipe",
+      "count": 3
+    }
+  ],
+  "revolutions": 8.0,
+  "load": 3.0,
+  "water": 0.0
+}

@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "PPP",
-    "PRP"
+    "PTP",
+    "PDP"
   ],
   "key": {
     "P": "fras:iron_plate",
-    "R": "minecraft:redstone"
+    "T": "fras:rivet",
+    "D": "minecraft:redstone"
   },
   "result": {
     "id": "fras:furnace_damper",

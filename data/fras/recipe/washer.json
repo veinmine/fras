@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PGP",
+    "CKC",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "fras:iron_gear",
+    "C": "fras:copper_pipe",
+    "K": "minecraft:bucket"
+  },
+  "result": {
+    "id": "fras:washer",
+    "count": 1
+  }
+}

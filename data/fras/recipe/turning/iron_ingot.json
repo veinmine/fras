@@ -1,0 +1,13 @@
+{
+  "type": "fras:turning",
+  "ingredient": "minecraft:iron_ingot",
+  "results": [
+    {
+      "id": "fras:iron_rod",
+      "count": 2
+    }
+  ],
+  "revolutions": 8.0,
+  "load": 4.0,
+  "water": 0.0
+}

@@ -1,0 +1,168 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/spruce_planks"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        10,
+        0
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/spruce_planks"
+        },
+        "south": {
+          "texture": "minecraft:block/spruce_planks"
+        },
+        "east": {
+          "texture": "minecraft:block/spruce_planks"
+        },
+        "west": {
+          "texture": "minecraft:block/spruce_planks"
+        },
+        "up": {
+          "texture": "minecraft:block/spruce_planks"
+        },
+        "down": {
+          "texture": "minecraft:block/spruce_planks"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        2,
+        10,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_oak_log"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        10,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_oak_log"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        14
+      ],
+      "to": [
+        2,
+        10,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_oak_log"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        14
+      ],
+      "to": [
+        16,
+        10,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_oak_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_oak_log"
+        }
+      }
+    }
+  ]
+}

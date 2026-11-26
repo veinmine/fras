@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/trip_hammer"
+    },
+    "facing=east": {
+      "model": "fras:block/trip_hammer",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fras:block/trip_hammer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fras:block/trip_hammer",
+      "y": 270
+    }
+  }
+}

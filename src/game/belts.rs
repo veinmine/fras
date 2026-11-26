@@ -156,6 +156,7 @@ pub fn inbox() -> mod_api::ModContainer {
 pub fn queue(dim: Dim, pos: Pos) {
     with_level(dim, |l| {
         l.belts.dirty.insert(pos);
+        l.belts.drive_check.insert(pos);
     });
 }
 
@@ -203,6 +204,7 @@ pub fn loaded(dim: Dim, pos: Pos, saved: Vec<(ItemStack, f64)>) {
             l.belts.restore.insert(pos, saved);
         }
         l.belts.dirty.insert(pos);
+        l.belts.drive_check.insert(pos);
     });
 }
 

@@ -8,6 +8,12 @@
     "fras:crank",
     "fras:water_wheel",
     "fras:grinder",
-    "fras:bellows"
+    "fras:bellows",
+    "fras:conveyor_belt",
+    "fras:diverter",
+    "fras:bucket_elevator",
+    "fras:washer",
+    "fras:trip_hammer",
+    "fras:sawmill"
   ]
 }

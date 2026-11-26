@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/lathe"
+    },
+    "facing=east": {
+      "model": "fras:block/lathe",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fras:block/lathe",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fras:block/lathe",
+      "y": 270
+    }
+  }
+}

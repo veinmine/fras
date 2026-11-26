@@ -1,0 +1,134 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "belt": "minecraft:block/brown_wool",
+    "particle": "minecraft:block/brown_wool"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        1,
+        5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        0
+      ],
+      "to": [
+        15,
+        6,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/brown_wool"
+        },
+        "south": {
+          "texture": "minecraft:block/brown_wool"
+        },
+        "east": {
+          "texture": "minecraft:block/brown_wool"
+        },
+        "west": {
+          "texture": "minecraft:block/brown_wool"
+        },
+        "up": {
+          "texture": "#belt"
+        },
+        "down": {
+          "texture": "minecraft:block/brown_wool"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5.02,
+        7
+      ],
+      "to": [
+        15,
+        6.02,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/red_terracotta"
+        },
+        "south": {
+          "texture": "minecraft:block/red_terracotta"
+        },
+        "east": {
+          "texture": "minecraft:block/red_terracotta"
+        },
+        "west": {
+          "texture": "minecraft:block/red_terracotta"
+        },
+        "up": {
+          "texture": "minecraft:block/red_terracotta"
+        }
+      }
+    }
+  ]
+}

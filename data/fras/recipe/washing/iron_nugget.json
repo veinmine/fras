@@ -1,0 +1,12 @@
+{
+  "type": "fras:washing",
+  "ingredient": "minecraft:iron_nugget",
+  "results": [
+    {
+      "id": "fras:rust_flakes"
+    }
+  ],
+  "revolutions": 64.0,
+  "load": 2.0,
+  "water": 200.0
+}

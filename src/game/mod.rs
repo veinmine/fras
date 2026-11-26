@@ -16,6 +16,8 @@ pub mod machines;
 pub mod parts;
 pub mod pipes;
 pub mod readout;
+#[cfg(test)]
+mod recipe_tree;
 pub mod rust;
 pub mod scenario;
 pub mod server;
@@ -229,7 +231,7 @@ mod tests {
         ] {
             keys.push(format!("fras.jam.{}", j.name()));
         }
-        for code in 0..8 {
+        for code in 0..9 {
             keys.push(format!(
                 "fras.grinder.status.{}",
                 crate::sim::grind::Status::from_code(code).key()
@@ -261,7 +263,23 @@ mod tests {
             keys.push(format!("fras.settings.{s}"));
             keys.push(format!("fras.settings.{s}.tooltip"));
         }
+        // 0.4
+        for st in ["under_driven", "jammed", "paused", "still"] {
+            keys.push(format!("fras.belt.stop.{st}"));
+        }
+        for why in ["too_short", "too_tall"] {
+            keys.push(format!("fras.belt.unformed.{why}"));
+        }
+        for size in ["fine", "medium", "oversize"] {
+            keys.push(format!("fras.trommel.{size}"));
+        }
+        keys.push("fras.machine.belt_mode".into());
+        keys.push("fras.tag.minecraft.wool".into());
+        keys.push("fras.tag.minecraft.planks".into());
+        keys.push("death.attack.fras.machine".into());
         for file in [
+            "belts.rs",
+            "machines.rs",
             "tools.rs",
             "parts.rs",
             "grinder.rs",

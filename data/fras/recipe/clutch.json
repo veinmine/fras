@@ -2,11 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "SRS"
+    "SGS",
+    " D "
   ],
   "key": {
     "S": "fras:iron_shaft",
-    "R": "minecraft:redstone"
+    "G": "fras:iron_gear",
+    "D": "minecraft:redstone"
   },
   "result": {
     "id": "fras:clutch",

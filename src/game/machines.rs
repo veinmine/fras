@@ -1184,8 +1184,15 @@ pub fn screen_draw(b: Block, host: &dyn ClientHost, event: &mut ScreenDrawEvent<
     draw.fill([bx + scale(rpm) - 1.0, by - 2.0, 2.0, 8.0], 0xFFFF_FFFF);
     let speed = format!("{} RPM", super::num(rpm as f64));
     draw.text(&speed, [bx + bw + 4.0, by - 2.0], 0xFF40_4040, false);
-    let key = format!("fras.grinder.status.{}", status.key());
-    let text = host.translate(&key).unwrap_or(key);
+    let key = match status {
+        Status::TooSlow => "fras.machine.too_slow".to_string(),
+        Status::Grinding => "fras.machine.working".to_string(),
+        _ => format!("fras.grinder.status.{}", status.key()),
+    };
+    let text = host
+        .translate(&key)
+        .unwrap_or(key)
+        .replace("%s", &min.to_string());
     let color = match status {
         Status::Jammed | Status::Overspeed | Status::NoWater => 0xFFB0_2020,
         Status::Grinding => 0xFF20_7020,

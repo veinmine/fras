@@ -1,0 +1,13 @@
+{
+  "type": "fras:hammering",
+  "ingredient": "minecraft:sand",
+  "count": 4,
+  "results": [
+    {
+      "id": "minecraft:sandstone"
+    }
+  ],
+  "revolutions": 1.0,
+  "load": 8.0,
+  "water": 0.0
+}

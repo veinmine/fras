@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fras:block/sawmill"
+    },
+    "facing=east": {
+      "model": "fras:block/sawmill",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "fras:block/sawmill",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fras:block/sawmill",
+      "y": 270
+    }
+  }
+}

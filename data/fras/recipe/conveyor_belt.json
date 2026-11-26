@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FFF",
+    "PSP"
+  ],
+  "key": {
+    "F": "#fras:belt_fabrics",
+    "P": "#minecraft:planks",
+    "S": "fras:wooden_shaft"
+  },
+  "result": {
+    "id": "fras:conveyor_belt",
+    "count": 6
+  }
+}

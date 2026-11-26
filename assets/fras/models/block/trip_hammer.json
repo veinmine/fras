@@ -1,0 +1,136 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/stripped_spruce_log"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        6
+      ],
+      "to": [
+        2,
+        16,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        6
+      ],
+      "to": [
+        16,
+        16,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14,
+        6
+      ],
+      "to": [
+        16,
+        16,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "south": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "east": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "west": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "up": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        },
+        "down": {
+          "texture": "minecraft:block/stripped_spruce_log"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        4,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "minecraft:block/anvil"
+        },
+        "south": {
+          "texture": "minecraft:block/anvil"
+        },
+        "east": {
+          "texture": "minecraft:block/anvil"
+        },
+        "west": {
+          "texture": "minecraft:block/anvil"
+        },
+        "up": {
+          "texture": "minecraft:block/anvil"
+        },
+        "down": {
+          "texture": "minecraft:block/anvil"
+        }
+      }
+    }
+  ]
+}
