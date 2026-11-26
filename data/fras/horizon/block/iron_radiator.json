@@ -1,0 +1,111 @@
+{
+  "template": "minecraft:iron_block",
+  "properties": {
+    "hardness": 2.0,
+    "occludes": false,
+    "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "north",
+    "rust": "clean"
+  },
+  "shapes": {
+    "properties": [
+      "facing"
+    ],
+    "values": {
+      "down": [
+        [
+          0.0625,
+          0.375,
+          0.0625,
+          0.9375,
+          1.0,
+          0.9375
+        ]
+      ],
+      "up": [
+        [
+          0.0625,
+          0.0,
+          0.0625,
+          0.9375,
+          0.625,
+          0.9375
+        ]
+      ],
+      "north": [
+        [
+          0.0625,
+          0.0625,
+          0.375,
+          0.9375,
+          0.9375,
+          1.0
+        ]
+      ],
+      "south": [
+        [
+          0.0625,
+          0.0625,
+          0.0,
+          0.9375,
+          0.9375,
+          0.625
+        ]
+      ],
+      "west": [
+        [
+          0.375,
+          0.0625,
+          0.0625,
+          1.0,
+          0.9375,
+          0.9375
+        ]
+      ],
+      "east": [
+        [
+          0.0,
+          0.0625,
+          0.0625,
+          0.625,
+          0.9375,
+          0.9375
+        ]
+      ]
+    }
+  }
+}

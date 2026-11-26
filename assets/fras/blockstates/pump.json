@@ -1,28 +1,132 @@
 {
   "variants": {
-    "facing=up": {
+    "facing=up,rust=clean": {
       "model": "fras:block/pump"
     },
-    "facing=down": {
+    "facing=up,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty"
+    },
+    "facing=up,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty"
+    },
+    "facing=up,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking"
+    },
+    "facing=up,rust=painted": {
+      "model": "fras:block/pump_rust_painted"
+    },
+    "facing=down,rust=clean": {
       "model": "fras:block/pump",
       "x": 180
     },
-    "facing=north": {
+    "facing=down,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty",
+      "x": 180
+    },
+    "facing=down,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty",
+      "x": 180
+    },
+    "facing=down,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking",
+      "x": 180
+    },
+    "facing=down,rust=painted": {
+      "model": "fras:block/pump_rust_painted",
+      "x": 180
+    },
+    "facing=north,rust=clean": {
       "model": "fras:block/pump",
       "x": 90
     },
-    "facing=south": {
+    "facing=north,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty",
+      "x": 90
+    },
+    "facing=north,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty",
+      "x": 90
+    },
+    "facing=north,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking",
+      "x": 90
+    },
+    "facing=north,rust=painted": {
+      "model": "fras:block/pump_rust_painted",
+      "x": 90
+    },
+    "facing=south,rust=clean": {
       "model": "fras:block/pump",
       "x": 90,
       "y": 180
     },
-    "facing=east": {
+    "facing=south,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,rust=painted": {
+      "model": "fras:block/pump_rust_painted",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east,rust=clean": {
       "model": "fras:block/pump",
       "x": 90,
       "y": 90
     },
-    "facing=west": {
+    "facing=east,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,rust=painted": {
+      "model": "fras:block/pump_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,rust=clean": {
       "model": "fras:block/pump",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,rust=spotty": {
+      "model": "fras:block/pump_rust_spotty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,rust=rusty": {
+      "model": "fras:block/pump_rust_rusty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,rust=leaking": {
+      "model": "fras:block/pump_rust_leaking",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,rust=painted": {
+      "model": "fras:block/pump_rust_painted",
       "x": 90,
       "y": 270
     }

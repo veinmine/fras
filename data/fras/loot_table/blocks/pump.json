@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:pump"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_pump",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:pump",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:pump"
+            }
+          ]
         }
       ],
       "condition": {

@@ -1,0 +1,73 @@
+{
+  "template": "minecraft:iron_chain",
+  "properties": {
+    "hardness": 3.0,
+    "occludes": false,
+    "sounds": "minecraft:iron_block",
+    "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
+    "requires_tool": false
+  },
+  "state_properties": {
+    "facing": {
+      "type": "enum",
+      "values": [
+        "down",
+        "up",
+        "north",
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    "damaged": {
+      "type": "boolean"
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
+    }
+  },
+  "default_state": {
+    "facing": "up",
+    "damaged": "false",
+    "rust": "clean"
+  },
+  "shapes": {
+    "default": [
+      [
+        0.0625,
+        0.0,
+        0.0625,
+        0.9375,
+        1.0,
+        0.9375
+      ]
+    ]
+  },
+  "collision_shapes": {
+    "default": [
+      [
+        0.0625,
+        0.0,
+        0.0625,
+        0.9375,
+        1.0,
+        0.9375
+      ]
+    ]
+  }
+}

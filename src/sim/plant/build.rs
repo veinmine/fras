@@ -82,6 +82,8 @@ impl Works {
         self.plants.clear();
         self.part_plant.clear();
         self.heats.clear();
+        self.bellows_of.clear();
+        self.ex_nets.clear();
     }
 
     /// Write each multiblock's water, temperature and timer and each steam
@@ -241,6 +243,27 @@ impl Works {
                 self.shells[si].domes.push(d);
             }
         }
+        // Dampers on working boilers (regulation spec 4.1).
+        for d in self.sorted_parts(|s| s.kind == Kind::Damper) {
+            let on = d.offset(self.parts[&d].spec.dir.opposite());
+            if let Some(&si) = self.shell_of.get(&on)
+                && self.shells[si].is_boiler()
+                && self.shells[si].works()
+            {
+                self.shells[si].dampers.push(d);
+            }
+        }
+        // Each firebox's bellows: the first by position, not on its mouth.
+        for b in self.sorted_parts(|s| s.kind == Kind::Bellows) {
+            let nozzle = self.parts[&b].spec.dir;
+            let fire = b.offset(nozzle);
+            if let Some(f) = self.parts.get(&fire)
+                && f.spec.kind == Kind::Firebox
+                && f.spec.dir != nozzle.opposite()
+            {
+                self.bellows_of.entry(fire).or_insert(b);
+            }
+        }
         // The fireboxes that heat each boiler.
         for si in 0..self.shells.len() {
             let s = &self.shells[si];
@@ -304,6 +327,10 @@ impl Works {
             fireboxes: 0,
             boiled: 0.0,
             fed: 0.0,
+            dampers: Vec::new(),
+            opening: 1.0,
+            feed_temp: crate::sim::steam::AMBIENT,
+            leaked: 0.0,
         });
     }
 
@@ -335,6 +362,9 @@ impl Works {
                 flywheel: hub,
                 demand: vec![0.0; cylinders.len()],
                 fill: vec![1.0; cylinders.len()],
+                throttle: vec![1.0; cylinders.len()],
+                drawn: vec![0.0; cylinders.len()],
+                vented: vec![0.0; cylinders.len()],
                 cylinders,
                 drive: Drive::default(),
                 plant: 0,
@@ -364,8 +394,31 @@ impl Works {
         match s.kind {
             Kind::Pipe(_) => s.face(face).then_some(Role::Pipe),
             Kind::Valve { .. } => (face.axis() == s.axis() && s.open()).then_some(Role::Pipe),
+            Kind::Governor => (face.axis() == s.axis()).then_some(Role::Pipe),
             Kind::Vent { .. } => (face == s.dir).then_some(Role::Fit(End::Vent(pos))),
+            Kind::Cylinder if face == Dir::Up && s.dir.axis() != crate::sim::geom::Axis::Y => {
+                Some(Role::Fit(End::Exhaust(pos)))
+            }
             Kind::Cylinder => (face == s.dir.opposite()).then_some(Role::Fit(End::Cylinder(pos))),
+            Kind::Exchanger => {
+                if face == s.dir {
+                    Some(Role::Fit(End::ExOut(pos)))
+                } else if face == s.dir.opposite() {
+                    Some(Role::Fit(End::ExIn(pos)))
+                } else {
+                    None
+                }
+            }
+            Kind::Drain => (face == s.dir).then_some(Role::Fit(End::Drain(pos))),
+            Kind::Grinder => {
+                if face == s.dir.opposite() {
+                    Some(Role::Fit(End::CoolIn(pos)))
+                } else if face.axis() != s.dir.axis() && face.axis() != crate::sim::geom::Axis::Y {
+                    Some(Role::Fit(End::CoolOut(pos)))
+                } else {
+                    None
+                }
+            }
             Kind::Pump => (face == s.dir.opposite()).then_some(Role::Fit(End::Pump(pos))),
             Kind::Dome => {
                 let &si = self.shell_of.get(&pos.offset(Dir::Down))?;
@@ -384,8 +437,20 @@ impl Works {
                     Some(Role::Vessel(End::Tank(si)))
                 }
             }
-            Kind::Firebox | Kind::Flywheel => None,
+            Kind::Firebox
+            | Kind::Flywheel
+            | Kind::Damper
+            | Kind::Bellows
+            | Kind::Radiator { .. } => None,
         }
+    }
+
+    /// The faces through which a fitting takes part in pipe networks.
+    pub(crate) fn fit_faces(&self, pos: Pos) -> Vec<Dir> {
+        Dir::ALL
+            .into_iter()
+            .filter(|d| matches!(self.role(pos, *d), Some(Role::Fit(_))))
+            .collect()
     }
 
     /// The content a vessel end gives, with a tank's own.
@@ -396,18 +461,23 @@ impl Works {
         }
     }
 
+    /// Whether two ends may share a network: their contents agree, or one
+    /// takes what the other brings.
+    fn agree(&self, a: End, b: End) -> bool {
+        match (self.end_content(a), self.end_content(b)) {
+            (Some(x), Some(y)) => x == y,
+            (Some(c), None) => b.accepts(c),
+            (None, Some(c)) => a.accepts(c),
+            (None, None) => true,
+        }
+    }
+
     /// Whether two roles facing each other connect.
     fn links(&self, a: Role, b: Role) -> bool {
         match (a, b) {
             (Role::Pipe, _) | (_, Role::Pipe) => true,
-            (Role::Fit(f), Role::Vessel(v)) | (Role::Vessel(v), Role::Fit(f)) => {
-                match (f.content(), self.end_content(v), v) {
-                    (_, _, End::Tank(_)) => {
-                        self.end_content(v).is_none_or(|c| Some(c) == f.content())
-                    }
-                    (fc, vc, _) => fc == vc,
-                }
-            }
+            (Role::Fit(f), Role::Vessel(v)) | (Role::Vessel(v), Role::Fit(f)) => self.agree(f, v),
+            (Role::Fit(f), Role::Fit(g)) => self.agree(f, g),
             _ => false,
         }
     }
@@ -459,32 +529,49 @@ impl Works {
             members.sort();
             comps.push((members, ends, frontier));
         }
-        // Fittings straight on a vessel, with no pipe between.
-        for f in
-            self.sorted_parts(|s| matches!(s.kind, Kind::Vent { .. } | Kind::Cylinder | Kind::Pump))
-        {
-            let face = self.parts[&f].spec.dir;
-            let face = if matches!(self.parts[&f].spec.kind, Kind::Vent { .. }) {
-                face
-            } else {
-                face.opposite()
-            };
-            if let Some((_, Role::Vessel(v))) = self.neighbour(f, face)
-                && let Some(Role::Fit(e)) = self.role(f, face)
-            {
-                comps.push((Vec::new(), vec![(v, f), (e, f)], Vec::new()));
+        // Fittings straight on a vessel or on another fitting, with no pipe
+        // between (a pair of fittings once, from the lower position).
+        let fittings = self.sorted_parts(|s| {
+            matches!(
+                s.kind,
+                Kind::Vent { .. }
+                    | Kind::Cylinder
+                    | Kind::Pump
+                    | Kind::Exchanger
+                    | Kind::Drain
+                    | Kind::Grinder
+            )
+        });
+        for f in fittings {
+            for face in self.fit_faces(f) {
+                let Some(Role::Fit(e)) = self.role(f, face) else {
+                    continue;
+                };
+                match self.neighbour(f, face) {
+                    Some((_, Role::Vessel(v))) => {
+                        comps.push((Vec::new(), vec![(v, f), (e, f)], Vec::new()));
+                    }
+                    Some((g, Role::Fit(o))) if f < g => {
+                        comps.push((Vec::new(), vec![(e, f), (o, g)], Vec::new()));
+                    }
+                    _ => {}
+                }
             }
         }
         for (pipes, ends, frontier) in comps {
             self.add_net(pipes, ends, frontier);
         }
+        self.classify_nets();
     }
 
+    /// A pipe network's parts, links and endpoints; its content and routes
+    /// come once every network is known (`classify_nets`).
     fn add_net(&mut self, pipes: Vec<Pos>, ends: Vec<(End, Pos)>, frontier: Vec<Pos>) {
         let index = self.nets.len();
         let mut net = Net {
             pipes: pipes.clone(),
             frontier,
+            ends,
             ..Net::default()
         };
         for q in &pipes {
@@ -503,11 +590,102 @@ impl Works {
                 }
             }
         }
-        // Group the endpoints: each one's attachment nodes.
+        for (e, _) in &net.ends {
+            match e {
+                End::Vent(v) | End::Cylinder(v) | End::Pump(v) => {
+                    self.net_of.insert(*v, index);
+                }
+                End::ExIn(v) => self.ex_nets.entry(*v).or_default().0 = Some(index),
+                End::ExOut(v) => self.ex_nets.entry(*v).or_default().1 = Some(index),
+                _ => {}
+            }
+        }
+        self.nets.push(net);
+    }
+
+    /// Each network's content (spec 3, 3.2; cooling spec 2): from the ends
+    /// that set one, else from an exchanger outlet's inlet; mixed if two
+    /// contents meet or an end can't take it. Then its sources, consumers
+    /// and routes.
+    fn classify_nets(&mut self) {
+        let n = self.nets.len();
+        let mut content: Vec<Option<Content>> = vec![None; n];
+        let mut mixed = vec![false; n];
+        // Setters fix a network's content; an empty tank takes the content of
+        // the first network it meets and passes it on; outlets give what their
+        // inlets turn into (chains of exchangers too).
+        for _ in 0..8 {
+            let mut changed = false;
+            for ni in 0..n {
+                if content[ni].is_some() || mixed[ni] {
+                    continue;
+                }
+                let mut found: BTreeSet<Content> = BTreeSet::new();
+                for (e, _) in &self.nets[ni].ends {
+                    if let Some(c) = self.end_content(*e) {
+                        found.insert(c);
+                    }
+                    if let End::ExOut(x) = e
+                        && let Some(c) = self
+                            .ex_nets
+                            .get(x)
+                            .and_then(|(i, _)| *i)
+                            .and_then(|i| content[i])
+                            .and_then(crate::sim::fluid::exchange::converts)
+                    {
+                        found.insert(c);
+                    }
+                }
+                if found.len() > 1 {
+                    mixed[ni] = true;
+                    changed = true;
+                } else if let Some(c) = found.into_iter().next() {
+                    content[ni] = Some(c);
+                    changed = true;
+                    let tanks: Vec<usize> = self.nets[ni]
+                        .ends
+                        .iter()
+                        .filter_map(|(e, _)| match e {
+                            End::Tank(si) => Some(*si),
+                            _ => None,
+                        })
+                        .collect();
+                    for si in tanks {
+                        if self.shells[si].content.is_none() {
+                            self.shells[si].content = Some(c);
+                        }
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        for ni in 0..n {
+            if let Some(c) = content[ni]
+                && self.nets[ni].ends.iter().any(|(e, _)| !e.accepts(c))
+            {
+                mixed[ni] = true;
+            }
+            if mixed[ni] {
+                content[ni] = None;
+            }
+        }
+        for ni in 0..n {
+            self.finish_net(ni, content[ni], mixed[ni]);
+        }
+    }
+
+    fn finish_net(&mut self, index: usize, content: Option<Content>, mixed: bool) {
+        let mut net = std::mem::take(&mut self.nets[index]);
+        net.content = content;
+        net.mixed = mixed;
+        let pipes = net.pipes.clone();
         let direct = pipes.is_empty();
+        // Group the endpoints: each one's attachment nodes.
         let mut attach: BTreeMap<End, Vec<Pos>> = BTreeMap::new();
         let mut domes: BTreeMap<usize, BTreeSet<Pos>> = BTreeMap::new();
-        for (e, at) in &ends {
+        for (e, at) in &net.ends {
             attach.entry(*e).or_default().push(*at);
             if let End::Domes(si) = e {
                 // Which dome: the vessel across from the pipe.
@@ -524,38 +702,21 @@ impl Works {
                     }
                 }
             }
-            if let End::Vent(v) | End::Cylinder(v) | End::Pump(v) = e {
-                self.net_of.insert(*v, index);
-            }
         }
-        // Its content, from its endpoints (spec 3, 3.2).
-        let mut steam = false;
-        let mut water = false;
-        let mut empty_tanks = Vec::new();
-        for e in attach.keys() {
-            match self.end_content(*e) {
-                Some(Content::Steam) => steam = true,
-                Some(Content::Water) => water = true,
-                None => empty_tanks.push(*e),
-            }
-        }
-        net.mixed = steam && water;
-        net.content = match (steam, water) {
-            (true, false) => Some(Content::Steam),
-            (false, true) => Some(Content::Water),
-            _ => None,
-        };
         // An empty tank takes the content of the first network it meets.
         if let Some(c) = net.content {
-            for e in empty_tanks {
-                if let End::Tank(si) = e {
-                    self.shells[si].content = Some(c);
+            for e in attach.keys() {
+                if let End::Tank(si) = e
+                    && self.shells[*si].content.is_none()
+                {
+                    self.shells[*si].content = Some(c);
                 }
             }
         }
         // Source nodes and consumers.
-        let mut pump_sources = Vec::new();
+        let mut plain_sources = Vec::new();
         let mut tank_sources = Vec::new();
+        let liquid = net.content.is_some_and(Content::is_liquid);
         for (e, ats) in &attach {
             let source_cap = match (*e, net.content) {
                 (End::Domes(si), Some(Content::Steam)) => Some(
@@ -565,6 +726,11 @@ impl Works {
                 (End::Pump(_), Some(Content::Water)) => Some(crate::sim::fluid::pump::source_cap(
                     crate::sim::fluid::pump::MAX_SOURCES,
                 )),
+                (End::ExOut(_), Some(c)) if c.is_liquid() => {
+                    Some(crate::sim::fluid::exchange::THROUGHPUT)
+                }
+                (End::CoolOut(_), Some(Content::HotWater)) => Some(UNLIMITED),
+                (End::Exhaust(_), Some(Content::Exhaust)) => Some(UNLIMITED),
                 _ => None,
             };
             let nodes: Vec<usize> = if direct {
@@ -580,41 +746,77 @@ impl Works {
                 }
                 net.sources.push((*e, node));
                 match e {
-                    End::Pump(_) => pump_sources.push(node),
-                    End::Tank(_) if net.content == Some(Content::Water) => tank_sources.push(node),
-                    _ => {}
+                    End::Tank(_) if liquid => tank_sources.push(node),
+                    _ => plain_sources.push(node),
                 }
             }
-            let consumer = match e {
-                End::Vent(_) | End::Cylinder(_) => net.content == Some(Content::Steam),
-                End::Feed(_) => net.content == Some(Content::Water),
-                End::Tank(_) => net.content == Some(Content::Water),
+            let consumer = match (e, net.content) {
+                (End::Vent(_) | End::Cylinder(_), Some(Content::Steam)) => true,
+                (End::Feed(_) | End::Tank(_) | End::Drain(_), Some(c)) => c.is_liquid(),
+                (End::CoolIn(_), Some(Content::Water)) => true,
+                (End::ExIn(_), Some(Content::HotWater | Content::Exhaust)) => true,
                 _ => false,
             };
             if consumer {
                 net.consumers.push((*e, nodes));
             }
         }
-        // A direct link: the consumer hangs on the vessel's source node.
+        // A direct link: the consumer hangs on the other end's source node.
         if direct {
             let src: Vec<usize> = net.sources.iter().map(|(_, n)| *n).collect();
             for (_, nodes) in net.consumers.iter_mut() {
                 nodes.extend(src.iter().copied());
             }
         }
+        // Cooled machines route first, exchangers last: a machine that can't
+        // get its hot water out loses cooling, an exchanger only lets
+        // exhaust vent.
+        let rank = |node: usize| match net.sources.iter().find(|(_, n)| *n == node) {
+            Some((End::CoolOut(_), _)) => 0,
+            Some((End::ExOut(_), _)) => 2,
+            _ => 1,
+        };
+        plain_sources.sort_by_key(|&n| (rank(n), net.graph.key[n]));
         match net.content {
-            Some(Content::Steam) => {
+            Some(c) if liquid => {
+                let _ = c;
+                net.tree = route::tree(&net.graph, &plain_sources);
+                net.tank_tree = route::tree(&net.graph, &tank_sources);
+                net.source_trees = plain_sources
+                    .iter()
+                    .map(|&s| route::tree(&net.graph, &[s]))
+                    .collect();
+            }
+            Some(c) => {
                 let all: Vec<usize> = net.sources.iter().map(|(_, n)| *n).collect();
                 net.tree = route::tree(&net.graph, &all);
-            }
-            Some(Content::Water) => {
-                net.tree = route::tree(&net.graph, &pump_sources);
-                net.tank_tree = route::tree(&net.graph, &tank_sources);
+                if c == Content::Exhaust {
+                    net.source_trees = all.iter().map(|&s| route::tree(&net.graph, &[s])).collect();
+                }
             }
             None => {}
         }
+        // The governors on the route to each node (steam only).
+        net.govs = vec![Vec::new(); net.graph.len()];
+        if net.content == Some(Content::Steam) {
+            for &u in &net.tree.order.clone() {
+                let mut g = net.tree.parent[u]
+                    .map(|p| net.govs[p].clone())
+                    .unwrap_or_default();
+                let key = net.graph.key[u];
+                if net.node_of.get(&key) == Some(&u)
+                    && self
+                        .parts
+                        .get(&key)
+                        .is_some_and(|p| p.spec.kind == Kind::Governor)
+                {
+                    g.push(key);
+                }
+                net.govs[u] = g;
+            }
+        }
         net.flow = vec![0.0; net.graph.len()];
-        self.nets.push(net);
+        self.nets[index] = net;
     }
 
     // ---- Steam networks ---------------------------------------------------------
@@ -747,6 +949,11 @@ impl Works {
                     | Kind::Dome
                     | Kind::Cylinder
                     | Kind::Vent { .. }
+                    | Kind::Damper
+                    | Kind::Bellows
+                    | Kind::Exchanger
+                    | Kind::Drain
+                    | Kind::Grinder
             )
         });
         let loose_item: HashMap<Pos, usize> = loose
@@ -766,9 +973,9 @@ impl Works {
             {
                 match e {
                     End::Domes(si) | End::Feed(si) | End::Tank(si) => dsu.union(net_item(ni), *si),
-                    End::Vent(q) | End::Cylinder(q) | End::Pump(q) => {
-                        if let Some(&it) = loose_item.get(q) {
-                            dsu.union(net_item(ni), it);
+                    e => {
+                        if let Some(it) = e.pos().and_then(|q| loose_item.get(&q)) {
+                            dsu.union(net_item(ni), *it);
                         }
                     }
                 }
@@ -804,10 +1011,15 @@ impl Works {
             }
         }
         for (si, s) in self.shells.iter().enumerate() {
-            for d in &s.domes {
+            for d in s.domes.iter().chain(&s.dampers) {
                 if let Some(&it) = loose_item.get(d) {
                     dsu.union(it, si);
                 }
+            }
+        }
+        for (fire, b) in &self.bellows_of {
+            if let (Some(&a), Some(&c)) = (loose_item.get(fire), loose_item.get(b)) {
+                dsu.union(a, c);
             }
         }
         // Number the plants by their roots.
@@ -837,6 +1049,9 @@ impl Works {
             plant.frontier.extend(net.frontier.iter().copied());
             for q in &net.pipes {
                 plant.chunks.insert(q.chunk());
+                if self.parts[q].spec.kind == Kind::Governor {
+                    plant.rot_parts.push(*q);
+                }
             }
         }
         for sn in self.steam.iter_mut() {
@@ -855,7 +1070,7 @@ impl Works {
             self.part_plant.insert(q, p);
             let plant = &mut self.plants[p];
             plant.chunks.insert(q.chunk());
-            if matches!(self.parts[&q].spec.kind, Kind::Flywheel | Kind::Pump) {
+            if self.parts[&q].spec.kind.is_rot() {
                 plant.rot_parts.push(q);
             }
         }

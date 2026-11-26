@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:iron_pipe"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_iron_pipe",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:iron_pipe",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:iron_pipe"
+            }
+          ]
         }
       ],
       "condition": {

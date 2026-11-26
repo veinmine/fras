@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XXX",
+    "XPX",
+    "XXX"
+  ],
+  "key": {
+    "X": "fras:heat_exchanger",
+    "P": "fras:red_oxide_paint"
+  },
+  "result": {
+    "id": "fras:painted_heat_exchanger",
+    "count": 8
+  }
+}

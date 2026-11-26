@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/storage_tank/shell_rust_spotty",
+  "loader": "fras:shell",
+  "mask": 55,
+  "axis": "z"
+}

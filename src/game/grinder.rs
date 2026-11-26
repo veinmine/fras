@@ -179,6 +179,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             saved.is_some_and(|s| s.jam.is_some()),
         ),
     });
+    let cooled = with_level(dim, |l| l.steam.works.cooled(pos));
 
     let before = event.entity.items.clone();
     if event.entity.items.len() < SLOTS {
@@ -208,13 +209,22 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             rpm,
             jammed,
             paused,
+            cooled,
             &book.recipes,
             &items,
             &mut random,
         )
     };
+    let working = result.status == Status::Grinding;
     with_level(dim, |l| {
         l.loads.insert(pos, result.load);
+        // Cooling water it asks for (cooling spec 6).
+        let demand = if paused {
+            0.0
+        } else {
+            crate::sim::fluid::cool::demand(rpm, working)
+        };
+        l.steam.works.set_cool_demand(pos, demand);
     });
 
     // Write the items back where they changed.
@@ -256,7 +266,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
         progress,
         (rpm * 10.0).round() as i32,
         result.status.code(),
-        grind::working_range(false).1 as i32,
+        grind::working_range(cooled).1 as i32,
     ];
     let data_changed = event.entity.data != data;
     if data_changed {
@@ -442,7 +452,7 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
         0xFFFF_AA00,
     );
     // Speed bar: 0 to 128 RPM, the working band green, red above the max.
-    let (bx, by, bw) = (x + 44.0, y + 58.0, 96.0);
+    let (bx, by, bw) = (x + 8.0, y + 58.0, 112.0);
     let scale = |rpm: f32| bw * (rpm / 128.0).clamp(0.0, 1.0);
     let (min, maxf) = (crate::sim::rot::part::GRINDER_MIN_RPM as f32, max as f32);
     draw.fill([bx, by, bw, 4.0], 0xFF40_4040);
@@ -453,12 +463,9 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
     draw.fill([bx + scale(maxf), by, bw - scale(maxf), 4.0], 0xFFB0_3030);
     let rpm = (rpm10 as f32 / 10.0).abs();
     draw.fill([bx + scale(rpm) - 1.0, by - 2.0, 2.0, 8.0], 0xFFFF_FFFF);
-    draw.text(
-        &format!("{} RPM", super::num(rpm as f64)),
-        [bx + bw + 4.0, by - 2.0],
-        0xFF40_4040,
-        false,
-    );
+    // The speed right of the bar, the status below it.
+    let speed = format!("{} RPM", super::num(rpm as f64));
+    draw.text(&speed, [bx + bw + 4.0, by - 2.0], 0xFF40_4040, false);
     // Status line.
     let key = format!("fras.grinder.status.{}", status.key());
     let text = host.translate(&key).unwrap_or(key);
@@ -467,7 +474,7 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
         Status::Grinding => 0xFF20_7020,
         _ => 0xFF40_4040,
     };
-    draw.text(&text, [x + 44.0, y + 66.0], color, false);
+    super::text_in(draw, &text, [x + 8.0, y + 64.0], 160.0, color);
 }
 
 #[cfg(test)]

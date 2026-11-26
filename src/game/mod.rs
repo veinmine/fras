@@ -6,9 +6,11 @@ pub mod blocks;
 pub mod draw;
 pub mod effects;
 pub mod firebox;
+pub mod governor;
 pub mod grinder;
 pub mod parts;
 pub mod pipes;
+pub mod rust;
 pub mod server;
 pub mod shell_model;
 pub mod steam;
@@ -39,11 +41,17 @@ pub struct Keys {
     pub copper_ingot: ItemKey,
     pub copper_nugget: ItemKey,
     pub iron_plate: ItemKey,
+    pub leather: ItemKey,
+    pub paint: ItemKey,
+    /// The pre-painted items (rust spec 7.2).
+    pub painted: Vec<ItemKey>,
+    pub rust_flakes: ItemKey,
     pub smoke: ParticleKey,
     pub crit: ParticleKey,
     pub cloud: ParticleKey,
     pub ember: ParticleKey,
     pub wisp: ParticleKey,
+    pub drip: ParticleKey,
 }
 
 pub static KEYS: OnceLock<Keys> = OnceLock::new();
@@ -98,6 +106,47 @@ pub fn yaw_dir(yaw: f32) -> Dir {
 }
 
 /// Format a number for players: at most one decimal.
+/// Split `text` into lines no wider than `max` GUI pixels, at spaces.
+pub fn wrap(draw: &dyn mod_api::DrawContext, text: &str, max: f32) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in text.split(' ') {
+        let tried = if line.is_empty() {
+            word.to_string()
+        } else {
+            format!("{line} {word}")
+        };
+        if !line.is_empty() && draw.text_width(&tried) > max {
+            lines.push(std::mem::replace(&mut line, word.to_string()));
+        } else {
+            line = tried;
+        }
+    }
+    if !line.is_empty() || lines.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
+/// Line height of screen text, GUI pixels.
+pub const LINE: f32 = 10.0;
+
+/// Draw `text` wrapped to `max` pixels from `at`; returns where the next line goes.
+pub fn text_in(
+    draw: &mut dyn mod_api::DrawContext,
+    text: &str,
+    at: [f32; 2],
+    max: f32,
+    color: u32,
+) -> f32 {
+    let mut y = at[1];
+    for line in wrap(&*draw, text, max) {
+        draw.text(&line, [at[0], y], color, false);
+        y += LINE;
+    }
+    y
+}
+
 pub fn num(v: f64) -> String {
     let r = (v * 10.0).round() / 10.0;
     if (r - r.round()).abs() < 1e-9 {
@@ -179,8 +228,30 @@ mod tests {
             ));
         }
         // Literal keys in the sources.
-        for m in steam::MODES {
+        for m in steam::MODES
+            .iter()
+            .chain(rust::ON_CHOICES.iter())
+            .chain(rust::SPEED_CHOICES.iter())
+        {
             keys.push(m.to_string());
+        }
+        for i in crate::PAINTED {
+            keys.push(format!("item.fras.painted_{i}"));
+        }
+        for c in ["steam", "waterlogged", "water", "rain"] {
+            keys.push(format!("fras.rust.cause.{c}"));
+        }
+        for st in ["clean", "spotty", "rusty", "leaking", "painted"] {
+            keys.push(format!("fras.rust.stage.{st}"));
+        }
+        keys.push("fras.jam.rusted".into());
+        keys.push("tooltip.fras.painted".into());
+        for c in ["water", "steam", "hot_water", "exhaust", "empty"] {
+            keys.push(format!("fras.content.{c}"));
+        }
+        for s in ["rust", "rust_speed"] {
+            keys.push(format!("fras.settings.{s}"));
+            keys.push(format!("fras.settings.{s}.tooltip"));
         }
         for file in [
             "tools.rs",
@@ -190,6 +261,8 @@ mod tests {
             "steam_inspect.rs",
             "pipes.rs",
             "firebox.rs",
+            "governor.rs",
+            "rust.rs",
         ] {
             let src =
                 std::fs::read_to_string(format!("{}/src/game/{file}", env!("CARGO_MANIFEST_DIR")))

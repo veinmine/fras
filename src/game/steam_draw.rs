@@ -7,10 +7,9 @@
 use mod_api::{BlockEntityDrawContext, BlockEntitySubmitEvent, ClientHost, CubeFace};
 
 use super::blocks::{self, Block};
-use super::draw::{CENTER, angle, axle, boxed, faces, prop, span, spin};
+use super::draw::{CENTER, angle, axle, boxed, faces, iron, prop, span, spin};
 use crate::sim::geom::{Axis, Dir, Pos};
 
-const IRON: &str = "block/iron_block";
 const DARK: &str = "block/anvil";
 const STEEL: &str = "block/smooth_stone";
 const BRASS: &str = "block/gold_block";
@@ -210,6 +209,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     let nbt = &event.entity.nbt;
     let pos = Pos::from_array(event.pos);
     let state = event.state;
+    super::draw::set_rust(host, state);
     let draw = &mut *event.draw;
     match block {
         Block::Flywheel => {
@@ -256,8 +256,83 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             sight_glass(draw, f, level, warn);
             draw.keep();
         }
+        Block::Governor => {
+            let socket = prop(host, state, "socket")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::Up);
+            let jammed = blocks::get_str(nbt, "jam").is_some_and(|j| !j.is_empty());
+            let rpm = if jammed {
+                0.0
+            } else {
+                blocks::get_f64(nbt, "rpm").unwrap_or(0.0)
+            };
+            let ball = blocks::get_i32(nbt, "ball").unwrap_or(0).clamp(0, 7);
+            flyballs(draw, pos, socket, rpm, ball);
+            draw.keep();
+        }
+        Block::Bellows => {
+            let socket = facing(host, state, Dir::North).opposite();
+            let jammed = blocks::get_str(nbt, "jam").is_some_and(|j| !j.is_empty());
+            let rpm = if jammed {
+                0.0
+            } else {
+                blocks::get_f64(nbt, "rpm").unwrap_or(0.0)
+            };
+            let axis = socket.axis();
+            spin(draw, pos, 1, axis, CENTER, rpm, 0.0);
+            let range = if socket.is_positive() {
+                [12.0, 16.0]
+            } else {
+                [0.0, 4.0]
+            };
+            axle(
+                draw,
+                axis,
+                range,
+                2.0,
+                "block/stripped_oak_log",
+                "block/stripped_oak_log_top",
+            );
+            draw.keep();
+        }
         _ => {}
     }
+}
+
+/// The governor's spindle on its socket side and the two flyballs, out by
+/// `step` (0 to 7), turning with the shaft.
+fn flyballs(draw: &mut dyn BlockEntityDrawContext, pos: Pos, socket: Dir, rpm: f64, step: i32) {
+    let axis = socket.axis();
+    let out = |a: f32, b: f32| {
+        if socket.is_positive() {
+            [a, b]
+        } else {
+            [16.0 - b, 16.0 - a]
+        }
+    };
+    spin(draw, pos, 1, axis, CENTER, rpm, 0.0);
+    // Spindle from the body to the socket face.
+    axle(draw, axis, out(11.0, 16.0), 1.0, STEEL, STEEL);
+    // Balls: out from the spindle by 1.5 to 5 texels, near the socket end.
+    let r = 1.5 + step as f32 * 0.5;
+    let along = out(12.0, 14.5);
+    for sign in [-1.0f32, 1.0] {
+        let c = 8.0 + sign * (r + 1.25);
+        let arm_lo = if sign > 0.0 { 8.0 } else { c };
+        let arm_hi = if sign > 0.0 { c } else { 8.0 };
+        boxed(
+            draw,
+            span(axis, out(13.0, 13.5), [arm_lo, arm_hi], [7.75, 8.25]),
+            faces(axis, iron(), iron()),
+        );
+        boxed(
+            draw,
+            span(axis, along, [c - 1.25, c + 1.25], [6.75, 9.25]),
+            faces(axis, BRASS, BRASS),
+        );
+    }
+    draw.still();
 }
 
 /// The 3×3 wheel: a smooth 32-sided rim, six spokes, the hub and its axle,
@@ -266,11 +341,13 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
     let a = unit(axis);
     let (e1, e2) = across(axis);
     spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
-    axle(draw, axis, [0.0, 16.0], 2.0, IRON, IRON);
+    axle(draw, axis, [0.0, 16.0], 2.0, iron(), iron());
     // The rim: 24 texels out, 4 deep, 3 thick across.
+    // Dark iron, rusted or painted with the part (rust spec 7.3).
+    let dark = super::draw::rusted_or(DARK);
     ring(
         draw,
-        DARK,
+        dark,
         CENTER,
         axis,
         20.0,
@@ -282,7 +359,7 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
     // The hub.
     ring(
         draw,
-        IRON,
+        iron(),
         CENTER,
         axis,
         0.0,
@@ -298,7 +375,7 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
         let side = add(scale(e1, -t.sin()), scale(e2, t.cos()));
         let from = add(CENTER, scale(dir, 3.0 / 16.0));
         let to = add(CENTER, scale(dir, 21.0 / 16.0));
-        beam(draw, DARK, from, to, side, 2.5, 2.5);
+        beam(draw, dark, from, to, side, 2.5, 2.5);
     }
     // The crank pin, at angle 0 on e1, standing out to the rod's plane.
     let pin = add(CENTER, scale(e1, PIN_R));
@@ -314,7 +391,7 @@ fn flywheel(draw: &mut dyn BlockEntityDrawContext, pos: Pos, axis: Axis, rpm: f6
     // The crank web, just off the hub's face, out to the pin.
     beam(
         draw,
-        IRON,
+        iron(),
         add(CENTER, scale(a, 3.6 / 16.0)),
         add(pin, scale(a, 3.6 / 16.0)),
         e2,
@@ -366,7 +443,7 @@ fn rod(draw: &mut dyn BlockEntityDrawContext, pos: Pos, f: Dir) {
     let up = [0.0, 1.0, 0.0];
     beam(
         draw,
-        IRON,
+        iron(),
         sub(cross_head, scale(toward, 1.5 / 16.0)),
         add(cross_head, scale(toward, 1.5 / 16.0)),
         up,
@@ -374,7 +451,7 @@ fn rod(draw: &mut dyn BlockEntityDrawContext, pos: Pos, f: Dir) {
         3.0,
     );
     // The connecting rod.
-    beam(draw, IRON, cross_head, pin, a, 2.0, 2.5);
+    beam(draw, iron(), cross_head, pin, a, 2.0, 2.5);
 }
 
 /// The handwheel on top of a manual valve, turned by its opening.
@@ -531,6 +608,9 @@ pub fn bounds(block: Block, b: &mut [f32; 6]) {
         }
         Block::SteamCylinder => {
             *b = [-2.0, -1.0, -2.0, 3.0, 2.0, 3.0];
+        }
+        Block::Governor => {
+            *b = [-0.5, -0.5, -0.5, 1.5, 1.5, 1.5];
         }
         _ => {}
     }

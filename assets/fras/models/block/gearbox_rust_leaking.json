@@ -1,0 +1,74 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "fras:block/rust_leaking",
+    "fast": "fras:block/rust_leaking",
+    "particle": "fras:block/rust_leaking"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        1,
+        0
+      ],
+      "to": [
+        15,
+        15,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "down": {
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        4,
+        9
+      ],
+      "to": [
+        12,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#fast"
+        },
+        "south": {
+          "texture": "#fast"
+        },
+        "east": {
+          "texture": "#fast"
+        },
+        "west": {
+          "texture": "#fast"
+        },
+        "up": {
+          "texture": "#fast"
+        },
+        "down": {
+          "texture": "#fast"
+        }
+      }
+    }
+  ]
+}

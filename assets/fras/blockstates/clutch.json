@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "rust=clean": {
       "model": "fras:block/clutch"
+    },
+    "rust=spotty": {
+      "model": "fras:block/clutch_rust_spotty"
+    },
+    "rust=rusty": {
+      "model": "fras:block/clutch_rust_rusty"
+    },
+    "rust=leaking": {
+      "model": "fras:block/clutch_rust_leaking"
+    },
+    "rust=painted": {
+      "model": "fras:block/clutch_rust_painted"
     }
   }
 }

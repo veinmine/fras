@@ -71,6 +71,13 @@ pub struct Shell {
     pub fireboxes: usize,
     pub boiled: f64,
     pub fed: f64,
+    /// Boilers: the dampers on it, and their opening (the most closed one).
+    pub dampers: Vec<Pos>,
+    pub opening: f64,
+    /// Boilers: the temperature of the last feed, °C.
+    pub feed_temp: f64,
+    /// Leaking blocks: what they lost last step, mB/s.
+    pub leaked: f64,
 }
 
 impl Shell {
@@ -131,15 +138,58 @@ pub enum End {
     Vent(Pos),
     Cylinder(Pos),
     Pump(Pos),
+    // ---- 0.3 (cooling spec 10) ----
+    /// A cylinder's top: exhaust source.
+    Exhaust(Pos),
+    /// A heat exchanger's inlet (consumer) and outlet (source).
+    ExIn(Pos),
+    ExOut(Pos),
+    Drain(Pos),
+    /// A grinder's cooling inlet (water) and hot water outlet.
+    CoolIn(Pos),
+    CoolOut(Pos),
 }
 
 impl End {
-    /// The content it gives a network (a tank's depends on what it holds).
+    /// The content it gives a network (a tank's depends on what it holds,
+    /// an exchanger outlet's on its inlet; feeds, drains and exchanger
+    /// inlets set none).
     pub fn content(self) -> Option<Content> {
         match self {
             End::Domes(_) | End::Vent(_) | End::Cylinder(_) => Some(Content::Steam),
-            End::Feed(_) | End::Pump(_) => Some(Content::Water),
-            End::Tank(_) => None,
+            End::Pump(_) | End::CoolIn(_) => Some(Content::Water),
+            End::CoolOut(_) => Some(Content::HotWater),
+            End::Exhaust(_) => Some(Content::Exhaust),
+            End::Feed(_) | End::Tank(_) | End::ExIn(_) | End::ExOut(_) | End::Drain(_) => None,
+        }
+    }
+
+    /// Whether it may sit on a network of content `c` (spec 3, 3.2;
+    /// cooling spec 2): a mismatch makes the network mixed and inert.
+    pub fn accepts(self, c: Content) -> bool {
+        match self {
+            End::Feed(_) | End::Drain(_) => c.is_liquid(),
+            End::ExIn(_) => matches!(c, Content::Exhaust | Content::HotWater),
+            End::Tank(_) => c != Content::Exhaust,
+            // An outlet never mixes: on another content its exchanger stops.
+            End::ExOut(_) => true,
+            e => e.content() == Some(c),
+        }
+    }
+
+    /// The position of a fitting's part.
+    pub fn pos(self) -> Option<Pos> {
+        match self {
+            End::Vent(q)
+            | End::Cylinder(q)
+            | End::Pump(q)
+            | End::Exhaust(q)
+            | End::ExIn(q)
+            | End::ExOut(q)
+            | End::Drain(q)
+            | End::CoolIn(q)
+            | End::CoolOut(q) => Some(q),
+            End::Domes(_) | End::Feed(_) | End::Tank(_) => None,
         }
     }
 }
@@ -158,15 +208,24 @@ pub struct Net {
     pub sources: Vec<(End, usize)>,
     /// Consumer endpoints and the nodes they attach at (all of them).
     pub consumers: Vec<(End, Vec<usize>)>,
-    /// Steam: the tree from every source. Water: from the pumps, and from the tanks.
+    /// Every endpoint and the pipe parts it attaches at (before content).
+    pub ends: Vec<(End, Pos)>,
+    /// Steam and exhaust: the tree from every source. Water and hot water:
+    /// from the sources that aren't tanks, and from the tanks.
     pub tree: Tree,
     pub tank_tree: Tree,
+    /// Water, hot water and exhaust: one tree per source that isn't a tank,
+    /// routed one after another, so lines from two sources that merge both
+    /// deliver (`tree` gives each node to one source only).
+    pub source_trees: Vec<Tree>,
     /// Positions next to it in unloaded chunks: it pauses.
     pub frontier: Vec<Pos>,
     pub pool: Option<usize>,
     pub plant: usize,
     /// Last step: the flow through each node, mB/s.
     pub flow: Vec<f64>,
+    /// Steam: the governors on the route to each node (regulation spec 9).
+    pub govs: Vec<Vec<Pos>>,
 }
 
 /// One steam network: its steam, what it is made of and its red line.
@@ -194,6 +253,11 @@ pub struct Engine {
     /// Last step, per cylinder: demand (mB/s) and fill.
     pub demand: Vec<f64>,
     pub fill: Vec<f64>,
+    /// Per cylinder: the governors' throttle, steam drawn and exhaust vented
+    /// (mB/s) last step.
+    pub throttle: Vec<f64>,
+    pub drawn: Vec<f64>,
+    pub vented: Vec<f64>,
     pub drive: Drive,
     pub plant: usize,
 }
@@ -271,16 +335,31 @@ pub struct Works {
     pub(crate) part_plant: HashMap<Pos, usize>,
     /// The boilers each firebox position heats.
     pub(crate) heats: BTreeMap<Pos, Vec<usize>>,
+    /// The bellows blowing each firebox (the first by position counts).
+    pub(crate) bellows_of: BTreeMap<Pos, Pos>,
+    /// Each exchanger's inlet and outlet networks.
+    pub(crate) ex_nets: HashMap<Pos, (Option<usize>, Option<usize>)>,
     // ---- Set by the game ----
     pub(crate) heat: HashMap<Pos, f64>,
     pub(crate) pump_sources: HashMap<Pos, u32>,
     pub(crate) rot: HashMap<Pos, Rot>,
+    /// Grinders' cooling water demand, mB/s.
+    pub(crate) cool_demand: HashMap<Pos, f64>,
     // ---- Results ----
     pub(crate) events: Vec<Event>,
     pub(crate) drives: BTreeMap<Pos, Drive>,
     pub(crate) pump_loads: BTreeMap<Pos, f64>,
     pub(crate) pump_flow: BTreeMap<Pos, f64>,
     pub(crate) vents: BTreeMap<Pos, VentState>,
+    // ---- 0.3 results ----
+    pub(crate) govs: HashMap<Pos, GovState>,
+    pub(crate) fires: BTreeMap<Pos, FireState>,
+    pub(crate) bellows_loads: BTreeMap<Pos, f64>,
+    pub(crate) exchangers: HashMap<Pos, ExState>,
+    pub(crate) cooling: HashMap<Pos, CoolState>,
+    pub(crate) drains: BTreeMap<Pos, (Content, f64)>,
+    /// Leaking parts losing something now: what and how much (mB/s).
+    pub(crate) leaks: BTreeMap<Pos, (Content, f64)>,
     /// Flywheels and pumps whose rotational networks the plant holds paused.
     pub(crate) held: BTreeSet<Pos>,
     /// Shell blocks whose look changed.
@@ -290,6 +369,63 @@ pub struct Works {
     pub(crate) steps: u64,
     /// Rebuilds done (for tests and the profiler).
     pub rebuilds: u64,
+}
+
+/// A governor's state between steps (its balls live in the part's saved data).
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct GovState {
+    /// The throttle, 0 to 1.
+    pub g: f64,
+    /// The speed at its socket last tick.
+    pub speed: f64,
+    pub history: crate::sim::steam::govern::History,
+}
+
+/// A firebox's heat last step.
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub struct FireState {
+    /// Its fuel's rate, kW (0 when out).
+    pub kw: f64,
+    /// The bellows' boost (0 to 0.5).
+    pub boost: f64,
+    /// The mean damper opening of its boilers: its burn rate (1 heating nothing).
+    pub damper: f64,
+}
+
+impl FireState {
+    /// What it gives in all, kW.
+    pub fn heat(&self) -> f64 {
+        self.kw * (1.0 + self.boost) * self.damper
+    }
+}
+
+/// Why a heat exchanger takes nothing in.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum ExBlock {
+    NoOutlet,
+    OutletFull,
+    /// Its outlet's network carries another content.
+    OutletCarries(Content),
+}
+
+/// A heat exchanger last step.
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub struct ExState {
+    pub inlet: Option<Content>,
+    pub power: f64,
+    pub radiators: (usize, usize),
+    /// Its intake capacity and what it took, mB/s.
+    pub capacity: f64,
+    pub took: f64,
+    pub blocked: Option<ExBlock>,
+}
+
+/// A cooled machine last step.
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+pub struct CoolState {
+    pub demand: f64,
+    pub received: f64,
+    pub cooled: bool,
 }
 
 /// A vent's state for effects.
@@ -362,6 +498,8 @@ impl Works {
         }
         self.heat.remove(&pos);
         self.pump_sources.remove(&pos);
+        self.cool_demand.remove(&pos);
+        self.govs.remove(&pos);
         self.dirty = true;
     }
 
@@ -384,6 +522,30 @@ impl Works {
         } else {
             self.heat.remove(&pos);
         }
+    }
+
+    /// A grinder's cooling demand now, mB/s (0 while idle).
+    pub fn set_cool_demand(&mut self, pos: Pos, mb_s: f64) {
+        self.cool_demand.insert(pos, mb_s);
+    }
+
+    /// One tick of a governor's balls at socket speed `s` (RPM): every tick,
+    /// so its lag is the same at any step length (regulation spec 9).
+    pub fn tick_governor(&mut self, pos: Pos, s: f64, dt: f64) {
+        let Some(p) = self.parts.get_mut(&pos) else {
+            return;
+        };
+        if p.spec.kind != Kind::Governor {
+            return;
+        }
+        let mut b = crate::sim::steam::govern::Balls {
+            x: p.saved.ball,
+            v: p.saved.ball_v,
+        };
+        b.step(s, dt);
+        p.saved.ball = b.x;
+        p.saved.ball_v = b.v;
+        self.govs.entry(pos).or_default().speed = s.abs();
     }
 
     /// The water source blocks a pump touches.
@@ -414,12 +576,13 @@ impl Works {
         self.parts.is_empty()
     }
 
-    /// Positions of every flywheel and pump (the game feeds their speeds).
+    /// Positions of every part that turns: flywheels, pumps, governors,
+    /// bellows and grinders (the game feeds their speeds).
     pub fn rot_parts(&self) -> Vec<Pos> {
         let mut out: Vec<Pos> = self
             .parts
             .iter()
-            .filter(|(_, p)| matches!(p.spec.kind, Kind::Flywheel | Kind::Pump))
+            .filter(|(_, p)| p.spec.kind.is_rot())
             .map(|(q, _)| *q)
             .collect();
         out.sort();

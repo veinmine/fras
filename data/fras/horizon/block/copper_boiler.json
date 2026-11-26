@@ -38,6 +38,16 @@
     },
     "joined_east": {
       "type": "boolean"
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
     }
   },
   "default_state": {
@@ -49,6 +59,7 @@
     "joined_north": "false",
     "joined_south": "false",
     "joined_west": "false",
-    "joined_east": "false"
+    "joined_east": "false",
+    "rust": "clean"
   }
 }

@@ -204,9 +204,13 @@ pub fn progress_per_tick(rpm: f64, min: f64, max: f64) -> f64 {
     if w < min { 0.0 } else { w.min(max) / 1200.0 }
 }
 
-/// The grinder's working range for its state (cooling raises the max in 0.3).
-pub fn working_range(_cooled: bool) -> (f64, f64) {
-    (GRINDER_MIN_RPM, GRINDER_MAX_RPM)
+/// The grinder's working range: cooling water raises the max (cooling spec 6).
+pub fn working_range(cooled: bool) -> (f64, f64) {
+    if cooled {
+        (GRINDER_MIN_RPM, crate::sim::fluid::cool::GRINDER_COOLED_MAX)
+    } else {
+        (GRINDER_MIN_RPM, GRINDER_MAX_RPM)
+    }
 }
 
 /// The status line, first match wins (spec 6). Codes are the data slot values.
@@ -260,6 +264,8 @@ pub struct Situation {
     pub jammed: bool,
     pub paused: bool,
     pub rpm: f64,
+    /// Cooling water raises its limit (cooling spec 6).
+    pub cooled: bool,
     /// The input holds a recipe's ingredient and count.
     pub has_recipe: bool,
     /// Its results fit.
@@ -267,7 +273,7 @@ pub struct Situation {
 }
 
 pub fn status(s: &Situation) -> Status {
-    let (min, max) = working_range(false);
+    let (min, max) = working_range(s.cooled);
     let w = s.rpm.abs();
     if s.jammed {
         Status::Jammed
@@ -319,6 +325,7 @@ pub fn tick(
     rpm: f64,
     jammed: bool,
     paused: bool,
+    cooled: bool,
     recipes: &[Recipe],
     items: &dyn Items,
     random: &mut dyn FnMut() -> f64,
@@ -337,6 +344,7 @@ pub fn tick(
         jammed,
         paused,
         rpm,
+        cooled,
         has_recipe: recipe.is_some(),
         fits,
     };
@@ -353,7 +361,7 @@ pub fn tick(
         return result;
     }
     let recipe = recipe.unwrap();
-    let (min, max) = working_range(false);
+    let (min, max) = working_range(cooled);
     work.progress += progress_per_tick(rpm, min, max);
     if work.progress + 1e-9 >= recipe.revolutions {
         let rolled = recipe.roll(random);
@@ -468,6 +476,15 @@ pub fn builtin() -> Vec<Recipe> {
         2.0,
         3.0,
     ));
+    // Rust flakes grind into pigment (rust spec 7).
+    v.push(recipe(
+        "rust_flakes",
+        item("fras:rust_flakes"),
+        1,
+        vec![out("fras:red_oxide_pigment", 1, 1.0)],
+        2.0,
+        3.0,
+    ));
     v
 }
 
@@ -578,6 +595,7 @@ mod tests {
             20.0,
             false,
             false,
+            false,
             &recipes,
             &TestItems,
             &mut rng,
@@ -588,6 +606,7 @@ mod tests {
             None,
             &mut outputs,
             20.0,
+            false,
             false,
             false,
             &recipes,
@@ -605,6 +624,7 @@ mod tests {
             8.0,
             false,
             false,
+            false,
             &recipes,
             &TestItems,
             &mut rng,
@@ -618,6 +638,7 @@ mod tests {
             &mut outputs,
             0.0,
             true,
+            false,
             false,
             &recipes,
             &TestItems,
@@ -647,6 +668,7 @@ mod tests {
             96.0,
             false,
             false,
+            false,
             &recipes,
             &TestItems,
             &mut rng,
@@ -659,6 +681,7 @@ mod tests {
             Some(&ore),
             &mut outputs,
             96.0,
+            false,
             false,
             false,
             &recipes,
@@ -689,6 +712,7 @@ mod tests {
                 96.0,
                 false,
                 false,
+                false,
                 &recipes,
                 &TestItems,
                 &mut rng,
@@ -703,6 +727,7 @@ mod tests {
             0.0,
             false,
             false,
+            false,
             &recipes,
             &TestItems,
             &mut rng,
@@ -713,6 +738,7 @@ mod tests {
             &mut outputs,
             96.0,
             true,
+            false,
             false,
             &recipes,
             &TestItems,
@@ -725,6 +751,7 @@ mod tests {
             96.0,
             false,
             true,
+            false,
             &recipes,
             &TestItems,
             &mut rng,
@@ -737,6 +764,7 @@ mod tests {
                 Some(&ore),
                 &mut outputs,
                 96.0,
+                false,
                 false,
                 false,
                 &recipes,
@@ -756,6 +784,7 @@ mod tests {
             96.0,
             false,
             false,
+            false,
             &recipes,
             &TestItems,
             &mut || 0.9,
@@ -767,6 +796,7 @@ mod tests {
             Some(&wool),
             &mut outputs,
             0.0,
+            false,
             false,
             false,
             &recipes,
@@ -783,6 +813,7 @@ mod tests {
                 jammed,
                 paused,
                 rpm,
+                cooled: false,
                 has_recipe,
                 fits,
             })

@@ -5,11 +5,29 @@
     "render_shape": "ENTITYBLOCK_ANIMATED",
     "occludes": false,
     "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
     "requires_tool": false
   },
   "state_properties": {
     "powered": {
       "type": "boolean"
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
     }
   },
   "shapes": {
@@ -48,5 +66,8 @@
         ]
       ]
     }
+  },
+  "default_state": {
+    "rust": "clean"
   }
 }

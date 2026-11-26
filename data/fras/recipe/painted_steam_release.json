@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XXX",
+    "XPX",
+    "XXX"
+  ],
+  "key": {
+    "X": "fras:steam_release",
+    "P": "fras:red_oxide_paint"
+  },
+  "result": {
+    "id": "fras:painted_steam_release",
+    "count": 8
+  }
+}

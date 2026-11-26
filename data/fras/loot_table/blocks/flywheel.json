@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:flywheel"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_flywheel",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:flywheel",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:flywheel"
+            }
+          ]
         }
       ],
       "condition": {

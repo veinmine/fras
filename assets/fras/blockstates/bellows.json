@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "fras:block/bellows"
+    },
+    "facing=down": {
+      "model": "fras:block/bellows",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "fras:block/bellows",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "fras:block/bellows",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "fras:block/bellows",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "fras:block/bellows",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

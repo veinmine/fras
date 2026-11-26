@@ -116,10 +116,35 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
             }
         }
     }
-    if burn > 0 && !paused {
-        burn -= 1;
-    }
+    // A damped fire burns slower; a banked one (dampers shut) holds
+    // (regulation spec 4.3). Bellows never change the burn time. One visit
+    // to the level's state per tick (criterion 17).
+    let (owed, banked_now, boost, damper) = with_level(dim, |l| {
+        let factor = l.steam.works.burn_factor(pos);
+        let (boost, damper) = l
+            .steam
+            .works
+            .fire(pos)
+            .map_or((0.0, 1.0), |f| (f.boost, f.damper));
+        let owed = if burn > 0 && !paused {
+            let f = l.steam.burn_frac.entry(pos).or_insert(0.0);
+            *f += factor;
+            let whole = f.floor();
+            *f -= whole;
+            whole as i32
+        } else {
+            0
+        };
+        (owed, factor <= 0.0, boost, damper)
+    });
+    burn = (burn - owed).max(0);
     let lit = burn > 0;
+    let banked = lit && banked_now;
+    with_level(dim, |l| {
+        if l.steam.banked_known.insert(pos, banked) != Some(banked) {
+            l.steam.banked.insert(pos, banked);
+        }
+    });
     steam::set_heat(dim, pos, if lit { kw } else { 0.0 });
     let boilers = with_level(dim, |l| l.steam.works.firebox_boilers(pos)) as i32;
     if lit != (old_burn > 0) {
@@ -132,7 +157,15 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
     });
     // The menu's flame moves in steps of half a second.
     let shown = |b: i32| if b > 0 { (b + 9) / 10 * 10 } else { 0 };
-    let data = vec![shown(burn), total.max(1), kw.round() as i32, boilers];
+    // [burn, total, fuel kW, boilers, bellows boost %, damper opening %].
+    let data = vec![
+        shown(burn),
+        total.max(1),
+        kw.round() as i32,
+        boilers,
+        (boost * 100.0).round() as i32,
+        (damper * 100.0).round() as i32,
+    ];
     let data_changed = event.entity.data != data;
     if data_changed {
         event.entity.data = data;
@@ -170,6 +203,9 @@ pub fn screen(_: &mut ScreenEvent<'_>) -> Option<mod_api::Screen> {
 pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
     let d = |i: usize| event.data.get(i).copied().unwrap_or(0);
     let (burn, total, kw, boilers) = (d(0), d(1).max(1), d(2), d(3));
+    // Older data has no bellows or damper slots: no boost, open.
+    let boost = d(4);
+    let damper = if event.data.len() > 5 { d(5) } else { 100 };
     let [x, y] = event.origin;
     let draw = &mut *event.draw;
     // The flame: a bar that shrinks as the fuel burns.
@@ -186,33 +222,47 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
             None => t,
         }
     };
+    // The heat it gives: the fuel's, times the bellows, times the dampers,
+    // and above it how it comes about ("2000 × 1.5 × 30%").
+    let heat_kw = (kw as f64 * (100 + boost) as f64 / 100.0 * damper as f64 / 100.0).round();
+    let (col, max, grey) = (x + 80.0, 88.0, 0xFF40_4040);
+    let mut at = y + 18.0;
+    if burn > 0 && (boost > 0 || damper < 100) {
+        let mut sum = format!("{kw}");
+        if boost > 0 {
+            sum += &format!(" × {}", super::num(1.0 + boost as f64 / 100.0));
+        }
+        if damper < 100 {
+            sum += &format!(" × {damper}%");
+        }
+        at = super::text_in(draw, &sum, [col, at], max, grey);
+    } else {
+        at += super::LINE;
+    }
     let heat = if burn > 0 {
-        tr("fras.firebox.heat", Some(format!("{kw}")))
+        tr("fras.firebox.heat", Some(format!("{}", heat_kw as i64)))
     } else {
         tr("fras.firebox.out", None)
     };
-    draw.text(&heat, [x + 80.0, y + 30.0], 0xFF40_4040, false);
+    at = super::text_in(draw, &heat, [col, at], max, grey) + 2.0;
     let heating = if boilers == 0 {
         tr("fras.firebox.heating_nothing", None)
     } else {
         tr("fras.firebox.heating", Some(format!("{boilers}")))
     };
-    let color = if boilers == 0 {
-        0xFFB0_2020
-    } else {
-        0xFF40_4040
-    };
-    draw.text(&heating, [x + 80.0, y + 42.0], color, false);
+    let color = if boilers == 0 { 0xFFB0_2020 } else { grey };
+    at = super::text_in(draw, &heating, [col, at], max, color) + 2.0;
     if burn > 0 {
         let secs = burn / 20;
-        draw.text(
+        super::text_in(
+            draw,
             &tr(
                 "fras.firebox.left",
                 Some(format!("{}:{:02}", secs / 60, secs % 60)),
             ),
-            [x + 80.0, y + 54.0],
-            0xFF40_4040,
-            false,
+            [col, at],
+            max,
+            grey,
         );
     }
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/storage_tank/shell_rust_rusty",
+  "loader": "fras:shell",
+  "mask": 39,
+  "axis": "y"
+}

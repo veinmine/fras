@@ -378,6 +378,7 @@ def grinding():
     g["gravel"] = recipe("minecraft:gravel", [out("minecraft:sand"), out("minecraft:flint", 1, 0.1)], 2.0)
     g["wool"] = recipe("#minecraft:wool", [out("minecraft:string", 4)], 2.0, 3.0)
     g["bone"] = recipe("minecraft:bone", [out("minecraft:bone_meal", 4), out("minecraft:bone_meal", 1, 0.5)], 2.0, 3.0)
+    g["rust_flakes"] = recipe(f"{NS}:rust_flakes", [out(f"{NS}:red_oxide_pigment")], 2.0, 3.0)
     return g
 
 
@@ -759,7 +760,8 @@ def steam_blockstate(name):
             parts.append({"when": {d: "true"}, "apply": dict({"model": f"{NS}:block/{name}/arm"}, **turn[d])})
         return {"multipart": parts}
     if name == "firebox":
-        return {"variants": {f"facing={d},lit={l}": dict({"model": f"{NS}:block/firebox{'_lit' if l == 'true' else ''}"}, **r) for d, r in NORTH_Y.items() for l in ["false", "true"]}}
+        # Banked keeps the lit door; the light level is what dims.
+        return {"variants": {f"banked={b},facing={d},lit={l}": dict({"model": f"{NS}:block/firebox{'_lit' if l == 'true' else ''}"}, **r) for d, r in NORTH_Y.items() for l in ["false", "true"] for b in ["false", "true"]}}
     if name in ("manual_valve", "redstone_valve"):
         return {"variants": {f"axis={a},damaged={b}": dict({"model": f"{NS}:block/{name}{'_damaged' if b == 'true' else ''}"}, **r) for a, r in AXIS_ROT.items() for b in ["false", "true"]}}
     if name in ("steam_release", "emergency_valve", "steam_cylinder"):
@@ -804,39 +806,379 @@ def steam_recipes():
 
 def steam_data():
     # The firebox's menu: one fuel slot, data [burn, total, kW, boilers].
-    write(f"data/{NS}/horizon/menu/firebox.json", {"slots": 1, "data_slots": 4})
+    write(f"data/{NS}/horizon/menu/firebox.json", {"slots": 1, "data_slots": 6})
     # Scalding (steam spec 8): heat, so fire resistance stops it; armour doesn't.
     write(f"data/{NS}/damage_type/scald.json", {"message_id": f"{NS}.scald", "exhaustion": 0.1, "scaling": "never", "effects": "burning"})
     write("data/minecraft/tags/damage_type/is_fire.json", {"replace": False, "values": [f"{NS}:scald"]})
     write("data/minecraft/tags/damage_type/bypasses_armor.json", {"replace": False, "values": [f"{NS}:scald"]})
 
 
+
+# ---- 0.3: regulation, cooling and rust ------------------------------------------------
+
+FLAP_ENUM = {"type": "enum", "values": ["0", "1", "2", "3"]}
+RUST_STAGES = ["clean", "spotty", "rusty", "leaking", "painted"]
+RUST_ENUM = {"type": "enum", "values": RUST_STAGES}
+# Rust spec 3: the iron parts, each with a pre-painted item.
+RUSTING = [
+    "iron_shaft", "bearing", "clutch", "iron_bevel_gear", "gearbox", "iron_pipe", "manual_valve", "redstone_valve",
+    "steam_release", "emergency_valve", "governor", "iron_boiler", "storage_tank", "steam_cylinder", "flywheel", "pump",
+    "heat_exchanger", "iron_radiator", "furnace_damper",
+]
+# Vanilla sprites standing for bare iron in the placeholder art: a rusted
+# part shows the stage's sprite in their place.
+IRONISH = {
+    "minecraft:block/iron_block", "minecraft:block/polished_andesite", "minecraft:block/anvil",
+    "minecraft:block/polished_basalt_top",
+}
+
+REGULATION_BLOCKS = {
+    "governor": (
+        {
+            "template": IRON,
+            "properties": {"hardness": 3.0, "occludes": False},
+            "state_properties": {"axis": AXIS_ENUM, "socket": DIR_ENUM, "damaged": BOOL},
+            "default_state": {"axis": "x", "socket": "up", "damaged": "false"},
+            "shapes": {"default": CASING},
+        },
+        "pickaxe",
+        "minecraft:block/iron_block",
+    ),
+    "furnace_damper": (
+        {
+            "template": IRON,
+            "properties": {"hardness": 2.5, "occludes": False},
+            "state_properties": {"facing": DIR_ENUM, "flap": FLAP_ENUM, "powered": BOOL},
+            "default_state": {"facing": "north", "flap": "3", "powered": "false"},
+            "shapes": facing_boxes([[2, 0, 2, 14, 6, 14]]),
+            "collision_shapes": facing_boxes([[2, 0, 2, 14, 6, 14]]),
+        },
+        "pickaxe",
+        "minecraft:block/iron_block",
+    ),
+    "bellows": (
+        {
+            "template": WOOD,
+            "properties": {"hardness": 2.0, "occludes": False},
+            "state_properties": {"facing": DIR_ENUM},
+            "default_state": {"facing": "north"},
+            "shapes": facing_boxes([[2, 0, 2, 14, 13, 14], [6, 13, 6, 10, 16, 10]]),
+        },
+        "axe",
+        "minecraft:block/oak_planks",
+    ),
+    "heat_exchanger": (
+        {
+            # The chain is waterloggable: an exchanger in water cools better.
+            "template": CHAIN,
+            "properties": {"hardness": 3.0, "occludes": False, "sounds": IRON},
+            "state_properties": {"facing": DIR_ENUM, "damaged": BOOL},
+            "default_state": {"facing": "up", "damaged": "false"},
+            "shapes": {"default": [box([1, 0, 1], [15, 16, 15])]},
+            "collision_shapes": {"default": [box([1, 0, 1], [15, 16, 15])]},
+        },
+        "pickaxe",
+        "minecraft:block/copper_block",
+    ),
+    "copper_radiator": (
+        {
+            "template": COPPER,
+            "properties": {"hardness": 2.0, "occludes": False},
+            "state_properties": {"facing": DIR_ENUM},
+            "default_state": {"facing": "north"},
+            "shapes": facing_boxes([[1, 0, 1, 15, 10, 15]]),
+        },
+        "pickaxe",
+        "minecraft:block/copper_block",
+    ),
+    "iron_radiator": (
+        {
+            "template": IRON,
+            "properties": {"hardness": 2.0, "occludes": False},
+            "state_properties": {"facing": DIR_ENUM},
+            "default_state": {"facing": "north"},
+            "shapes": facing_boxes([[1, 0, 1, 15, 10, 15]]),
+        },
+        "pickaxe",
+        "minecraft:block/iron_block",
+    ),
+    "drain": (
+        {
+            "template": COPPER,
+            "properties": {"hardness": 2.0, "occludes": False},
+            "state_properties": {"facing": DIR_ENUM, "damaged": BOOL},
+            "default_state": {"facing": "north", "damaged": "false"},
+            "shapes": facing_boxes([[3, 0, 3, 13, 6, 13], [5, 6, 5, 11, 16, 11]]),
+        },
+        "pickaxe",
+        "minecraft:block/copper_block",
+    ),
+}
+for _name, _decl in REGULATION_BLOCKS.items():
+    _decl[0]["properties"]["push_reaction"] = "IMMOVEABLE"
+    BLOCKS[_name] = _decl
+    STEAM_BLOCKS[_name] = _decl
+# The firebox banks: a dim glow while its dampers are shut.
+BLOCKS["firebox"][0]["state_properties"]["banked"] = BOOL
+BLOCKS["firebox"][0]["default_state"]["banked"] = "false"
+BLOCKS["firebox"][0]["state_light"] = {"properties": ["lit", "banked"], "values": {
+    "true,false": 13, "true,true": 7, "false,false": 0, "false,true": 0}}
+for _name in RUSTING:
+    _d = BLOCKS[_name][0]
+    _d.setdefault("state_properties", {})["rust"] = RUST_ENUM
+    _d.setdefault("default_state", {})["rust"] = "clean"
+    _d["properties"]["random_ticks"] = {"property": "rust", "values": ["clean", "spotty", "rusty"]}
+
+
+def regulation_models():
+    m = {}
+    iron, andesite, dark = "minecraft:block/iron_block", "minecraft:block/polished_andesite", "minecraft:block/anvil"
+    copper, cut = "minecraft:block/copper_block", "minecraft:block/cut_copper"
+    broken = "minecraft:block/cracked_deepslate_tiles"
+    # The governor: a valve body on a pipe along y with a brass cap (the
+    # spindle and balls are drawn by its block entity).
+    for b in ["", "_damaged"]:
+        m[f"block/governor{b}"] = block_model(
+            {"pipe": copper, "body": broken if b else iron, "top": "minecraft:block/gold_block"},
+            [
+                el([5, 0, 5], [11, 4, 11], "#pipe", skip=("up",)),
+                el([5, 12, 5], [11, 16, 11], "#pipe", skip=("down",)),
+                el([4, 4, 4], [12, 12, 12], {"side": "#body", "east": "#top", "west": "#top"}),
+            ],
+            iron,
+        )
+    # The damper, facing up: a riveted box on the boiler and a flap whose
+    # angle shows the opening (0 shut, 3 open).
+    for f in range(4):
+        flap = {"from": [3, 6, 7.5], "to": [13, 15, 8.5], "faces": {d: {"texture": "#flap"} for d in ["north", "south", "east", "west", "up", "down"]}}
+        if f < 3:
+            angle = [-45.0, -22.5, 0.0][f] if f > 0 else -45.0
+            flap = {"from": [3, 6, 7.5], "to": [13, 15, 8.5], "rotation": {"origin": [8, 6, 8], "axis": "x", "angle": angle},
+                    "faces": {d: {"texture": "#flap"} for d in ["north", "south", "east", "west", "up", "down"]}}
+        if f == 0:
+            flap = el([3, 6, 3], [13, 7, 13], "#flap")
+        m[f"block/furnace_damper_{f}"] = block_model(
+            {"box": iron, "flap": dark},
+            [el([2, 0, 2], [14, 6, 14], "#box"), flap],
+            iron,
+        )
+    # Bellows, nozzle up: a wooden frame, leather folds, an iron nozzle.
+    m["block/bellows"] = block_model(
+        {"wood": "minecraft:block/oak_planks", "leather": "minecraft:block/brown_terracotta", "nozzle": iron},
+        [
+            el([2, 0, 2], [14, 2, 14], "#wood"),
+            el([3, 2, 3], [13, 10, 13], "#leather"),
+            el([2, 10, 2], [14, 12, 14], "#wood"),
+            el([5, 12, 5], [11, 13, 11], "#wood"),
+            el([6, 13, 6], [10, 16, 10], "#nozzle", skip=("down",)),
+        ],
+        "minecraft:block/oak_planks",
+    )
+    # The heat exchanger, outlet up: a copper shell with iron bands.
+    for b in ["", "_damaged"]:
+        m[f"block/heat_exchanger{b}"] = block_model(
+            {"shell": broken if b else copper, "band": iron, "end": cut},
+            [
+                el([2, 2, 2], [14, 14, 14], {"side": "#shell", "up": "#end", "down": "#end"}),
+                el([1, 4, 1], [15, 6, 15], "#band"),
+                el([1, 10, 1], [15, 12, 15], "#band"),
+                el([5, 14, 5], [11, 16, 11], "#end", skip=("down",)),
+                el([5, 0, 5], [11, 2, 11], "#end", skip=("up",)),
+            ],
+            copper,
+        )
+    # Radiators, facing up (attached below): a plate and four fins.
+    for name, mat in [("copper_radiator", copper), ("iron_radiator", iron)]:
+        m[f"block/{name}"] = block_model(
+            {"fin": mat},
+            [el([1, 0, 1], [15, 2, 15], "#fin")] + [el([1 + 4 * i, 2, 1], [3 + 4 * i, 10, 15], "#fin") for i in range(4)],
+            mat,
+        )
+    # The drain, pipe face up: a stub and a grate below.
+    for b in ["", "_damaged"]:
+        m[f"block/drain{b}"] = block_model(
+            {"pipe": broken if b else copper, "grate": "minecraft:block/iron_trapdoor"},
+            [el([5, 6, 5], [11, 16, 11], "#pipe", skip=("down",)), el([3, 0, 3], [13, 6, 13], {"side": "#pipe", "down": "#grate", "up": "#pipe"})],
+            copper,
+        )
+    for name in ["governor", "bellows", "heat_exchanger", "copper_radiator", "iron_radiator", "drain"]:
+        m[f"item/{name}"] = {"parent": f"{NS}:block/{name}"}
+    m["item/furnace_damper"] = {"parent": f"{NS}:block/furnace_damper_3"}
+    for name in ["rust_flakes", "red_oxide_pigment", "red_oxide_paint"]:
+        m[f"item/{name}"] = {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{name}"}}
+    return m
+
+
+def regulation_blockstate(name):
+    dmg = lambda b: "_damaged" if b == "true" else ""
+    if name == "governor":
+        return {"variants": {f"axis={a},damaged={b}": dict({"model": f"{NS}:block/governor{dmg(b)}"}, **r) for a, r in AXIS_ROT.items() for b in ["false", "true"]}}
+    if name == "furnace_damper":
+        return {"variants": {f"facing={d},flap={f}": dict({"model": f"{NS}:block/furnace_damper_{f}"}, **r) for d, r in END_ROD.items() for f in "0123"}}
+    if name in ("heat_exchanger", "drain"):
+        return {"variants": {f"facing={d},damaged={b}": dict({"model": f"{NS}:block/{name}{dmg(b)}"}, **r) for d, r in END_ROD.items() for b in ["false", "true"]}}
+    return {"variants": {f"facing={d}": dict({"model": f"{NS}:block/{name}"}, **r) for d, r in END_ROD.items()}}
+
+
+def rusted_model(model, stage, models):
+    """A copy of `model` with bare iron shown at `stage` (textures swapped,
+    parents of this mod followed)."""
+    out = json.loads(json.dumps(model))
+    sprite = f"{NS}:block/rust_{stage}"
+    for k, v in list(out.get("textures", {}).items()):
+        if v in IRONISH:
+            out["textures"][k] = sprite
+    parent = out.get("parent", "")
+    if parent.startswith(f"{NS}:"):
+        path = parent.split(":", 1)[1]
+        if path in models:
+            out["parent"] = f"{parent}_rust_{stage}"
+    elif parent == "minecraft:block/cube_all" and out.get("textures", {}).get("all") in IRONISH:
+        out["textures"]["all"] = sprite
+    return out
+
+
+def rust_everything(models, states):
+    """Rust variants of every rusting block's models and blockstates, and the
+    painted items' models."""
+    extra = {}
+
+    def need(path):
+        # A model and the mod parents it inherits from, for each stage.
+        todo = [path]
+        while todo:
+            p = todo.pop()
+            if p not in models:
+                continue
+            for st in RUST_STAGES[1:]:
+                key = f"{p}_rust_{st}"
+                if key not in extra:
+                    extra[key] = rusted_model(models[p], st, models)
+            par = models[p].get("parent", "")
+            if par.startswith(f"{NS}:"):
+                todo.append(par.split(":", 1)[1])
+
+    for name in RUSTING:
+        bs = states[name]
+        if "variants" in bs:
+            v2 = {}
+            for key, var in bs["variants"].items():
+                path = var["model"].split(":", 1)[1]
+                need(path)
+                for st in RUST_STAGES:
+                    k = f"{key},rust={st}" if key else f"rust={st}"
+                    mv = dict(var)
+                    if st != "clean":
+                        mv["model"] = f"{var['model']}_rust_{st}"
+                    v2[k] = mv
+            states[name] = {"variants": v2}
+        else:
+            parts = []
+            for part in bs["multipart"]:
+                path = part["apply"]["model"].split(":", 1)[1]
+                need(path)
+                for st in RUST_STAGES:
+                    pp = json.loads(json.dumps(part))
+                    pp.setdefault("when", {})["rust"] = st
+                    if st != "clean":
+                        pp["apply"]["model"] = f"{part['apply']['model']}_rust_{st}"
+                    parts.append(pp)
+            states[name] = {"multipart": parts}
+        # The painted item's model.
+        item = models.get(f"item/{name}")
+        if item is None:
+            continue
+        if item.get("parent", "").startswith(f"{NS}:block/"):
+            need(item["parent"].split(":", 1)[1])
+            extra[f"item/painted_{name}"] = {"parent": f"{item['parent']}_rust_painted"}
+        else:
+            extra[f"item/painted_{name}"] = rusted_model(item, "painted", models)
+    models.update(extra)
+
+
+def regulation_recipes():
+    p, i, c = f"{NS}:iron_plate", "minecraft:iron_ingot", f"{NS}:copper_pipe"
+    r = {
+        "governor": shaped(["I I", " S ", "PVP"], {"I": i, "S": f"{NS}:iron_shaft", "P": p, "V": f"{NS}:manual_valve"}, f"{NS}:governor"),
+        "furnace_damper": shaped(["PPP", "PRP"], {"P": p, "R": "minecraft:redstone"}, f"{NS}:furnace_damper"),
+        "bellows": shaped(["WWW", "LLL", "WSW"], {"W": "#minecraft:planks", "L": "minecraft:leather", "S": f"{NS}:wooden_shaft"}, f"{NS}:bellows"),
+        "heat_exchanger": shaped(["PCP", "C C", "PCP"], {"P": p, "C": c}, f"{NS}:heat_exchanger"),
+        "copper_radiator": shaped(["BBB", "BBB"], {"B": "minecraft:copper_bars"}, f"{NS}:copper_radiator", 2),
+        "iron_radiator": shaped(["BBB", "BBB"], {"B": "minecraft:iron_bars"}, f"{NS}:iron_radiator", 2),
+        "drain": shapeless([c, "minecraft:iron_trapdoor"], f"{NS}:drain"),
+        # Rust spec 10 and 12.1.
+        "red_oxide_paint": shapeless([f"{NS}:red_oxide_pigment", f"{NS}:red_oxide_pigment", "minecraft:potion"], f"{NS}:red_oxide_paint", 2),
+    }
+    for name in RUSTING:
+        r[f"painted_{name}"] = shaped(["XXX", "XPX", "XXX"], {"X": f"{NS}:{name}", "P": f"{NS}:red_oxide_paint"}, f"{NS}:painted_{name}", 8)
+    return r
+
+
+def regulation_items():
+    items = {
+        "rust_flakes": {"template": "minecraft:gunpowder"},
+        "red_oxide_pigment": {"template": "minecraft:redstone"},
+        "red_oxide_paint": {"template": "minecraft:honeycomb", "max_stack_size": 16},
+    }
+    for name in RUSTING:
+        items[f"painted_{name}"] = {
+            "template": "minecraft:iron_ingot",
+            "block": f"{NS}:{name}",
+            "components": {"minecraft:block_state": {"rust": "painted"}},
+        }
+    return items
+
+
+def loot(name):
+    entry = {"type": "minecraft:item", "name": f"{NS}:{name}"}
+    if name in RUSTING:
+        entry = {"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "name": f"{NS}:painted_{name}",
+             "condition": {"type": "minecraft:block_state_property", "block": f"{NS}:{name}", "properties": {"rust": "painted"}}},
+            entry,
+        ]}
+    return {
+        "type": "minecraft:block",
+        "pools": [{"rolls": 1, "entries": [entry], "condition": {"type": "minecraft:survives_explosion"}}],
+        "random_sequence": f"{NS}:blocks/{name}",
+    }
+
+
 def main():
     for name, recipe in grinding().items():
         write(f"data/{NS}/recipe/grinding/{name}.json", recipe)
+    states = {}
     for name, (decl, tool, _) in BLOCKS.items():
         # Every part drops by hand (a bearing whose mount goes drops too);
         # the tool tags only make mining faster.
         decl["properties"]["requires_tool"] = False
         write(f"data/{NS}/horizon/block/{name}.json", decl)
-        write(f"assets/{NS}/blockstates/{name}.json", steam_blockstate(name) if name in STEAM_BLOCKS else blockstate(name))
+        if name in REGULATION_BLOCKS:
+            states[name] = regulation_blockstate(name)
+        elif name in STEAM_BLOCKS:
+            states[name] = steam_blockstate(name)
+        else:
+            states[name] = blockstate(name)
         write(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/{name}"}})
-        write(
-            f"data/{NS}/loot_table/blocks/{name}.json",
-            # The 26.3 loot format: one `condition` object with a `type`.
-            {
-                "type": "minecraft:block",
-                "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{name}"}], "condition": {"type": "minecraft:survives_explosion"}}],
-                "random_sequence": f"{NS}:blocks/{name}",
-            },
-        )
+        # The 26.3 loot format: one `condition` object with a `type`.
+        write(f"data/{NS}/loot_table/blocks/{name}.json", loot(name))
     # The grinder's menu: input slot 0, results 1-4 (players only take from
     # those), data slots [progress, rpm, status, max].
     write(f"data/{NS}/horizon/menu/grinder.json", {"slots": 5, "data_slots": 4, "results": [1, 2, 3, 4]})
-    for name, decl in ITEMS.items():
+    # The governor's: one hidden slot (menus need one), data [target, sens, speed, ball, throttle, engines, swing].
+    write(f"data/{NS}/horizon/menu/governor.json", {"slots": 1, "data_slots": 7})
+    items = dict(ITEMS)
+    items.update(regulation_items())
+    for name, decl in items.items():
         write(f"data/{NS}/horizon/item/{name}.json", decl)
         write(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/{name}"}})
-    for path, model in list(models().items()) + list(steam_models().items()):
+    models = {}
+    for path, model in list(models_all()):
+        models[path] = model
+    rust_everything(models, states)
+    for name, bs in states.items():
+        write(f"assets/{NS}/blockstates/{name}.json", bs)
+    for path, model in models.items():
         write(f"assets/{NS}/models/{path}.json", model)
     axe = [f"{NS}:{n}" for n, (_, t, _) in BLOCKS.items() if t == "axe"]
     pickaxe = [f"{NS}:{n}" for n, (_, t, _) in BLOCKS.items() if t == "pickaxe"]
@@ -845,10 +1187,14 @@ def main():
     write(f"data/{NS}/tags/block/parts.json", {"replace": False, "values": [f"{NS}:{n}" for n in BLOCKS]})
     write(f"data/{NS}/tags/item/crushed_ores.json", {"replace": False, "values": [f"{NS}:crushed_{m}" for m in ["iron", "copper", "gold"]]})
     steam_data()
-    for name, recipe in list(recipes().items()) + list(steam_recipes().items()):
+    for name, recipe in list(recipes().items()) + list(steam_recipes().items()) + list(regulation_recipes().items()):
         write(f"data/{NS}/recipe/{name}.json", recipe)
-    order = list(BLOCKS) + list(ITEMS)
+    order = list(BLOCKS) + list(items)
     write(f"data/{NS}/horizon/creative_tab/main.json", {"title": "Fire, Rust and Steam", "icon": f"{NS}:gearbox", "items": [f"{NS}:{n}" for n in order]})
+
+
+def models_all():
+    return list(models().items()) + list(steam_models().items()) + list(regulation_models().items())
 
 
 if __name__ == "__main__":

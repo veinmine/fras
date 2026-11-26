@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "LLL",
+    "WSW"
+  ],
+  "key": {
+    "W": "#minecraft:planks",
+    "L": "minecraft:leather",
+    "S": "fras:wooden_shaft"
+  },
+  "result": {
+    "id": "fras:bellows",
+    "count": 1
+  }
+}

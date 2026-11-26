@@ -6,7 +6,7 @@
 //!
 //! As in `server`, hooks only queue work here and the level tick does it.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::atomic::{AtomicU8, Ordering};
 
 use mod_api::{
@@ -58,6 +58,24 @@ pub struct Steam {
     /// entity about once a second).
     pub fires: HashMap<Pos, (i32, i32, f64)>,
     pub puffs: Vec<(Pos, u32)>,
+    // ---- 0.3 ----
+    /// Governors whose settings changed in their menu: read them again.
+    pub governors_dirty: BTreeSet<Pos>,
+    /// Rusting parts that took a random tick.
+    pub rust_ticks: BTreeSet<Pos>,
+    /// Positions inside an active scald area (rust spec 4: steam exposure).
+    pub scalding: HashSet<Pos>,
+    /// Fireboxes whose banked state changed.
+    pub banked: BTreeMap<Pos, bool>,
+    /// Rusting parts' counts (rust spec 5.1), written to their blocks now
+    /// and then.
+    pub rust_counts: HashMap<Pos, u32>,
+    /// Each firebox's banked state as last set on its block.
+    pub banked_known: HashMap<Pos, bool>,
+    /// Each firebox's fractional burn time owed (a damped fire burns slower).
+    pub burn_frac: HashMap<Pos, f64>,
+    /// Grinders' cooled state as last told to the rotational network.
+    pub cooled: HashMap<Pos, bool>,
 }
 
 // ---- Explosion mode (spec 2, 7.5) -------------------------------------------------
@@ -117,7 +135,10 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
         )
     });
     for pos in redstone {
-        if block_at(&*host, level, pos) == Some(Block::RedstoneValve) {
+        if matches!(
+            block_at(&*host, level, pos),
+            Some(Block::RedstoneValve | Block::FurnaceDamper)
+        ) {
             let powered = level.has_neighbor_signal(&*host, pos.to_array());
             set_property(
                 host,
@@ -133,6 +154,26 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             set_property(host, level, pos, "lit", if on { "true" } else { "false" });
         }
     }
+    let (banked, govs) = with_level(dim, |l| {
+        (
+            std::mem::take(&mut l.steam.banked),
+            std::mem::take(&mut l.steam.governors_dirty),
+        )
+    });
+    for (pos, on) in banked {
+        if block_at(&*host, level, pos) == Some(Block::Firebox) {
+            set_property(
+                host,
+                level,
+                pos,
+                "banked",
+                if on { "true" } else { "false" },
+            );
+        }
+    }
+    for pos in govs {
+        queue(dim, pos, false);
+    }
     let (pending, connect, pumps, flywheels) = with_level(dim, |l| {
         (
             std::mem::take(&mut l.steam.pending),
@@ -142,6 +183,7 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
         )
     });
     let mut new_vents = Vec::new();
+    let mut new_dampers = Vec::new();
     for (pos, placed) in pending {
         let read = read_plant(&*host, level, pos);
         if let Some((Block::EmergencyValve, spec, nbt)) = &read
@@ -149,6 +191,12 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             && blocks::get_f64(nbt, "set").is_none()
         {
             new_vents.push((pos, spec.dir));
+        }
+        if let Some((Block::FurnaceDamper, spec, nbt)) = &read
+            && placed
+            && blocks::get_f64(nbt, "set").is_none()
+        {
+            new_dampers.push((pos, spec.dir.opposite()));
         }
         with_level(dim, |l| match read {
             None => {
@@ -179,7 +227,7 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     // A new emergency valve opens half a bar under the red line of what it
     // sits on (fluids spec 6.4). Placing it dissolved the networks, so they
     // are rebuilt first: otherwise every new valve reads no red line.
-    if !new_vents.is_empty() {
+    if !new_vents.is_empty() || !new_dampers.is_empty() {
         let view = GameView {
             host: &*host,
             level,
@@ -189,6 +237,16 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     for (pos, facing) in new_vents {
         let red = with_level(dim, |l| l.steam.works.gauge(pos.offset(facing)).red);
         let set = crate::sim::fluid::valve::default_set((red > 0.0).then_some(red));
+        let mut c = Compound::new();
+        blocks::put_f64(&mut c, "set", set);
+        server::merge(host, level, pos, c);
+        queue(dim, pos, false);
+    }
+    // A new damper turns the fire down a bar under its boiler's red line
+    // (regulation spec 4.2).
+    for (pos, toward) in new_dampers {
+        let red = with_level(dim, |l| l.steam.works.gauge(pos.offset(toward)).red);
+        let set = crate::sim::steam::damper::default_set((red > 0.0).then_some(red));
         let mut c = Compound::new();
         blocks::put_f64(&mut c, "set", set);
         server::merge(host, level, pos, c);
@@ -252,6 +310,35 @@ pub fn before_rot(dim: Dim) {
         }
         for (pos, load) in l.steam.works.pump_loads() {
             l.mech.set_load(pos, load);
+        }
+        for (pos, load) in l.steam.works.bellows_loads() {
+            l.mech.set_load(pos, load);
+        }
+        // A governor's spindle pulls its load while turning.
+        for pos in l.steam.works.governors() {
+            let turning = l.mech.speed(pos).is_some_and(|(w, _)| w.abs() > 0.5);
+            let load = if turning {
+                crate::sim::steam::govern::LOAD
+            } else {
+                0.0
+            };
+            l.mech.set_load(pos, load);
+        }
+    });
+}
+
+/// After the rotational solve, every tick: the governors' balls follow the
+/// speed at their sockets (regulation spec 9).
+pub fn tick_governors(dim: Dim) {
+    with_level(dim, |l| {
+        for pos in l.steam.works.governors() {
+            let speed = match l.mech.part(pos) {
+                Some(p) if p.jam.is_none() => l.mech.speed(pos).map_or(0.0, |s| s.0),
+                _ => 0.0,
+            };
+            l.steam
+                .works
+                .tick_governor(pos, speed, crate::sim::rot::solve::DT);
         }
     });
 }
@@ -327,10 +414,51 @@ pub fn after_rot(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, ticks: u6
     for (pos, fields) in saves {
         server::merge(host, level, pos, fields);
     }
+    regulation_looks(host, level, dim);
     if ticks.is_multiple_of(20) {
         warnings(host, level, dim);
     }
     vent_effects(host, level, dim);
+}
+
+/// Dampers' flaps and grinders' cooling, after each step.
+fn regulation_looks(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
+    let (flaps, cooled) = with_level(dim, |l| {
+        let w = &l.steam.works;
+        let flaps: Vec<(Pos, u8)> = w
+            .parts_of(crate::sim::plant::Kind::Damper)
+            .into_iter()
+            .filter_map(|q| {
+                w.damper_info(q)
+                    .map(|d| (q, crate::sim::steam::damper::flap(d.opening)))
+            })
+            .collect();
+        let mut cooled = Vec::new();
+        for q in w.parts_of(crate::sim::plant::Kind::Grinder) {
+            let c = w.cooled(q);
+            if l.steam.cooled.get(&q) != Some(&c) {
+                cooled.push((q, c));
+            }
+        }
+        for (q, c) in &cooled {
+            l.steam.cooled.insert(*q, *c);
+        }
+        (flaps, cooled)
+    });
+    for (pos, f) in flaps {
+        let v = f.to_string();
+        if server::property(&*host, level, pos, "flap").as_deref() != Some(v.as_str()) {
+            set_property(host, level, pos, "flap", &v);
+        }
+    }
+    for (pos, c) in cooled {
+        let mut f = Compound::new();
+        blocks::put_bool(&mut f, "cooled", c);
+        server::merge(host, level, pos, f);
+        with_level(dim, |l| {
+            l.pending.insert(pos, false);
+        });
+    }
 }
 
 /// Steps over which the shell saves are spread (100 ticks).
@@ -340,17 +468,34 @@ const SAVE_SLOTS: u64 = 100 / STEP_TICKS;
 fn shell_saves(works: &Works, slot: u64) -> Vec<(Pos, Compound)> {
     let mut out = Vec::new();
     for q in shell_blocks(works) {
-        let h = (q.x as i64).wrapping_mul(73_856_093)
-            ^ (q.y as i64).wrapping_mul(19_349_663)
-            ^ (q.z as i64).wrapping_mul(83_492_791);
-        if h.rem_euclid(SAVE_SLOTS as i64) as u64 != slot {
+        if save_slot(q) != slot {
             continue;
         }
         if let Some(s) = works.saved(q) {
             out.push((q, blocks::plant_fields(&s)));
         }
     }
+    // Governors, dampers, exchangers and cooled grinders keep their state
+    // too (regulation spec 8, cooling spec 12), in the same slots.
+    use crate::sim::plant::Kind;
+    for kind in [Kind::Governor, Kind::Damper, Kind::Exchanger, Kind::Grinder] {
+        for q in works.parts_of(kind) {
+            if save_slot(q) != slot {
+                continue;
+            }
+            if let Some(s) = works.saved(q) {
+                out.push((q, blocks::regulation_fields(&s)));
+            }
+        }
+    }
     out
+}
+
+fn save_slot(q: Pos) -> u64 {
+    let h = (q.x as i64).wrapping_mul(73_856_093)
+        ^ (q.y as i64).wrapping_mul(19_349_663)
+        ^ (q.z as i64).wrapping_mul(83_492_791);
+    h.rem_euclid(SAVE_SLOTS as i64) as u64
 }
 
 fn shell_blocks(works: &Works) -> Vec<Pos> {
@@ -663,6 +808,75 @@ fn vent_effects(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             puff_particles(host, level, [at[0], at[1] - 0.4, at[2]], 0.1, 2, 0.04);
         }
     }
+    // Leaks hiss or drip; hot drips steam (rust spec 6). Drains pour.
+    let (leaks, drains) = with_level(dim, |l| (l.steam.works.leaks(), l.steam.works.drains()));
+    for (pos, content, _) in leaks {
+        let at = center(pos);
+        match content {
+            crate::sim::fluid::Content::Water => {
+                if random() < 0.5 {
+                    particles(
+                        host,
+                        level,
+                        |k| k.drip,
+                        [at[0], at[1] - 0.4, at[2]],
+                        0.3,
+                        1,
+                        0.0,
+                    );
+                }
+                if random() < 0.05 {
+                    sound_at(
+                        host,
+                        level,
+                        at,
+                        "minecraft:block.pointed_dripstone.drip_water",
+                        0.4,
+                        1.0,
+                    );
+                }
+            }
+            _ => {
+                puff_particles(host, level, at, 0.3, 1, 0.05);
+                if content != crate::sim::fluid::Content::Steam {
+                    particles(
+                        host,
+                        level,
+                        |k| k.drip,
+                        [at[0], at[1] - 0.4, at[2]],
+                        0.3,
+                        1,
+                        0.0,
+                    );
+                }
+                if random() < 0.1 {
+                    sound_at(
+                        host,
+                        level,
+                        at,
+                        "minecraft:block.fire.extinguish",
+                        0.15,
+                        2.0,
+                    );
+                }
+            }
+        }
+    }
+    for (pos, content, flow) in drains {
+        let facing = server::property(&*host, level, pos, "facing")
+            .as_deref()
+            .and_then(Dir::from_name)
+            .unwrap_or(Dir::North);
+        let out = center(pos.offset(facing.opposite()));
+        let n = (flow / 20.0).ceil() as i32;
+        particles(host, level, |k| k.drip, out, 0.2, n, 0.0);
+        if content == crate::sim::fluid::Content::HotWater {
+            puff_particles(host, level, out, 0.2, 1, 0.03);
+        }
+        if random() < 0.05 {
+            sound_at(host, level, out, "minecraft:block.water.ambient", 0.3, 1.2);
+        }
+    }
 }
 
 /// Hiss, shake and glow for multiblocks near or over their rating (spec 2, 7.1, 7.4).
@@ -741,6 +955,7 @@ const SCALD: f32 = 1.0;
 const HOT_PIPE: f32 = 1.0;
 
 fn hurt_in(host: &mut dyn ServerHost, level: LevelRef, min: [f64; 3], max: [f64; 3], amount: f32) {
+    SCALD_BOXES.with(|b| b.borrow_mut().push((min, max)));
     let Some(entities) = level.entities_in(&*host, min, max) else {
         return;
     };
@@ -764,9 +979,45 @@ fn block_box(pos: Pos, grow: f64) -> ([f64; 3], [f64; 3]) {
     )
 }
 
-/// Every 10 ticks: vents, bursts, exhausts, puffs, clouds and hot pipes scald.
+thread_local! {
+    /// The scald boxes of the current pass, for rust's steam exposure.
+    static SCALD_BOXES: std::cell::RefCell<Vec<([f64; 3], [f64; 3])>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// Every 10 ticks: vents, bursts, leaks, exhausts, puffs, clouds and hot
+/// pipes scald; the positions in those areas expose iron to steam.
 fn scald(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
-    let (vents, exhausts, puffs, clouds, hot) = with_level(dim, |l| {
+    SCALD_BOXES.with(|b| b.borrow_mut().clear());
+    scald_areas(host, level, dim);
+    let boxes = SCALD_BOXES.with(|b| std::mem::take(&mut *b.borrow_mut()));
+    let mut set = HashSet::new();
+    for (min, max) in boxes {
+        let lo = [
+            min[0].floor() as i32,
+            min[1].floor() as i32,
+            min[2].floor() as i32,
+        ];
+        let hi = [
+            max[0].ceil() as i32,
+            max[1].ceil() as i32,
+            max[2].ceil() as i32,
+        ];
+        if (hi[0] - lo[0]) * (hi[1] - lo[1]) * (hi[2] - lo[2]) > 4096 {
+            continue;
+        }
+        for x in lo[0]..hi[0] {
+            for y in lo[1]..hi[1] {
+                for z in lo[2]..hi[2] {
+                    set.insert(Pos::new(x, y, z));
+                }
+            }
+        }
+    }
+    with_level(dim, |l| l.steam.scalding = set);
+}
+
+fn scald_areas(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
+    let (vents, exhausts, puffs, clouds, hot, leaks) = with_level(dim, |l| {
         let w = &l.steam.works;
         (
             w.vents(),
@@ -774,8 +1025,16 @@ fn scald(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
             l.steam.puffs.iter().map(|p| p.0).collect::<Vec<_>>(),
             l.steam.clouds.clone(),
             w.hot_pipes(),
+            w.leaks(),
         )
     });
+    // Steam leaks and hot drips scald the block around them (rust spec 6).
+    for (pos, content, _) in leaks {
+        if content != crate::sim::fluid::Content::Water {
+            let (min, max) = block_box(pos, 1.0);
+            hurt_in(host, level, min, max, SCALD);
+        }
+    }
     for (pos, v) in vents {
         if !v.open || v.rate <= 1.0 {
             continue;
@@ -922,6 +1181,10 @@ pub fn forget(dim: Dim, pos: Pos) {
         l.steam.signals.remove(&pos);
         l.steam.saved.remove(&pos);
         l.steam.fires.remove(&pos);
+        // A grinder placed here next starts uncooled: tell the network again.
+        l.steam.cooled.remove(&pos);
+        l.steam.banked_known.remove(&pos);
+        l.steam.rust_counts.remove(&pos);
     });
 }
 

@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:iron_boiler"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_iron_boiler",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:iron_boiler",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:iron_boiler"
+            }
+          ]
         }
       ],
       "condition": {

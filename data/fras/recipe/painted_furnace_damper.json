@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XXX",
+    "XPX",
+    "XXX"
+  ],
+  "key": {
+    "X": "fras:furnace_damper",
+    "P": "fras:red_oxide_paint"
+  },
+  "result": {
+    "id": "fras:painted_furnace_damper",
+    "count": 8
+  }
+}

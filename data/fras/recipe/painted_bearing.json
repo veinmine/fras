@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XXX",
+    "XPX",
+    "XXX"
+  ],
+  "key": {
+    "X": "fras:bearing",
+    "P": "fras:red_oxide_paint"
+  },
+  "result": {
+    "id": "fras:painted_bearing",
+    "count": 8
+  }
+}

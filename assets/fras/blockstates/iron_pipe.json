@@ -2,7 +2,8 @@
   "multipart": [
     {
       "when": {
-        "damaged": "false"
+        "damaged": "false",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/core"
@@ -10,7 +11,44 @@
     },
     {
       "when": {
-        "damaged": "true"
+        "damaged": "false",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_rust_spotty"
+      }
+    },
+    {
+      "when": {
+        "damaged": "false",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_rust_rusty"
+      }
+    },
+    {
+      "when": {
+        "damaged": "false",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_rust_leaking"
+      }
+    },
+    {
+      "when": {
+        "damaged": "false",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_rust_painted"
+      }
+    },
+    {
+      "when": {
+        "damaged": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/core_damaged"
@@ -18,7 +56,44 @@
     },
     {
       "when": {
-        "down": "true"
+        "damaged": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_damaged_rust_spotty"
+      }
+    },
+    {
+      "when": {
+        "damaged": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_damaged_rust_rusty"
+      }
+    },
+    {
+      "when": {
+        "damaged": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_damaged_rust_leaking"
+      }
+    },
+    {
+      "when": {
+        "damaged": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/core_damaged_rust_painted"
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm",
@@ -27,7 +102,48 @@
     },
     {
       "when": {
-        "up": "true"
+        "down": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm",
@@ -36,7 +152,48 @@
     },
     {
       "when": {
-        "north": "true"
+        "up": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "up": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm"
@@ -44,7 +201,44 @@
     },
     {
       "when": {
-        "south": "true"
+        "north": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty"
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty"
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking"
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted"
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm",
@@ -53,7 +247,48 @@
     },
     {
       "when": {
-        "west": "true"
+        "south": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm",
@@ -62,10 +297,91 @@
     },
     {
       "when": {
-        "east": "true"
+        "west": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "rust": "clean"
       },
       "apply": {
         "model": "fras:block/iron_pipe/arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "rust": "spotty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_spotty",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "rust": "rusty"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_rusty",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "rust": "leaking"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_leaking",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "rust": "painted"
+      },
+      "apply": {
+        "model": "fras:block/iron_pipe/arm_rust_painted",
         "y": 90
       }
     }

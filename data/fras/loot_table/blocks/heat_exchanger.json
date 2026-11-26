@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_heat_exchanger",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:heat_exchanger",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:heat_exchanger"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ],
+  "random_sequence": "fras:blocks/heat_exchanger"
+}

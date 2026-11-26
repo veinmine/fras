@@ -5,8 +5,24 @@
       "rolls": 1,
       "entries": [
         {
-          "type": "minecraft:item",
-          "name": "fras:manual_valve"
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "name": "fras:painted_manual_valve",
+              "condition": {
+                "type": "minecraft:block_state_property",
+                "block": "fras:manual_valve",
+                "properties": {
+                  "rust": "painted"
+                }
+              }
+            },
+            {
+              "type": "minecraft:item",
+              "name": "fras:manual_valve"
+            }
+          ]
         }
       ],
       "condition": {

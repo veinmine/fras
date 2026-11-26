@@ -4,6 +4,14 @@
     "hardness": 3.0,
     "occludes": false,
     "push_reaction": "IMMOVEABLE",
+    "random_ticks": {
+      "property": "rust",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty"
+      ]
+    },
     "requires_tool": false
   },
   "state_properties": {
@@ -17,9 +25,20 @@
         "west",
         "east"
       ]
+    },
+    "rust": {
+      "type": "enum",
+      "values": [
+        "clean",
+        "spotty",
+        "rusty",
+        "leaking",
+        "painted"
+      ]
     }
   },
   "default_state": {
-    "facing": "north"
+    "facing": "north",
+    "rust": "clean"
   }
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "fras:block/iron_boiler/shell_rust_rusty",
+  "loader": "fras:shell",
+  "mask": 61,
+  "axis": "x"
+}

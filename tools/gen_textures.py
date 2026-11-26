@@ -113,8 +113,96 @@ METALS = {
 }
 
 
+FLAKES = [
+    "................",
+    "................",
+    "...r............",
+    "..rdr.....o.....",
+    "...r.....odr....",
+    "..........r.....",
+    "......ro........",
+    ".....rddr...r...",
+    "......rr...rdo..",
+    "..o.........r...",
+    ".rdr...or.......",
+    "..r...rddr......",
+    ".......rr.......",
+]
+PIGMENT = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "......rrr.......",
+    "....rrlrrrr.....",
+    "...rrlllrrrr....",
+    "..rrrrlrrrrrd...",
+    ".rrrrrrrrrrrdd..",
+    ".dddddddddddd...",
+]
+PAINT = [
+    "................",
+    "......####......",
+    ".....#hhhh#.....",
+    "....########....",
+    "...#wwwwwwww#...",
+    "...#rrrrrrrr#...",
+    "...#rlrrrrrr#...",
+    "...#rlrrrrrr#...",
+    "...#rrrrrrrr#...",
+    "...#rrrrrrrd#...",
+    "...#wwwwwwww#...",
+    "...#wwwwwwww#...",
+    "....########....",
+]
+RUST = ((150, 70, 30, 255), (120, 52, 24, 255), (180, 95, 45, 255))
+
+
+def rust_block(stage):
+    """Iron with rust: a grey base, rust spots by stage (deterministic)."""
+    import random
+    rng = random.Random(stage)
+    share = {"spotty": 0.18, "rusty": 0.6, "leaking": 0.85}.get(stage, 0.0)
+    rows = []
+    for y in range(16):
+        row = []
+        for x in range(16):
+            if stage == "painted":
+                v = rng.randint(-8, 8)
+                base = (140 + v, 48 + v // 2, 34 + v // 2, 255)
+                if x in (0, 15) or y in (0, 15):
+                    base = (110, 38, 28, 255)
+                row.append(base)
+                continue
+            g = 200 + rng.randint(-14, 10)
+            px = (g, g, g + 4, 255)
+            if x in (0, 15) or y in (0, 15):
+                px = (150, 150, 156, 255)
+            if rng.random() < share:
+                px = rng.choice(RUST)
+            row.append(px)
+        rows.append(row)
+    if stage == "leaking":
+        # A dark hole and a drip below it.
+        for (x, y) in [(7, 6), (8, 6), (7, 7), (8, 7)]:
+            rows[y][x] = (40, 22, 14, 255)
+        for y in range(8, 13):
+            rows[y][8] = (90, 40, 20, 255)
+    return rows
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    block = os.path.join(ROOT, "assets/fras/textures/block")
+    os.makedirs(block, exist_ok=True)
+    for stage in ["spotty", "rusty", "leaking", "painted"]:
+        png(os.path.join(block, f"rust_{stage}.png"), rust_block(stage))
+    r, d, o = RUST
+    png(os.path.join(OUT, "rust_flakes.png"), draw(FLAKES, {"r": r, "d": d, "o": o}))
+    png(os.path.join(OUT, "red_oxide_pigment.png"), draw(PIGMENT, {"r": (160, 55, 35, 255), "l": (200, 85, 60, 255), "d": (110, 35, 25, 255)}))
+    png(os.path.join(OUT, "red_oxide_paint.png"), draw(PAINT, {"#": DARK, "h": (120, 85, 50, 255), "w": (176, 176, 184, 255), "r": (150, 45, 32, 255), "l": (200, 85, 60, 255), "d": (100, 30, 22, 255)}))
     png(os.path.join(OUT, "wrench.png"), draw(WRENCH, {"#": DARK, "w": (176, 176, 184, 255)}))
     png(os.path.join(OUT, "hand_hammer.png"), draw(HAMMER, {"#": DARK, "w": (170, 170, 178, 255), "b": (120, 85, 50, 255)}))
     png(os.path.join(OUT, "leather_belt.png"), draw(BELT, {"#": (60, 35, 20, 255), "l": (150, 90, 50, 255), "d": (110, 65, 35, 255)}))

@@ -1,0 +1,524 @@
+{
+  "variants": {
+    "facing=up,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0"
+    },
+    "facing=up,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty"
+    },
+    "facing=up,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty"
+    },
+    "facing=up,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking"
+    },
+    "facing=up,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted"
+    },
+    "facing=up,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1"
+    },
+    "facing=up,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty"
+    },
+    "facing=up,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty"
+    },
+    "facing=up,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking"
+    },
+    "facing=up,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted"
+    },
+    "facing=up,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2"
+    },
+    "facing=up,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty"
+    },
+    "facing=up,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty"
+    },
+    "facing=up,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking"
+    },
+    "facing=up,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted"
+    },
+    "facing=up,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3"
+    },
+    "facing=up,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty"
+    },
+    "facing=up,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty"
+    },
+    "facing=up,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking"
+    },
+    "facing=up,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted"
+    },
+    "facing=down,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0",
+      "x": 180
+    },
+    "facing=down,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty",
+      "x": 180
+    },
+    "facing=down,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty",
+      "x": 180
+    },
+    "facing=down,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking",
+      "x": 180
+    },
+    "facing=down,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted",
+      "x": 180
+    },
+    "facing=down,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1",
+      "x": 180
+    },
+    "facing=down,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty",
+      "x": 180
+    },
+    "facing=down,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty",
+      "x": 180
+    },
+    "facing=down,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking",
+      "x": 180
+    },
+    "facing=down,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted",
+      "x": 180
+    },
+    "facing=down,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2",
+      "x": 180
+    },
+    "facing=down,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty",
+      "x": 180
+    },
+    "facing=down,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty",
+      "x": 180
+    },
+    "facing=down,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking",
+      "x": 180
+    },
+    "facing=down,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted",
+      "x": 180
+    },
+    "facing=down,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3",
+      "x": 180
+    },
+    "facing=down,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty",
+      "x": 180
+    },
+    "facing=down,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty",
+      "x": 180
+    },
+    "facing=down,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking",
+      "x": 180
+    },
+    "facing=down,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted",
+      "x": 180
+    },
+    "facing=north,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0",
+      "x": 90
+    },
+    "facing=north,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty",
+      "x": 90
+    },
+    "facing=north,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty",
+      "x": 90
+    },
+    "facing=north,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking",
+      "x": 90
+    },
+    "facing=north,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted",
+      "x": 90
+    },
+    "facing=north,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1",
+      "x": 90
+    },
+    "facing=north,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty",
+      "x": 90
+    },
+    "facing=north,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty",
+      "x": 90
+    },
+    "facing=north,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking",
+      "x": 90
+    },
+    "facing=north,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted",
+      "x": 90
+    },
+    "facing=north,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2",
+      "x": 90
+    },
+    "facing=north,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty",
+      "x": 90
+    },
+    "facing=north,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty",
+      "x": 90
+    },
+    "facing=north,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking",
+      "x": 90
+    },
+    "facing=north,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted",
+      "x": 90
+    },
+    "facing=north,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3",
+      "x": 90
+    },
+    "facing=north,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty",
+      "x": 90
+    },
+    "facing=north,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty",
+      "x": 90
+    },
+    "facing=north,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking",
+      "x": 90
+    },
+    "facing=north,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted",
+      "x": 90
+    },
+    "facing=south,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,flap=0,rust=clean": {
+      "model": "fras:block/furnace_damper_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=0,rust=spotty": {
+      "model": "fras:block/furnace_damper_0_rust_spotty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=0,rust=rusty": {
+      "model": "fras:block/furnace_damper_0_rust_rusty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=0,rust=leaking": {
+      "model": "fras:block/furnace_damper_0_rust_leaking",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=0,rust=painted": {
+      "model": "fras:block/furnace_damper_0_rust_painted",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=1,rust=clean": {
+      "model": "fras:block/furnace_damper_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=1,rust=spotty": {
+      "model": "fras:block/furnace_damper_1_rust_spotty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=1,rust=rusty": {
+      "model": "fras:block/furnace_damper_1_rust_rusty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=1,rust=leaking": {
+      "model": "fras:block/furnace_damper_1_rust_leaking",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=1,rust=painted": {
+      "model": "fras:block/furnace_damper_1_rust_painted",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=2,rust=clean": {
+      "model": "fras:block/furnace_damper_2",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=2,rust=spotty": {
+      "model": "fras:block/furnace_damper_2_rust_spotty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=2,rust=rusty": {
+      "model": "fras:block/furnace_damper_2_rust_rusty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=2,rust=leaking": {
+      "model": "fras:block/furnace_damper_2_rust_leaking",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=2,rust=painted": {
+      "model": "fras:block/furnace_damper_2_rust_painted",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=3,rust=clean": {
+      "model": "fras:block/furnace_damper_3",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=3,rust=spotty": {
+      "model": "fras:block/furnace_damper_3_rust_spotty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=3,rust=rusty": {
+      "model": "fras:block/furnace_damper_3_rust_rusty",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=3,rust=leaking": {
+      "model": "fras:block/furnace_damper_3_rust_leaking",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,flap=3,rust=painted": {
+      "model": "fras:block/furnace_damper_3_rust_painted",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

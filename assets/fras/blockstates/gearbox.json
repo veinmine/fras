@@ -1,26 +1,118 @@
 {
   "variants": {
-    "facing=north": {
+    "facing=north,rust=clean": {
       "model": "fras:block/gearbox"
     },
-    "facing=south": {
+    "facing=north,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty"
+    },
+    "facing=north,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty"
+    },
+    "facing=north,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking"
+    },
+    "facing=north,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted"
+    },
+    "facing=south,rust=clean": {
       "model": "fras:block/gearbox",
       "y": 180
     },
-    "facing=east": {
+    "facing=south,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty",
+      "y": 180
+    },
+    "facing=south,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty",
+      "y": 180
+    },
+    "facing=south,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking",
+      "y": 180
+    },
+    "facing=south,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted",
+      "y": 180
+    },
+    "facing=east,rust=clean": {
       "model": "fras:block/gearbox",
       "y": 90
     },
-    "facing=west": {
+    "facing=east,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty",
+      "y": 90
+    },
+    "facing=east,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty",
+      "y": 90
+    },
+    "facing=east,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking",
+      "y": 90
+    },
+    "facing=east,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted",
+      "y": 90
+    },
+    "facing=west,rust=clean": {
       "model": "fras:block/gearbox",
       "y": 270
     },
-    "facing=up": {
+    "facing=west,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty",
+      "y": 270
+    },
+    "facing=west,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty",
+      "y": 270
+    },
+    "facing=west,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking",
+      "y": 270
+    },
+    "facing=west,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted",
+      "y": 270
+    },
+    "facing=up,rust=clean": {
       "model": "fras:block/gearbox",
       "x": 270
     },
-    "facing=down": {
+    "facing=up,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty",
+      "x": 270
+    },
+    "facing=up,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty",
+      "x": 270
+    },
+    "facing=up,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking",
+      "x": 270
+    },
+    "facing=up,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted",
+      "x": 270
+    },
+    "facing=down,rust=clean": {
       "model": "fras:block/gearbox",
+      "x": 90
+    },
+    "facing=down,rust=spotty": {
+      "model": "fras:block/gearbox_rust_spotty",
+      "x": 90
+    },
+    "facing=down,rust=rusty": {
+      "model": "fras:block/gearbox_rust_rusty",
+      "x": 90
+    },
+    "facing=down,rust=leaking": {
+      "model": "fras:block/gearbox_rust_leaking",
+      "x": 90
+    },
+    "facing=down,rust=painted": {
+      "model": "fras:block/gearbox_rust_painted",
       "x": 90
     }
   }

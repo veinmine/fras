@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:copper_pipe",
+    "minecraft:iron_trapdoor"
+  ],
+  "result": {
+    "id": "fras:drain",
+    "count": 1
+  }
+}

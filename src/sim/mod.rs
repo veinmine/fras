@@ -7,4 +7,5 @@ pub mod grind;
 pub mod multi;
 pub mod plant;
 pub mod rot;
+pub mod rust;
 pub mod steam;

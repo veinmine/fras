@@ -18,7 +18,7 @@ use game::parts::{BlockHooks, EntityHooks};
 pub const ID: &str = "fras";
 
 /// FRAS's items that are not blocks.
-pub const ITEMS: [&str; 8] = [
+pub const ITEMS: [&str; 11] = [
     "wrench",
     "leather_belt",
     "hand_hammer",
@@ -27,6 +27,33 @@ pub const ITEMS: [&str; 8] = [
     "crushed_gold",
     "iron_plate",
     "copper_plate",
+    "rust_flakes",
+    "red_oxide_pigment",
+    "red_oxide_paint",
+];
+
+/// The rusting blocks, each with a pre-painted item `painted_<name>` that
+/// places it painted (rust spec 7.2).
+pub const PAINTED: [&str; 19] = [
+    "iron_shaft",
+    "bearing",
+    "clutch",
+    "iron_bevel_gear",
+    "gearbox",
+    "iron_pipe",
+    "manual_valve",
+    "redstone_valve",
+    "steam_release",
+    "emergency_valve",
+    "governor",
+    "iron_boiler",
+    "storage_tank",
+    "steam_cylinder",
+    "flywheel",
+    "pump",
+    "heat_exchanger",
+    "iron_radiator",
+    "furnace_damper",
 ];
 
 #[derive(Default)]
@@ -49,6 +76,9 @@ impl Hooks for Fras {
             if block == Block::Firebox {
                 r.block_container(&key, game::firebox::container());
             }
+            if block == Block::Governor {
+                r.block_container(&key, game::governor::container());
+            }
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.
@@ -60,15 +90,23 @@ impl Hooks for Fras {
         let leather_belt = r.item_key("fras:leather_belt");
         r.item_part(wrench, game::tools::Wrench);
         r.item_part(leather_belt, game::tools::LeatherBelt);
+        let paint = r.item_key("fras:red_oxide_paint");
+        r.item_part(paint, game::rust::Paint);
         for item in game::blocks::Block::ALL
             .map(Block::name)
             .into_iter()
             .chain(ITEMS)
-            // An item has one part: these two draw their tooltip themselves.
-            .filter(|item| !matches!(*item, "wrench" | "leather_belt"))
+            // An item has one part: these draw their tooltip themselves.
+            .filter(|item| !matches!(*item, "wrench" | "leather_belt" | "red_oxide_paint"))
         {
             let key = r.item_key(&format!("{ID}:{item}"));
             r.item_part(key, game::tools::Tooltip(item));
+        }
+        let mut painted = Vec::new();
+        for item in PAINTED {
+            let key = r.item_key(&format!("{ID}:painted_{item}"));
+            r.item_part(key, game::tools::Tooltip("painted"));
+            painted.push(key);
         }
         let setting = mod_api::SettingSpec::choice(
             game::steam::SETTING,
@@ -79,6 +117,25 @@ impl Hooks for Fras {
         .tooltip("fras.settings.explosion.tooltip");
         if let Err(e) = r.register_setting(setting) {
             eprintln!("[{ID}] setting: {e}");
+        }
+        let rust_on = mod_api::SettingSpec::choice(
+            game::rust::SETTING_ON,
+            "fras.settings.rust",
+            game::rust::ON_CHOICES,
+            0,
+        )
+        .tooltip("fras.settings.rust.tooltip");
+        let rust_speed = mod_api::SettingSpec::choice(
+            game::rust::SETTING_SPEED,
+            "fras.settings.rust_speed",
+            game::rust::SPEED_CHOICES,
+            1,
+        )
+        .tooltip("fras.settings.rust_speed.tooltip");
+        for s in [rust_on, rust_speed] {
+            if let Err(e) = r.register_setting(s) {
+                eprintln!("[{ID}] setting: {e}");
+            }
         }
         let _ = game::KEYS.set(game::Keys {
             wrench,
@@ -95,11 +152,16 @@ impl Hooks for Fras {
             copper_ingot: r.item_key("minecraft:copper_ingot"),
             copper_nugget: r.item_key("minecraft:copper_nugget"),
             iron_plate: r.item_key("fras:iron_plate"),
+            leather: r.item_key("minecraft:leather"),
+            paint,
+            painted,
+            rust_flakes: r.item_key("fras:rust_flakes"),
             smoke: r.particle_key("minecraft:smoke"),
             crit: r.particle_key("minecraft:crit"),
             cloud: r.particle_key("minecraft:poof"),
             ember: r.particle_key("minecraft:lava"),
             wisp: r.particle_key("minecraft:white_smoke"),
+            drip: r.particle_key("minecraft:dripping_water"),
         });
     }
 
@@ -149,6 +211,9 @@ impl Hooks for Fras {
         if let Some(mode) = host.setting_choice(game::steam::SETTING) {
             game::steam::set_explosion_mode(mode as u8);
         }
+        let on = host.setting_choice(game::rust::SETTING_ON).unwrap_or(0);
+        let speed = host.setting_choice(game::rust::SETTING_SPEED).unwrap_or(1);
+        game::rust::set_settings(on as u8, speed as u8);
     }
 
     /// Recipes and tags are final: read the grinding recipes.

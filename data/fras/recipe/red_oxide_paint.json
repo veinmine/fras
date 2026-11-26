@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:red_oxide_pigment",
+    "fras:red_oxide_pigment",
+    "minecraft:potion"
+  ],
+  "result": {
+    "id": "fras:red_oxide_paint",
+    "count": 2
+  }
+}

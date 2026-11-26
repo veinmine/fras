@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XXX",
+    "XPX",
+    "XXX"
+  ],
+  "key": {
+    "X": "fras:clutch",
+    "P": "fras:red_oxide_paint"
+  },
+  "result": {
+    "id": "fras:painted_clutch",
+    "count": 8
+  }
+}
