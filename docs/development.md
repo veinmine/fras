@@ -83,8 +83,22 @@ Not in 0.1 (no hook yet, or left for later):
 | Performance: 50 boilers, 50 engines, 2000 pipes under 0.2 ms per tick; a 2000-pipe rebuild under 2 ms | ~0.46 ms per tick in game (steam step 0.12, shell saves 0.13, block entities 0.20, of which ~0.13 is Horizon copying each block entity's data); rebuild ~0.6 ms alone, ~2.1 ms with the 50-boiler plant in the level | Measured on archmage. A rebuild rebuilds every plant in the level; per-network rebuilds and fewer ticking block entities are left for later. |
 | Hot steam pipe 1 damage per second | 1 damage every half second, like a magma block | At 1 per second a fed player's regeneration cancelled it out in game. |
 
+## Where 0.3 differs from the spec
+
+| Spec | 0.3 | Why |
+| --- | --- | --- |
+| Flyball damping ζ 0.2 | 0.6 | With 0.2, sensitivity 1 hunted ±10 RPM at target 64 and 5 bar in game. With 0.6 it is steady from 2 to 6 bar; at the spec's 4 bar / target 90 rig hunting starts at sensitivity 4, which a second flywheel steadies (above 5 bar it only calms it). |
+| A load drop doesn't overshoot the target | It can overshoot by a few RPM (63.6 at target 64 after the clutch let go) | The second-order balls predict it too; it settles within the band. |
+| Governor settings screen with no slots | One hidden slot | A Horizon menu needs at least one slot. |
+| Painted items place painted parts through the `minecraft:block_state` component | The item part sets `rust=painted` on placement | The component isn't applied to mod blocks in this Horizon build. |
+| An idle governed plant banks its fire | The damper holds about 15% open and banks fully only when no steam is used | Boiler losses and the pump's draw keep pressure just under the set point. |
+| Paint from 2 pigment + 1 water bottle | 2 pigment + any potion | A shaped/shapeless recipe can't check the potion's contents. |
+| Rust flakes → pigment (no grinding numbers) | 2 revolutions, load 3 Nm | Like bone and wool. |
+| Performance: 0.2 plant + 50 governors, dampers, bellows, exchangers under 0.6 ms per tick | ~0.67 ms of mod time (level work 0.47, fireboxes 0.15, governors 0.02); server tick 1.3 → 2.2 ms with Horizon's block entity overhead | Measured on archmage. 2000 rusting parts: see the PR. |
+
 ## Testing in a game
 
 Use a separate instance (`fras-dev`). Speed things up: `/tp` to the test site instead of walking, and
 `/tick rate 100` (or `/tick sprint`) while waiting for spin-up, coasting, warnings or grinding. The exit
-criteria are in section 13 of `specs/rotational-network.md`.
+criteria are in section 13 of `specs/rotational-network.md` (0.1), section 11 of `specs/regulation.md`
+(0.3). For rust, `/gamerule randomTickSpeed 300` makes a day of exposure about 15 seconds.

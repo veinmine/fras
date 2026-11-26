@@ -92,6 +92,31 @@ for those, prefer the word a Polish mechanic would use.
 | bar (unit) | bar | **mod** |
 | simmering (a valve) | syczy | **mod** |
 | starved (an engine) | niedobór pary | **mod** |
+| Governor | Regulator odśrodkowy | **mod** |
+| target speed | prędkość zadana | **mod** |
+| sensitivity | czułość | **mod** |
+| throttle | przepustnica | **mod** |
+| hunting (a governor) | kołysanie (regulatora) | **mod** |
+| Furnace damper | Szyber | **mod** |
+| banked fire | przytłumiony ogień | **mod** |
+| Bellows | Miech | **mod** |
+| Heat exchanger | Wymiennik ciepła | **mod** |
+| condensing | skraplanie | **mod** |
+| Radiator (copper / iron) | Chłodnica (miedziana / żelazna) | **mod** |
+| hot water | gorąca woda | **mod** |
+| exhaust steam | para wylotowa | **mod** |
+| Drain | Spust | **mod** |
+| cooling | chłodzenie | **mod** |
+| closed loop | obieg zamknięty | **mod** |
+| Rust | Rdza | **mod** |
+| clean / spotty / rusty / leaking (stages) | czysty / nalot rdzy / zardzewiały / cieknący | **mod** |
+| rusted through | przerdzewiały | **mod** |
+| Rust flakes | Płatki rdzy | **mod** |
+| Red oxide pigment | Pigment żelazowy | **mod** |
+| Red oxide paint | Minia żelazowa | **mod** |
+| painted (Painted Iron Pipe) | pomalowany (Pomalowana żelazna rura) | **mod** |
+| scrape | zeskrobać | **mod** |
+| leak | wyciek | **mod** |
 
 ## Vanilla words FRAS uses
 
