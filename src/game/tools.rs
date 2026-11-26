@@ -872,20 +872,27 @@ pub struct Tooltip(pub &'static str);
 /// GLFW's Shift modifier bit.
 const SHIFT: u32 = 0x0001;
 const GRAY: u32 = 0xA8A8_A8FF;
+/// Tooltip lines wrap at this many GUI pixels.
+const TOOLTIP_WIDTH: i32 = 200;
 
 #[mod_api::horizon_part]
 impl ItemPart for Tooltip {
     fn tooltip(&self, host: &dyn mod_api::ClientHost, event: &mut mod_api::TooltipEvent<'_>) {
         let key = format!("tooltip.fras.{}", self.0);
-        event
-            .lines
-            .push((Text::translate(key.clone(), vec![]), GRAY));
+        // Long texts wrap, so a tooltip fits on the screen.
+        let mut push = |text: Text| match host.text_split(&text, TOOLTIP_WIDTH) {
+            Ok(lines) if !lines.is_empty() => {
+                event.lines.extend(lines.into_iter().map(|l| (l, GRAY)))
+            }
+            _ => event.lines.push((text, GRAY)),
+        };
+        push(Text::translate(key.clone(), vec![]));
         let details = format!("{key}.details");
         if host.translate(&details).is_none() {
             return;
         }
         if host.modifiers().bits & SHIFT != 0 {
-            event.lines.push((Text::translate(details, vec![]), GRAY));
+            push(Text::translate(details, vec![]));
         } else {
             event
                 .lines

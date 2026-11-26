@@ -98,7 +98,7 @@
   "fras.belt.needs": "Ten pas wymaga skórzanych pasów: %s",
   "fras.belt.linked": "Pas założony",
   "fras.grinder.status.jammed": "Zablokowana: napraw kluczem",
-  "fras.grinder.status.paused": "Wstrzymana: poza symulowanym obszarem",
+  "fras.grinder.status.paused": "Wstrzymana: poza obszarem",
   "fras.grinder.status.overspeed": "Za szybko!",
   "fras.grinder.status.no_power": "Brak napędu",
   "fras.grinder.status.too_slow": "Za wolno: potrzeba 12 obr./min",
@@ -325,7 +325,7 @@
   "fras.inspect.leaks": "Wycieki w tej sieci: %s, strata %s mB/s",
   "fras.governor.target": "Prędkość zadana",
   "fras.governor.sensitivity": "Czułość",
-  "fras.governor.speed": "Prędkość %s obr./min, kule %s obr./min",
+  "fras.governor.speed": "%s obr/min, kule %s",
   "fras.governor.not_turning": "Nie obraca się: przepustnica otwarta",
   "fras.governor.hunting": "Kołysanie: ±%s obr./min",
   "fras.governor.engines": "Dławi silniki: %s",
@@ -341,8 +341,5 @@
   "fras.rust.no_cooling": "Przerdzewiała: nie chłodzi. Zeskrob z żelazną blachą, aby naprawić",
   "fras.rust.off": "%s. Rdza wyłączona",
   "fras.rust.rusting": "%s. Rdzewieje: %s. %s za około %s dni",
-  "fras.rust.not_exposed": "%s. Nie rdzewieje tu",
-  "fras.firebox.fuel": "Paliwo %s kW",
-  "fras.firebox.bellows": "miech %s",
-  "fras.firebox.damper": "szyber %s"
+  "fras.rust.not_exposed": "%s. Nie rdzewieje tu"
 }

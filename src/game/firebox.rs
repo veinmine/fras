@@ -222,49 +222,47 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
             None => t,
         }
     };
-    // The heat it gives: the fuel's, times the bellows, times the dampers.
+    // The heat it gives: the fuel's, times the bellows, times the dampers,
+    // and above it how it comes about ("2000 × 1.5 × 30%").
     let heat_kw = (kw as f64 * (100 + boost) as f64 / 100.0 * damper as f64 / 100.0).round();
+    let (col, max, grey) = (x + 80.0, 88.0, 0xFF40_4040);
+    let mut at = y + 18.0;
+    if burn > 0 && (boost > 0 || damper < 100) {
+        let mut sum = format!("{kw}");
+        if boost > 0 {
+            sum += &format!(" × {}", super::num(1.0 + boost as f64 / 100.0));
+        }
+        if damper < 100 {
+            sum += &format!(" × {damper}%");
+        }
+        at = super::text_in(draw, &sum, [col, at], max, grey);
+    } else {
+        at += super::LINE;
+    }
     let heat = if burn > 0 {
         tr("fras.firebox.heat", Some(format!("{}", heat_kw as i64)))
     } else {
         tr("fras.firebox.out", None)
     };
-    draw.text(&heat, [x + 80.0, y + 30.0], 0xFF40_4040, false);
-    // What changes it, above: "Coal 1000 kW, bellows +50%, damper 40%".
-    let mut parts = Vec::new();
-    if burn > 0 && (boost > 0 || damper < 100) {
-        parts.push(tr("fras.firebox.fuel", Some(format!("{kw}"))));
-    }
-    if boost > 0 {
-        parts.push(tr("fras.firebox.bellows", Some(format!("+{boost}%"))));
-    }
-    if damper < 100 {
-        parts.push(tr("fras.firebox.damper", Some(format!("{damper}%"))));
-    }
-    if !parts.is_empty() {
-        draw.text(&parts.join(", "), [x + 80.0, y + 18.0], 0xFF40_4040, false);
-    }
+    at = super::text_in(draw, &heat, [col, at], max, grey) + 2.0;
     let heating = if boilers == 0 {
         tr("fras.firebox.heating_nothing", None)
     } else {
         tr("fras.firebox.heating", Some(format!("{boilers}")))
     };
-    let color = if boilers == 0 {
-        0xFFB0_2020
-    } else {
-        0xFF40_4040
-    };
-    draw.text(&heating, [x + 80.0, y + 42.0], color, false);
+    let color = if boilers == 0 { 0xFFB0_2020 } else { grey };
+    at = super::text_in(draw, &heating, [col, at], max, color) + 2.0;
     if burn > 0 {
         let secs = burn / 20;
-        draw.text(
+        super::text_in(
+            draw,
             &tr(
                 "fras.firebox.left",
                 Some(format!("{}:{:02}", secs / 60, secs % 60)),
             ),
-            [x + 80.0, y + 54.0],
-            0xFF40_4040,
-            false,
+            [col, at],
+            max,
+            grey,
         );
     }
 }

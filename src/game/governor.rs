@@ -83,7 +83,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
 pub fn screen(_: &mut ScreenEvent<'_>) -> Option<mod_api::Screen> {
     Some(mod_api::Screen {
         width: 176.0,
-        height: 96.0,
+        height: 104.0,
         slots: vec![None],
         inventory_y: 1000.0,
         inventory_x: 8.0,
@@ -184,7 +184,7 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
     } else {
         tr(host, "fras.governor.engines", &[engines.to_string()])
     };
-    draw.text(&note, [x + 8.0, y + 80.0], grey, false);
+    super::text_in(draw, &note, [x + 8.0, y + 80.0], 160.0, grey);
 }
 
 pub fn screen_click(_: &dyn ClientHost, event: &mut ScreenClickEvent<'_>) -> Option<i32> {

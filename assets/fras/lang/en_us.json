@@ -98,7 +98,7 @@
   "fras.belt.needs": "This belt needs %s leather belts",
   "fras.belt.linked": "Belt linked",
   "fras.grinder.status.jammed": "Jammed: repair with the wrench",
-  "fras.grinder.status.paused": "Paused: outside the simulated area",
+  "fras.grinder.status.paused": "Paused: outside the loaded area",
   "fras.grinder.status.overspeed": "Overspeed!",
   "fras.grinder.status.no_power": "No power",
   "fras.grinder.status.too_slow": "Too slow: needs 12 RPM",
@@ -325,7 +325,7 @@
   "fras.inspect.leaks": "%s leak(s) on this network, losing %s mB/s",
   "fras.governor.target": "Target",
   "fras.governor.sensitivity": "Sensitivity",
-  "fras.governor.speed": "Speed %s RPM, balls %s RPM",
+  "fras.governor.speed": "Speed %s RPM, balls %s",
   "fras.governor.not_turning": "Not turning: throttle wide open",
   "fras.governor.hunting": "Hunting: ±%s RPM",
   "fras.governor.engines": "Throttles %s engine(s)",
@@ -341,8 +341,5 @@
   "fras.rust.no_cooling": "Rusted through: no cooling. Scrape with an iron plate to repair",
   "fras.rust.off": "%s. Rust is off",
   "fras.rust.rusting": "%s. Rusting: %s. %s in about %s days",
-  "fras.rust.not_exposed": "%s. Not exposed",
-  "fras.firebox.fuel": "Fuel %s kW",
-  "fras.firebox.bellows": "bellows %s",
-  "fras.firebox.damper": "damper %s"
+  "fras.rust.not_exposed": "%s. Not exposed"
 }

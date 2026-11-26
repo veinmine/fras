@@ -106,6 +106,47 @@ pub fn yaw_dir(yaw: f32) -> Dir {
 }
 
 /// Format a number for players: at most one decimal.
+/// Split `text` into lines no wider than `max` GUI pixels, at spaces.
+pub fn wrap(draw: &dyn mod_api::DrawContext, text: &str, max: f32) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in text.split(' ') {
+        let tried = if line.is_empty() {
+            word.to_string()
+        } else {
+            format!("{line} {word}")
+        };
+        if !line.is_empty() && draw.text_width(&tried) > max {
+            lines.push(std::mem::replace(&mut line, word.to_string()));
+        } else {
+            line = tried;
+        }
+    }
+    if !line.is_empty() || lines.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
+/// Line height of screen text, GUI pixels.
+pub const LINE: f32 = 10.0;
+
+/// Draw `text` wrapped to `max` pixels from `at`; returns where the next line goes.
+pub fn text_in(
+    draw: &mut dyn mod_api::DrawContext,
+    text: &str,
+    at: [f32; 2],
+    max: f32,
+    color: u32,
+) -> f32 {
+    let mut y = at[1];
+    for line in wrap(&*draw, text, max) {
+        draw.text(&line, [at[0], y], color, false);
+        y += LINE;
+    }
+    y
+}
+
 pub fn num(v: f64) -> String {
     let r = (v * 10.0).round() / 10.0;
     if (r - r.round()).abs() < 1e-9 {
