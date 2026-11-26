@@ -399,8 +399,8 @@ fn fines_fall_before_mediums_and_oversize_last() {
     let mut order = Vec::new();
     for _ in 0..40 {
         drum.tick(&s);
-        for k in 0..3 {
-            if !drum.outlets[k].is_empty() && !order.contains(&k) {
+        for (k, outlet) in drum.outlets.iter().enumerate() {
+            if !outlet.is_empty() && !order.contains(&k) {
                 order.push(k);
             }
         }

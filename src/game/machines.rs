@@ -1124,21 +1124,32 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     }
 }
 
+/// The blocks a trommel change at `changed` can form or unform: every row
+/// through a changed block, beside it (a block touching a row's side), or
+/// that it lengthens lies within three blocks along x and z, diagonals
+/// included (a block beside a middle leaves the ends diagonal to it).
+fn trommel_near(changed: &BTreeSet<Pos>) -> Vec<Pos> {
+    let mut near: BTreeSet<Pos> = BTreeSet::new();
+    for p in changed {
+        for dx in -3..=3 {
+            for dz in -3..=3 {
+                near.insert(Pos::new(p.x + dx, p.y, p.z + dz));
+            }
+        }
+    }
+    near.into_iter().collect()
+}
+
 /// Form the trommel rows near changed blocks; unformed blocks drop what
 /// their drum held.
 fn form_trommels(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, changed: &BTreeSet<Pos>) {
-    let mut near: BTreeSet<Pos> = BTreeSet::new();
-    for p in changed {
-        for d in -3..=3 {
-            near.insert(Pos::new(p.x + d, p.y, p.z));
-            near.insert(Pos::new(p.x, p.y, p.z + d));
-        }
-    }
-    let near: Vec<Pos> = near.into_iter().collect();
+    let near = trommel_near(changed);
     let (rows, present) = {
         let is = |q: Pos| block_at(&*host, level, q) == Some(Block::Trommel);
-        let present: BTreeSet<Pos> = near.iter().copied().filter(|q| is(*q)).collect();
-        (trommel_rows(&is, &near), present)
+        let rows = trommel_rows(&is, &near);
+        let mut present: BTreeSet<Pos> = near.iter().copied().filter(|q| is(*q)).collect();
+        present.extend(rows.iter().flat_map(|(row, _)| row.iter().copied()));
+        (rows, present)
     };
     let mut formed: HashMap<Pos, (&'static str, Axis)> = HashMap::new();
     for (row, axis) in &rows {
@@ -1608,5 +1619,19 @@ mod tests {
         let mut stacked: Vec<Pos> = (0..3).map(|x| Pos::new(x, 0, 0)).collect();
         stacked.extend((0..3).map(|x| Pos::new(x, 1, 0)));
         assert_eq!(rows(&stacked).len(), 2);
+    }
+
+    #[test]
+    fn a_block_beside_a_middle_reaches_the_rows_ends() {
+        // Found in game: a trommel placed beside a formed row's middle left
+        // its ends formed, as they sit diagonal to the new block.
+        let changed: BTreeSet<Pos> = [Pos::new(1, 0, 1)].into();
+        let near = trommel_near(&changed);
+        for x in 0..3 {
+            assert!(near.contains(&Pos::new(x, 0, 0)));
+        }
+        // A fourth block on the end still reaches the far end.
+        let changed: BTreeSet<Pos> = [Pos::new(3, 0, 0)].into();
+        assert!(trommel_near(&changed).contains(&Pos::new(0, 0, 0)));
     }
 }
