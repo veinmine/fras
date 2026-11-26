@@ -457,8 +457,14 @@ Each subsystem gets its own detailed spec, written and agreed before it is imple
    (2026-11-25, for 0.3).
 6. **Items and machines:** recipes, processing times, speed ranges and loads per machine, belts.
    **Grinder written:** [`specs/grinder.md`](specs/grinder.md) (2026-11-23), the one machine 0.1 needs; it
-   refines section 6 (see its section 13). The other machines follow with their milestones.
-7. **Progression:** full tier-1 recipe tree and balance targets.
+   refines section 6 (see its section 13). **Written for 0.4:** [`specs/logistics.md`](specs/logistics.md)
+   (2026-11-26: conveyor belts and slopes, bucket elevator, diverter, processing on the belt) and
+   [`specs/machines.md`](specs/machines.md) (2026-11-26: washer, trip hammer, lathe, sawmill, trommel, the reference
+   ore line).
+7. **Progression:** full tier-1 recipe tree and balance targets. **Written for 0.4:**
+   [`specs/progression.md`](specs/progression.md) (2026-11-26: intermediate parts, the recipe tree and bootstrap path;
+   holds the 0.4 exit criteria). The optional copper golem crank: [`specs/copper-golem.md`](specs/copper-golem.md)
+   (2026-11-26, a one-day prototype).
 8. **UX:** gauges, inspection overlay, GUIs, sounds, tooltips.
 9. **Engineer's Handbook:** text layout, pages, images, cross-links, content per subsystem (for 1.0).
 
