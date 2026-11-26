@@ -237,9 +237,12 @@ impl Works {
                     bellows::boost(r.omega)
                 }
             });
+            // A creative firebox may ignore the dampers.
+            let free = self.parts[&f].spec.free;
             let openings: Vec<f64> = self
                 .heats
                 .get(&f)
+                .filter(|_| !free)
                 .map(|bs| bs.iter().map(|&b| self.shells[b].opening).collect())
                 .unwrap_or_default();
             fires.insert(
@@ -260,9 +263,10 @@ impl Works {
                 continue;
             }
             let share = fire.kw * (1.0 + fire.boost) / boilers.len() as f64;
+            let free = self.parts.get(spot).is_some_and(|p| p.spec.free);
             for &b in boilers {
                 let e = heat_in.entry(b).or_default();
-                e.0 += share * self.shells[b].opening;
+                e.0 += share * if free { 1.0 } else { self.shells[b].opening };
                 e.1 += 1;
             }
         }

@@ -168,3 +168,37 @@ fn a_creative_drain_takes_exhaust_but_never_steam() {
     assert_eq!(w.void_flow(p(1, 4, 0)), None);
     assert!((pressure(&w, p(1, 3, 0)) - 4.0).abs() < 0.01);
 }
+
+#[test]
+fn a_creative_firebox_may_ignore_a_shut_damper() {
+    let world = World::default();
+    for free in [false, true] {
+        let mut w = Works::new();
+        boiler(&mut w, ShellKind::IronBoiler);
+        w.insert(p(0, 2, 0), Spec::new(Kind::Dome), None);
+        let mut f = Spec::new(Kind::Firebox);
+        f.free = free;
+        w.insert(p(0, -1, 0), f, None);
+        w.set_heat(p(0, -1, 0), 1000.0);
+        let mut d = Spec::new(Kind::Damper).with_dir(Dir::West);
+        d.powered = true;
+        w.insert(p(-1, 0, 0), d, None);
+        for _ in 0..100 {
+            w.step(&world);
+            top_up(&mut w);
+        }
+        let heat = w.shells[0].heat;
+        if free {
+            assert!((heat - 1000.0).abs() < 1e-6, "{heat}");
+        } else {
+            assert!(heat < 1.0, "{heat}");
+        }
+        // Changing it needs no rebuild.
+        let before = w.rebuilds;
+        let mut f2 = w.part(p(0, -1, 0)).unwrap().spec;
+        f2.free = !free;
+        w.update(p(0, -1, 0), f2);
+        w.step(&world);
+        assert_eq!(w.rebuilds, before);
+    }
+}

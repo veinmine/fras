@@ -710,6 +710,7 @@ impl BlockEntityPart for EntityHooks {
         match self.0 {
             Block::Governor => super::governor::screen_click(host, event),
             b if b.is_creative() => super::creative::screen_click(b, host, event),
+            b if super::readout::Readout::of(b).is_some() => super::readout::screen_click(event),
             _ => None,
         }
     }
@@ -719,6 +720,8 @@ impl BlockEntityPart for EntityHooks {
             super::governor::menu_button(host, event);
         } else if self.0.is_creative() {
             super::creative::menu_button(self.0, host, event);
+        } else if super::readout::Readout::of(self.0).is_some() {
+            super::readout::menu_button(event);
         }
     }
 }
@@ -761,6 +764,7 @@ fn tachometer_tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'
         rpm,
         red,
         yellow,
+        super::readout::range(&event.entity.nbt),
         &mut event.entity.data,
     );
     let nbt = &event.entity.nbt;
@@ -812,8 +816,17 @@ fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTi
             blocks::put_f64(nbt, "red", g.red);
         }
         let kind = super::readout::Readout::Pressure;
-        let data =
-            super::readout::update(dim, pos, kind, g.bar, g.red, 0.0, &mut event.entity.data);
+        let range = super::readout::range(&event.entity.nbt);
+        let data = super::readout::update(
+            dim,
+            pos,
+            kind,
+            g.bar,
+            g.red,
+            0.0,
+            range,
+            &mut event.entity.data,
+        );
         (g.signal() as i32, changed, data)
     } else {
         let (level_, warn) = with_level(dim, |l| l.steam.works.sight(part)).unwrap_or((0.0, 0));
@@ -838,6 +851,7 @@ fn gauge_tick(block: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTi
             level_,
             0.0,
             warn as f64,
+            super::readout::range(&event.entity.nbt),
             &mut event.entity.data,
         );
         (signal, changed, data)

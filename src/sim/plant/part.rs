@@ -147,6 +147,8 @@ pub struct Spec {
     pub fluid: Option<Content>,
     /// Creative source: its rate, mB/s.
     pub amount: f64,
+    /// Creative firebox: burns at full rate whatever its boilers' dampers say.
+    pub free: bool,
 }
 
 impl Spec {
@@ -166,6 +168,7 @@ impl Spec {
             rust: Stage::Clean,
             fluid: None,
             amount: 0.0,
+            free: false,
         }
     }
 
@@ -223,6 +226,8 @@ impl Spec {
         b.reverse = false;
         a.amount = 0.0;
         b.amount = 0.0;
+        a.free = false;
+        b.free = false;
         (a.target, a.sens, a.powered, a.wet, a.rust) = (0.0, 0, false, false, Stage::Clean);
         (b.target, b.sens, b.powered, b.wet, b.rust) = (0.0, 0, false, false, Stage::Clean);
         if matches!(a.kind, Kind::Vent { .. }) {

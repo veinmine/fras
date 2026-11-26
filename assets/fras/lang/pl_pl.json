@@ -368,7 +368,6 @@
   "fras.readout.red_line": "Czerwona linia %s",
   "fras.readout.low": "Mało",
   "fras.readout.very_low": "Bardzo mało",
-  "fras.readout.minute_ago": "1 min temu",
   "fras.readout.now": "teraz",
   "fras.creative.now.speed": "Prędkość",
   "fras.creative.now.torque": "Moment",
@@ -379,5 +378,8 @@
   "fras.creative.now.fluid": "Płyn",
   "fras.creative.now.heat": "Daje ciepła",
   "fras.creative.now.boilers": "Grzane kotły",
-  "fras.readout.half_minute_ago": "30 s temu"
+  "fras.readout.ago": "%s min temu",
+  "fras.creative.dampers": "Szybry",
+  "fras.creative.obeyed": "Działają",
+  "fras.creative.ignored": "Pomijane"
 }

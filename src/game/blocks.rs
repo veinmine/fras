@@ -404,6 +404,7 @@ impl Block {
                 spec.amount = get_f64(nbt, "c_rate").unwrap_or(super::creative::DEFAULT_STEAM_RATE);
                 spec.set = get_f64(nbt, "c_bar").unwrap_or(super::creative::DEFAULT_BAR);
             }
+            Block::CreativeFirebox => spec.free = get_bool(nbt, "c_free"),
             Block::CreativeWater => {
                 spec.fluid = Some(if get_bool(nbt, "c_hot") {
                     Content::HotWater

@@ -368,7 +368,6 @@
   "fras.readout.red_line": "Red line %s",
   "fras.readout.low": "Low",
   "fras.readout.very_low": "Very low",
-  "fras.readout.minute_ago": "1 min ago",
   "fras.readout.now": "now",
   "fras.creative.now.speed": "Speed",
   "fras.creative.now.torque": "Torque",
@@ -379,5 +378,8 @@
   "fras.creative.now.fluid": "Fluid",
   "fras.creative.now.heat": "Heat given",
   "fras.creative.now.boilers": "Boilers heated",
-  "fras.readout.half_minute_ago": "30 s ago"
+  "fras.readout.ago": "%s min ago",
+  "fras.creative.dampers": "Dampers",
+  "fras.creative.obeyed": "Obeyed",
+  "fras.creative.ignored": "Ignored"
 }

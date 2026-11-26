@@ -115,14 +115,24 @@ fn settings(block: Block) -> &'static [Setting] {
             max: 1.0,
         },
     ];
-    const FIRE: &[Setting] = &[Setting {
-        label: "fras.creative.heat",
-        key: "c_kw",
-        default: DEFAULT_KW,
-        step: 50.0,
-        big: 250.0,
-        max: MAX_KW,
-    }];
+    const FIRE: &[Setting] = &[
+        Setting {
+            label: "fras.creative.heat",
+            key: "c_kw",
+            default: DEFAULT_KW,
+            step: 50.0,
+            big: 250.0,
+            max: MAX_KW,
+        },
+        Setting {
+            label: "fras.creative.dampers",
+            key: "c_free",
+            default: 0.0,
+            step: 0.0,
+            big: 0.0,
+            max: 1.0,
+        },
+    ];
     match block {
         Block::CreativeEngine => ENGINE,
         Block::LoadBank => LOAD,
@@ -320,6 +330,15 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
                 &[],
             ),
             "c_hot" => tr(host, content_key(if v != 0 { 2 } else { 1 }), &[]),
+            "c_free" => tr(
+                host,
+                if v != 0 {
+                    "fras.creative.ignored"
+                } else {
+                    "fras.creative.obeyed"
+                },
+                &[],
+            ),
             _ => v.to_string(),
         };
         draw.text(&shown, [x + MINUS_X + 16.0, ry + 2.0], grey, false);

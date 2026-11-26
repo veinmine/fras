@@ -1213,9 +1213,9 @@ def main():
     # Creative blocks: one hidden slot, data [setting 0, setting 1, status 0, status 1].
     for name in CREATIVE_BLOCKS:
         write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 4})
-    # Readouts: one hidden slot, data [value, red line, extra, head, 120 samples].
+    # Readouts: one hidden slot, data [value, red line, extra, head, range, 120 samples].
     for name in ["tachometer", "pressure_gauge", "sight_glass"]:
-        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 124})
+        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 125})
     items = dict(ITEMS)
     items.update(regulation_items())
     for name, decl in items.items():

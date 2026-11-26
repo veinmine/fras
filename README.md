@@ -15,7 +15,7 @@ jam; the wrench repairs them.
 ## Debugging tools
 
 Right-click a tachometer, pressure gauge or sight glass for its reading as a number and a chart of the
-last minute (with the red line).
+last 1, 5 or 10 minutes (with the red line).
 
 Creative only (no recipes; their own creative tab; a magenta and black border so they never pass for real
 machines), each with a screen (shift-click the buttons for big steps):
@@ -27,7 +27,7 @@ machines), each with a screen (shift-click the buttons for big steps):
 | Creative steam source | Steam on every face, up to a set pressure (0 to 16 bar) at a set rate. |
 | Creative water source | Water or hot water on every face at a set rate. |
 | Creative drain | Takes any water, hot water or exhaust on every face, without limit. |
-| Creative firebox | Heats its boilers at a set rate (0 to 10 000 kW) with no fuel; bellows and dampers work on it. |
+| Creative firebox | Heats its boilers at a set rate (0 to 10 000 kW) with no fuel; bellows work on it, and dampers too unless set to be ignored. |
 
 ## What's in 0.3
 
