@@ -1,0 +1,13 @@
+{
+  "type": "fras:sawing",
+  "ingredient": "#minecraft:planks",
+  "results": [
+    {
+      "id": "minecraft:stick",
+      "count": 3
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 3.0,
+  "water": 0.0
+}

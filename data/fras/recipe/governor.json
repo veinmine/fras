@@ -3,12 +3,12 @@
   "category": "misc",
   "pattern": [
     "I I",
-    " S ",
+    " G ",
     "PVP"
   ],
   "key": {
     "I": "minecraft:iron_ingot",
-    "S": "fras:iron_shaft",
+    "G": "fras:iron_gear",
     "P": "fras:iron_plate",
     "V": "fras:manual_valve"
   },

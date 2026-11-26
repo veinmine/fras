@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "PPP",
+    "PTP",
     "P P",
-    "PPP"
+    "PTP"
   ],
   "key": {
-    "P": "fras:iron_plate"
+    "P": "fras:iron_plate",
+    "T": "fras:rivet"
   },
   "result": {
     "id": "fras:iron_boiler",

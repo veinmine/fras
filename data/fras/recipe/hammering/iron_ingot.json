@@ -1,0 +1,12 @@
+{
+  "type": "fras:hammering",
+  "ingredient": "minecraft:iron_ingot",
+  "results": [
+    {
+      "id": "fras:iron_plate"
+    }
+  ],
+  "revolutions": 2.0,
+  "load": 8.0,
+  "water": 0.0
+}

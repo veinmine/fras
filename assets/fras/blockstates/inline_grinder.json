@@ -1,0 +1,151 @@
+{
+  "variants": {
+    "facing=north,half=upper,socket=north": {
+      "model": "fras:block/inline_grinder"
+    },
+    "facing=north,half=lower,socket=north": {
+      "model": "fras:block/machine_drive"
+    },
+    "facing=north,half=upper,socket=south": {
+      "model": "fras:block/inline_grinder"
+    },
+    "facing=north,half=lower,socket=south": {
+      "model": "fras:block/machine_drive",
+      "y": 180
+    },
+    "facing=north,half=upper,socket=west": {
+      "model": "fras:block/inline_grinder"
+    },
+    "facing=north,half=lower,socket=west": {
+      "model": "fras:block/machine_drive",
+      "y": 270
+    },
+    "facing=north,half=upper,socket=east": {
+      "model": "fras:block/inline_grinder"
+    },
+    "facing=north,half=lower,socket=east": {
+      "model": "fras:block/machine_drive",
+      "y": 90
+    },
+    "facing=north,half=upper,socket=down": {
+      "model": "fras:block/inline_grinder"
+    },
+    "facing=north,half=lower,socket=down": {
+      "model": "fras:block/machine_drive_down"
+    },
+    "facing=east,half=upper,socket=north": {
+      "model": "fras:block/inline_grinder",
+      "y": 90
+    },
+    "facing=east,half=lower,socket=north": {
+      "model": "fras:block/machine_drive"
+    },
+    "facing=east,half=upper,socket=south": {
+      "model": "fras:block/inline_grinder",
+      "y": 90
+    },
+    "facing=east,half=lower,socket=south": {
+      "model": "fras:block/machine_drive",
+      "y": 180
+    },
+    "facing=east,half=upper,socket=west": {
+      "model": "fras:block/inline_grinder",
+      "y": 90
+    },
+    "facing=east,half=lower,socket=west": {
+      "model": "fras:block/machine_drive",
+      "y": 270
+    },
+    "facing=east,half=upper,socket=east": {
+      "model": "fras:block/inline_grinder",
+      "y": 90
+    },
+    "facing=east,half=lower,socket=east": {
+      "model": "fras:block/machine_drive",
+      "y": 90
+    },
+    "facing=east,half=upper,socket=down": {
+      "model": "fras:block/inline_grinder",
+      "y": 90
+    },
+    "facing=east,half=lower,socket=down": {
+      "model": "fras:block/machine_drive_down"
+    },
+    "facing=south,half=upper,socket=north": {
+      "model": "fras:block/inline_grinder",
+      "y": 180
+    },
+    "facing=south,half=lower,socket=north": {
+      "model": "fras:block/machine_drive"
+    },
+    "facing=south,half=upper,socket=south": {
+      "model": "fras:block/inline_grinder",
+      "y": 180
+    },
+    "facing=south,half=lower,socket=south": {
+      "model": "fras:block/machine_drive",
+      "y": 180
+    },
+    "facing=south,half=upper,socket=west": {
+      "model": "fras:block/inline_grinder",
+      "y": 180
+    },
+    "facing=south,half=lower,socket=west": {
+      "model": "fras:block/machine_drive",
+      "y": 270
+    },
+    "facing=south,half=upper,socket=east": {
+      "model": "fras:block/inline_grinder",
+      "y": 180
+    },
+    "facing=south,half=lower,socket=east": {
+      "model": "fras:block/machine_drive",
+      "y": 90
+    },
+    "facing=south,half=upper,socket=down": {
+      "model": "fras:block/inline_grinder",
+      "y": 180
+    },
+    "facing=south,half=lower,socket=down": {
+      "model": "fras:block/machine_drive_down"
+    },
+    "facing=west,half=upper,socket=north": {
+      "model": "fras:block/inline_grinder",
+      "y": 270
+    },
+    "facing=west,half=lower,socket=north": {
+      "model": "fras:block/machine_drive"
+    },
+    "facing=west,half=upper,socket=south": {
+      "model": "fras:block/inline_grinder",
+      "y": 270
+    },
+    "facing=west,half=lower,socket=south": {
+      "model": "fras:block/machine_drive",
+      "y": 180
+    },
+    "facing=west,half=upper,socket=west": {
+      "model": "fras:block/inline_grinder",
+      "y": 270
+    },
+    "facing=west,half=lower,socket=west": {
+      "model": "fras:block/machine_drive",
+      "y": 270
+    },
+    "facing=west,half=upper,socket=east": {
+      "model": "fras:block/inline_grinder",
+      "y": 270
+    },
+    "facing=west,half=lower,socket=east": {
+      "model": "fras:block/machine_drive",
+      "y": 90
+    },
+    "facing=west,half=upper,socket=down": {
+      "model": "fras:block/inline_grinder",
+      "y": 270
+    },
+    "facing=west,half=lower,socket=down": {
+      "model": "fras:block/machine_drive_down"
+    }
+  }
+}

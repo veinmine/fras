@@ -9,7 +9,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use super::*;
 use crate::sim::fluid::route;
-use crate::sim::geom::Dir;
+use crate::sim::geom::{Axis, Dir};
 use crate::sim::multi::{boiler, engine, shape};
 use crate::sim::rot::View;
 use crate::sim::steam::PIPE_STEAM;
@@ -418,6 +418,9 @@ impl Works {
                     None
                 }
             }
+            // The top block's left and right sides (machines spec 4.3).
+            Kind::Washer => (face.axis() != Axis::Y && face.axis() != s.dir.axis())
+                .then_some(Role::Fit(End::Wash(pos))),
             Kind::Pump => (face == s.dir.opposite()).then_some(Role::Fit(End::Pump(pos))),
             Kind::Source => s.fluid.map(|c| Role::Fit(End::Source(pos, c))),
             Kind::Void => Some(Role::Fit(End::Void(pos))),
@@ -541,6 +544,7 @@ impl Works {
                     | Kind::Exchanger
                     | Kind::Drain
                     | Kind::Grinder
+                    | Kind::Washer
                     | Kind::Source
                     | Kind::Void
             )
@@ -761,6 +765,7 @@ impl Works {
             let consumer = match (e, net.content) {
                 (End::Vent(_) | End::Cylinder(_), Some(Content::Steam)) => true,
                 (End::Feed(_) | End::Tank(_) | End::Drain(_), Some(c)) => c.is_liquid(),
+                (End::Wash(_), Some(Content::Water | Content::HotWater)) => true,
                 (End::CoolIn(_), Some(Content::Water)) => true,
                 (End::ExIn(_), Some(Content::HotWater | Content::Exhaust)) => true,
                 (End::Void(_), Some(c)) => c != Content::Steam,
@@ -968,6 +973,7 @@ impl Works {
                     | Kind::Exchanger
                     | Kind::Drain
                     | Kind::Grinder
+                    | Kind::Washer
                     | Kind::Source
                     | Kind::Void
             )

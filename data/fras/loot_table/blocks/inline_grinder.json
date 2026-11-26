@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "fras:inline_grinder",
+          "condition": {
+            "type": "minecraft:block_state_property",
+            "block": "fras:inline_grinder",
+            "properties": {
+              "half": "lower"
+            }
+          }
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ],
+  "random_sequence": "fras:blocks/inline_grinder"
+}

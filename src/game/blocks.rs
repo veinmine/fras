@@ -5,6 +5,7 @@ use mod_api::{Compound, Tag};
 
 use crate::sim::fluid::Content;
 use crate::sim::geom::{Axis, Dir, Pos};
+use crate::sim::machine::Machine;
 use crate::sim::multi::shape::Cuboid;
 use crate::sim::plant::{Kind as PlantKind, Saved as PlantSaved, Spec as PlantSpec};
 use crate::sim::rot::{BeltEnd, Jam, Kind, Material, Saved, Shape, Spec};
@@ -51,6 +52,18 @@ pub enum Block {
     CopperRadiator,
     IronRadiator,
     Drain,
+    // ---- 0.4: the factory ----
+    ConveyorBelt,
+    Diverter,
+    BucketElevator,
+    Washer,
+    TripHammer,
+    Lathe,
+    Sawmill,
+    Trommel,
+    IronPulley,
+    LargeIronPulley,
+    InlineGrinder,
     // ---- Creative (debugging) ----
     CreativeEngine,
     LoadBank,
@@ -61,7 +74,7 @@ pub enum Block {
 }
 
 impl Block {
-    pub const ALL: [Block; 42] = [
+    pub const ALL: [Block; 53] = [
         Block::ShaftWood,
         Block::ShaftIron,
         Block::Bearing,
@@ -98,6 +111,17 @@ impl Block {
         Block::CopperRadiator,
         Block::IronRadiator,
         Block::Drain,
+        Block::ConveyorBelt,
+        Block::Diverter,
+        Block::BucketElevator,
+        Block::Washer,
+        Block::TripHammer,
+        Block::Lathe,
+        Block::Sawmill,
+        Block::Trommel,
+        Block::IronPulley,
+        Block::LargeIronPulley,
+        Block::InlineGrinder,
         Block::CreativeEngine,
         Block::LoadBank,
         Block::CreativeSteam,
@@ -145,6 +169,17 @@ impl Block {
             Block::CopperRadiator => "copper_radiator",
             Block::IronRadiator => "iron_radiator",
             Block::Drain => "drain",
+            Block::ConveyorBelt => "conveyor_belt",
+            Block::Diverter => "diverter",
+            Block::BucketElevator => "bucket_elevator",
+            Block::Washer => "washer",
+            Block::TripHammer => "trip_hammer",
+            Block::Lathe => "lathe",
+            Block::Sawmill => "sawmill",
+            Block::Trommel => "trommel",
+            Block::InlineGrinder => "inline_grinder",
+            Block::IronPulley => "iron_pulley",
+            Block::LargeIronPulley => "large_iron_pulley",
             Block::CreativeEngine => "creative_engine",
             Block::LoadBank => "load_bank",
             Block::CreativeSteam => "creative_steam_source",
@@ -185,8 +220,63 @@ impl Block {
             Block::Bellows => Kind::Bellows,
             Block::CreativeEngine => Kind::Motor,
             Block::LoadBank => Kind::LoadBank,
+            Block::IronPulley => Kind::IronPulley { large: false },
+            Block::LargeIronPulley => Kind::IronPulley { large: true },
+            // A belt block is a part only where a shaft drives it (its
+            // `drive` property, logistics 3.3); an elevator only at its head.
+            Block::ConveyorBelt => Kind::BeltDrive {
+                share: crate::sim::belt::BLOCKS_PER_DRIVE as u8,
+            },
+            Block::BucketElevator => Kind::Elevator { height: 16 },
+            b => Kind::Machine(b.machine().filter(|m| *m != Machine::Grinder)?),
+        })
+    }
+
+    /// The 0.4 machine (or the grinder) it is.
+    pub fn machine(self) -> Option<Machine> {
+        Some(match self {
+            Block::Grinder => Machine::Grinder,
+            Block::Washer => Machine::Washer,
+            Block::TripHammer => Machine::TripHammer,
+            Block::Lathe => Machine::Lathe,
+            Block::Sawmill => Machine::Sawmill,
+            Block::Trommel => Machine::Trommel,
+            Block::InlineGrinder => Machine::InlineGrinder,
             _ => return None,
         })
+    }
+
+    /// The 0.4 machines with an info screen (not the grinder, which has its own).
+    pub fn is_machine04(self) -> bool {
+        self.is_line_machine() || self == Block::Trommel
+    }
+
+    /// The two-block line machines (machines spec 2.3).
+    pub fn is_line_machine(self) -> bool {
+        matches!(
+            self,
+            Block::Washer
+                | Block::TripHammer
+                | Block::Lathe
+                | Block::Sawmill
+                | Block::InlineGrinder
+        )
+    }
+
+    pub fn is_pulley(self) -> bool {
+        matches!(
+            self,
+            Block::Pulley | Block::LargePulley | Block::IronPulley | Block::LargeIronPulley
+        )
+    }
+
+    pub fn is_large_pulley(self) -> bool {
+        matches!(self, Block::LargePulley | Block::LargeIronPulley)
+    }
+
+    /// Belt blocks: they carry items in a line (logistics 3).
+    pub fn is_belt(self) -> bool {
+        matches!(self, Block::ConveyorBelt | Block::Diverter)
     }
 
     /// Whether its block entity ticks: sources, machines and the tachometer
@@ -205,6 +295,7 @@ impl Block {
                 | Block::FurnaceDamper
                 | Block::EmergencyValve
         ) || self.is_creative()
+            || self.is_machine04()
     }
 
     /// The creative-only debugging blocks (no recipes).
@@ -234,6 +325,7 @@ impl Block {
                 | Block::FurnaceDamper
                 | Block::EmergencyValve
         ) || self.is_creative()
+            || self.is_machine04()
     }
 
     /// Whether it is a part of the steam plant (spec 2 to 4).
@@ -268,6 +360,7 @@ impl Block {
             Block::IronRadiator => PlantKind::Radiator { copper: false },
             Block::Drain => PlantKind::Drain,
             Block::Grinder => PlantKind::Grinder,
+            Block::Washer => PlantKind::Washer,
             Block::CreativeSteam | Block::CreativeWater => PlantKind::Source,
             Block::CreativeDrain => PlantKind::Void,
             Block::CreativeFirebox => PlantKind::Firebox,
@@ -298,6 +391,8 @@ impl Block {
                 | Block::HeatExchanger
                 | Block::IronRadiator
                 | Block::FurnaceDamper
+                | Block::IronPulley
+                | Block::LargeIronPulley
         )
     }
 
@@ -316,7 +411,7 @@ impl Block {
     /// Whether the plant draws it in `steam_draw` (the steam parts that move
     /// or show a reading); the grinder is a plant part but drawn as a machine.
     pub fn steam_drawn(self) -> bool {
-        (self.is_plant() && self != Block::Grinder && !self.is_creative())
+        (self.is_plant() && !matches!(self, Block::Grinder | Block::Washer) && !self.is_creative())
             || matches!(self, Block::PressureGauge | Block::SightGlass)
     }
 
@@ -338,6 +433,10 @@ impl Block {
         nbt: &Compound,
     ) -> Option<PlantSpec> {
         let kind = self.plant_kind()?;
+        // The washer's tank is in its top block (machines spec 4.3).
+        if self == Block::Washer && get("half").as_deref() != Some("upper") {
+            return None;
+        }
         let flag = |key: &str| get(key).as_deref() == Some("true");
         let dir = |key: &str, default: Dir| {
             get(key)
@@ -402,7 +501,7 @@ impl Block {
             Block::Bellows | Block::CopperRadiator | Block::IronRadiator | Block::Drain => {
                 spec.dir = dir("facing", Dir::North);
             }
-            Block::Grinder => spec.dir = dir("facing", Dir::North),
+            Block::Grinder | Block::Washer => spec.dir = dir("facing", Dir::North),
             Block::CreativeSteam => {
                 spec.fluid = Some(Content::Steam);
                 spec.amount = get_f64(nbt, "c_rate").unwrap_or(super::creative::DEFAULT_STEAM_RATE);
@@ -457,7 +556,26 @@ impl Block {
             | Block::Clutch
             | Block::Pulley
             | Block::LargePulley
+            | Block::IronPulley
+            | Block::LargeIronPulley
             | Block::WaterWheel => Shape::Inline(axis()),
+            Block::ConveyorBelt | Block::BucketElevator => {
+                Shape::Socket(get("drive").as_deref().and_then(Dir::from_name)?)
+            }
+            // The drive (lower half) is the part; the machine on top isn't.
+            b if b.is_line_machine() => {
+                if get("half").as_deref() == Some("upper") {
+                    return None;
+                }
+                Shape::Socket(dir("socket", Dir::Down))
+            }
+            // A formed trommel's part is the block with the socket (8.2).
+            Block::Trommel => {
+                if get("part").is_none_or(|p| p == "none") {
+                    return None;
+                }
+                Shape::Socket(get("socket").as_deref().and_then(Dir::from_name)?)
+            }
             Block::BevelGearWood | Block::BevelGearIron => {
                 let input = dir("input", Dir::West);
                 let mut output = dir("output", Dir::South);
@@ -501,8 +619,11 @@ impl Block {
         if self == Block::Clutch {
             spec.engaged = get("powered").as_deref() != Some("true");
         }
-        if matches!(self, Block::Pulley | Block::LargePulley) {
+        if self.is_pulley() {
             spec.belt = belt(nbt);
+        }
+        if self == Block::BucketElevator && get("part").as_deref() != Some("head") {
+            return None;
         }
         if self == Block::Grinder {
             spec.cooled = get_bool(nbt, "cooled");
@@ -732,6 +853,20 @@ pub const CLIENT_KEYS: &[&str] = &[
     "cooled",
     "target",
     "sens",
+    // 0.4: belts (the controller's line snapshot) and machines
+    "bl_v",
+    "bl_t",
+    "bl_items",
+    "bl_path",
+    "bl_stop",
+    "bl_ctl",
+    "working",
+    "bl_elev",
+    "m_item",
+    "m_hold",
+    "m_hit",
+    "drum",
+    "tank",
 ];
 
 #[cfg(test)]

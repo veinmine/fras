@@ -113,6 +113,7 @@ pub fn tick(host: &mut dyn ServerHost, event: &mut BlockEntityTickEvent<'_>) {
                     stack.shrink(1)
                 };
                 items_changed = true;
+                super::debug::count("fuel", 1);
             }
         }
     }

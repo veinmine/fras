@@ -16,7 +16,7 @@ use crate::sim::geom::{Axis, Dir, Pos};
 use crate::sim::rot::part::{BELT_MAX_DISTANCE, CRANK_STALL, CRANK_TOP, WHEEL_TOP};
 use crate::sim::rot::{BeltEnd, Jam, Kind, Material, Shape};
 
-fn tr(key: &str, args: Vec<String>) -> Text {
+pub(crate) fn tr(key: &str, args: Vec<String>) -> Text {
     Text::translate(key, args.into_iter().map(Text::literal).collect())
 }
 
@@ -80,7 +80,19 @@ pub fn wrench(
         pos = pos.offset(facing.opposite());
         block = block_at(&*host, level, pos)?;
     }
-    if player.is_secondary_use_active(&*host) == Some(true) {
+    let sneaking = player.is_secondary_use_active(&*host) == Some(true);
+    // Belts and elevators: the line answers (logistics 3.2, 3.5, 8.1, 9, 11).
+    if block.is_belt() || block == Block::BucketElevator {
+        return Some(belt_wrench(host, player, level, dim, pos, block, sneaking));
+    }
+    // A line machine's top and a trommel's other blocks stand for the
+    // block that is the part on the network (machines spec 2.3, 8.2).
+    if block.is_machine04()
+        && let Some(part) = super::machines::part_pos(&*host, level, pos, block)
+    {
+        pos = part;
+    }
+    if sneaking {
         for line in inspect(&*host, level, dim, pos, block) {
             tell(host, player, line);
         }
@@ -158,6 +170,12 @@ pub fn repair_cost(block: Block) -> Vec<(&'static str, u32)> {
         | Block::CreativeWater
         | Block::CreativeDrain
         | Block::CreativeFirebox => vec![],
+        // 0.4 (logistics 3.5, 8.2; machines 13.1; progression 4.4). A belt
+        // takes leather or wool, which `belts::repair` handles itself.
+        Block::ConveyorBelt | Block::Diverter => vec![("minecraft:leather", 1)],
+        Block::BucketElevator => vec![("minecraft:iron_nugget", 2)],
+        Block::IronPulley | Block::LargeIronPulley => vec![("minecraft:iron_nugget", 1)],
+        b => b.machine().map(|m| m.repair().to_vec()).unwrap_or_default(),
     }
 }
 
@@ -181,10 +199,13 @@ pub fn cost_text(cost: &[(&str, u32)]) -> Text {
         if i > 0 {
             t = t.append(Text::literal(", "));
         }
-        let name = id.replace(':', ".");
+        let key = match id.strip_prefix('#') {
+            Some(tag) => format!("fras.tag.{}", tag.replace(':', ".")),
+            None => format!("item.{}", id.replace(':', ".")),
+        };
         t = t
             .append(Text::literal(format!("{n} × ")))
-            .append(Text::translate(format!("item.{name}"), vec![]));
+            .append(Text::translate(key, vec![]));
     }
     t
 }
@@ -276,29 +297,75 @@ fn repair_plant(
     InteractionResult::Success
 }
 
+/// The player's stacks that count as `id`: an item, or a tag FRAS's costs
+/// name (`#minecraft:planks`, `#minecraft:wool`, read by the item's name).
+pub(crate) fn carried_id(
+    host: &dyn mod_api::Host,
+    player: PlayerRef,
+    id: &str,
+) -> Vec<(u32, ItemStack)> {
+    let suffix = match id {
+        "#minecraft:planks" => Some("_planks"),
+        "#minecraft:wool" => Some("_wool"),
+        _ => None,
+    };
+    match suffix {
+        Some(suffix) => player
+            .inventory_slots(host)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|(_, s)| {
+                let name = s.item().id(host);
+                name.starts_with("minecraft:") && name.ends_with(suffix)
+            })
+            .collect(),
+        None => cost_key(id).map_or_else(Vec::new, |k| carried(host, player, k)),
+    }
+}
+
+/// Take `count` of what `id` names from the player. False (and nothing
+/// taken) if they don't have that many.
+pub(crate) fn take_id(host: &mut dyn ServerHost, player: PlayerRef, id: &str, count: u32) -> bool {
+    let slots = carried_id(&*host, player, id);
+    if slots.iter().map(|(_, s)| s.count()).sum::<u32>() < count {
+        return false;
+    }
+    let mut left = count;
+    for (slot, stack) in slots {
+        if left == 0 {
+            break;
+        }
+        let n = stack.count().min(left);
+        left -= n;
+        let _ = player.set_inventory_slot(host, slot, stack.shrink(n));
+    }
+    true
+}
+
 /// Take a part's repair cost from the player (nothing in creative). False,
 /// with a message, if they don't carry it.
 fn pay(host: &mut dyn ServerHost, player: PlayerRef, block: Block) -> bool {
-    let cost = repair_cost(block);
+    pay_cost(host, player, &repair_cost(block))
+}
+
+/// Take `cost` from the player (nothing in creative). False, with a
+/// message, if they don't carry it.
+pub(crate) fn pay_cost(host: &mut dyn ServerHost, player: PlayerRef, cost: &[(&str, u32)]) -> bool {
     if !creative(&*host, player) {
         let missing = cost.iter().any(|(id, n)| {
-            cost_key(id).is_none_or(|k| {
-                carried(&*host, player, k)
-                    .iter()
-                    .map(|(_, s)| s.count())
-                    .sum::<u32>()
-                    < *n
-            })
+            carried_id(&*host, player, id)
+                .iter()
+                .map(|(_, s)| s.count())
+                .sum::<u32>()
+                < *n
         });
         if missing {
-            let line = Text::translate("fras.repair.missing", vec![cost_text(&cost)]);
+            let line = Text::translate("fras.repair.missing", vec![cost_text(cost)]);
             bar(host, player, line);
             return false;
         }
-        for (id, n) in &cost {
-            if let Some(k) = cost_key(id) {
-                take(host, player, k, *n);
-            }
+        for (id, n) in cost {
+            take_id(host, player, id, *n);
         }
     }
     true
@@ -374,7 +441,8 @@ fn configure(
                 .unwrap_or(Dir::North);
             set_property(host, level, pos, "facing", socket.clockwise().name())
         }
-        Block::Pulley | Block::LargePulley => {
+        b if b.is_machine04() => super::machines::cycle_socket(host, level, dim, pos, b),
+        b if b.is_pulley() => {
             let Some(entity) = host.block_entity(level, pos.to_array()) else {
                 return false;
             };
@@ -793,7 +861,7 @@ fn belt(host: &mut dyn ServerHost, event: &UseOnEvent<'_>) -> Option<Interaction
     let (player, level, dim) = context(&*host, event.player)?;
     let pos = Pos::from_array(event.pos);
     let (block, spec, nbt) = read_part(&*host, level, pos)?;
-    if !matches!(block, Block::Pulley | Block::LargePulley) {
+    if !block.is_pulley() {
         return None;
     }
     if blocks::belt(&nbt).is_some() {
@@ -808,9 +876,8 @@ fn belt(host: &mut dyn ServerHost, event: &UseOnEvent<'_>) -> Option<Interaction
         return Some(InteractionResult::Success);
     };
     // The first pulley must still be a free pulley.
-    let first = read_part(&*host, level, a).filter(|(b, _, n)| {
-        matches!(b, Block::Pulley | Block::LargePulley) && blocks::belt(n).is_none()
-    });
+    let first =
+        read_part(&*host, level, a).filter(|(b, _, n)| b.is_pulley() && blocks::belt(n).is_none());
     let Some((block_a, spec_a, _)) = first else {
         with(|s| s.belt_starts.insert(event.player, (dim, pos)));
         bar(host, player, tr("fras.belt.start", vec![]));
@@ -836,8 +903,8 @@ fn belt(host: &mut dyn ServerHost, event: &UseOnEvent<'_>) -> Option<Interaction
         let _ = player.set_inventory_slot(host, slot, event.stack.clone().shrink(cost));
     }
     for (here, there, big) in [
-        (a, pos, block == Block::LargePulley),
-        (pos, a, block_a == Block::LargePulley),
+        (a, pos, block.is_large_pulley()),
+        (pos, a, block_a.is_large_pulley()),
     ] {
         let mut c = mod_api::Compound::new();
         blocks::put_belt(
@@ -905,6 +972,226 @@ impl ItemPart for Tooltip {
                 .push((Text::translate("tooltip.fras.shift", vec![]), 0x6060_60FF));
         }
     }
+}
+
+// ---- Belts and elevators ------------------------------------------------------
+
+/// The wrench on a belt, diverter or elevator: sneak for the overlay;
+/// otherwise repair a jammed line, swap a diverter's flap, turn an
+/// elevator's outlet or reverse a belt line.
+fn belt_wrench(
+    host: &mut dyn ServerHost,
+    player: PlayerRef,
+    level: LevelRef,
+    dim: Dim,
+    pos: Pos,
+    block: Block,
+    sneaking: bool,
+) -> InteractionResult {
+    if sneaking {
+        for line in belt_inspect(&*host, level, dim, pos, block) {
+            tell(host, player, line);
+        }
+        return InteractionResult::Success;
+    }
+    let (blocks_of_line, drives, kind) = with_level(dim, |l| {
+        l.belts
+            .line_at(pos)
+            .map(|(ls, _)| (ls.line.blocks.clone(), ls.drives.clone(), Some(ls.kind)))
+            .unwrap_or((vec![pos], Vec::new(), None))
+    });
+    let jammed: Vec<(Pos, Jam)> = with_level(dim, |l| {
+        drives
+            .iter()
+            .filter_map(|d| l.mech.part(*d).and_then(|p| p.jam).map(|j| (*d, j)))
+            .collect()
+    });
+    if let Some((_, jam)) = jammed.first().copied() {
+        // A belt takes 1 leather or 1 wool (logistics 3.5).
+        let cost: Vec<(&str, u32)> = if block == Block::BucketElevator {
+            repair_cost(block)
+        } else if !carried_id(&*host, player, "minecraft:leather").is_empty() {
+            vec![("minecraft:leather", 1)]
+        } else {
+            vec![("#minecraft:wool", 1)]
+        };
+        if !pay_cost(host, player, &cost) {
+            return InteractionResult::Fail;
+        }
+        with_level(dim, |l| {
+            for (d, _) in &jammed {
+                l.mech.repair(*d);
+            }
+        });
+        effects::sound(host, level, pos, "minecraft:block.anvil.use", 0.5, 1.5);
+        let line = Text::translate(
+            "fras.repair.done",
+            vec![Text::translate(format!("fras.jam.{}", jam.name()), vec![])],
+        );
+        bar(host, player, line);
+        return InteractionResult::Success;
+    }
+    let prop = |host: &dyn mod_api::Host, q: Pos, key: &str| server::property(host, level, q, key);
+    let done = match block {
+        Block::Diverter => {
+            let flap = if prop(&*host, pos, "flap").as_deref() == Some("right") {
+                "left"
+            } else {
+                "right"
+            };
+            set_property(host, level, pos, "flap", flap)
+        }
+        Block::BucketElevator => {
+            // The head's outlet turns to the next horizontal side that isn't
+            // its drive (logistics 8.1).
+            let head = match kind {
+                Some(_) => *blocks_of_line.last().unwrap_or(&pos),
+                None => pos,
+            };
+            let facing = prop(&*host, head, "facing")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::North);
+            let drive = prop(&*host, head, "drive")
+                .as_deref()
+                .and_then(Dir::from_name);
+            let mut next = facing.clockwise();
+            if Some(next) == drive {
+                next = next.clockwise();
+            }
+            set_property(host, level, head, "facing", next.name())
+        }
+        _ => {
+            // Reverse the whole line's heading (logistics 3.2).
+            let mut any = false;
+            for b in &blocks_of_line {
+                if let Some(f) = prop(&*host, *b, "facing")
+                    .as_deref()
+                    .and_then(Dir::from_name)
+                {
+                    any |= set_property(host, level, *b, "facing", f.opposite().name());
+                }
+            }
+            any
+        }
+    };
+    if done {
+        effects::sound(host, level, pos, "minecraft:block.chain.place", 0.6, 1.4);
+        InteractionResult::Success
+    } else {
+        InteractionResult::Pass
+    }
+}
+
+/// The overlay of a belt line, elevator or diverter (logistics 11).
+pub fn belt_inspect(
+    host: &dyn mod_api::Host,
+    level: LevelRef,
+    dim: Dim,
+    pos: Pos,
+    block: Block,
+) -> Vec<Text> {
+    use super::belts::{EndState, LineKind};
+    use crate::sim::belt;
+    let mut lines = vec![
+        Text::literal("— ")
+            .append(Text::translate(
+                format!("block.fras.{}", block.name()),
+                vec![],
+            ))
+            .append(Text::literal(" —")),
+    ];
+    let info = with_level(dim, |l| {
+        let unformed = l.belts.unformed.get(&pos).copied();
+        let line = l.belts.line_at(pos).map(|(ls, _)| {
+            let rpm = ls
+                .drives
+                .first()
+                .and_then(|d| l.mech.speed(*d))
+                .map_or(0.0, |s| s.0);
+            (ls.clone(), rpm)
+        });
+        (unformed, line)
+    });
+    let (unformed, line) = info;
+    if let Some(why) = unformed {
+        lines.push(tr(&format!("fras.belt.unformed.{why}"), vec![]));
+        return lines;
+    }
+    let Some((ls, rpm)) = line else {
+        lines.push(tr("fras.inspect.not_connected", vec![]));
+        return lines;
+    };
+    let bps = ls.v.abs() * 20.0;
+    lines.push(tr("fras.belt.speed", vec![num(bps), num(rpm.abs())]));
+    lines.push(tr(
+        "fras.belt.items",
+        vec![ls.line.count().to_string(), ls.line.capacity().to_string()],
+    ));
+    lines.push(tr("fras.belt.load", vec![num(ls.load)]));
+    match ls.kind {
+        LineKind::Belt => {
+            lines.push(tr(
+                "fras.belt.drives",
+                vec![
+                    ls.drives.len().to_string(),
+                    belt::drives_needed(ls.line.len()).to_string(),
+                ],
+            ));
+            lines.push(tr("fras.belt.length", vec![ls.line.len().to_string()]));
+            let way = if ls.v < -1e-9 {
+                "fras.belt.backwards"
+            } else {
+                "fras.belt.forward"
+            };
+            lines.push(tr(way, vec![]));
+        }
+        LineKind::Elevator { outlet } => {
+            lines.push(tr("fras.belt.height", vec![ls.line.len().to_string()]));
+            let head = *ls.line.blocks.last().unwrap_or(&pos);
+            let q = head.offset(outlet);
+            lines.push(tr(
+                "fras.belt.outlet",
+                vec![q.x.to_string(), q.y.to_string(), q.z.to_string()],
+            ));
+        }
+    }
+    let end = match &ls.end {
+        EndState::Idle => tr("fras.belt.end.idle", vec![]),
+        EndState::Delivering(q) => tr(
+            "fras.belt.end.delivering",
+            vec![q.x.to_string(), q.y.to_string(), q.z.to_string()],
+        ),
+        EndState::Open => tr("fras.belt.end.open", vec![]),
+        EndState::BlockedSolid => tr("fras.belt.end.solid", vec![]),
+        EndState::BlockedFull => tr("fras.belt.end.full", vec![]),
+    };
+    lines.push(end);
+    if let Some(stop) = ls.stop {
+        lines.push(tr(
+            &format!("fras.belt.stop.{}", super::belts::stop_name(stop)),
+            vec![],
+        ));
+    }
+    if block == Block::Diverter {
+        let powered = server::property(host, level, pos, "powered").as_deref() == Some("true");
+        let key = if powered {
+            "fras.belt.diverter.on"
+        } else {
+            "fras.belt.diverter.off"
+        };
+        let heading = server::property(host, level, pos, "facing")
+            .as_deref()
+            .and_then(Dir::from_name)
+            .unwrap_or(Dir::North);
+        let out = super::belts::flap_dir(host, level, pos, heading).opposite();
+        let q = pos.offset(out);
+        lines.push(tr(
+            key,
+            vec![q.x.to_string(), q.y.to_string(), q.z.to_string()],
+        ));
+    }
+    lines
 }
 
 #[cfg(test)]

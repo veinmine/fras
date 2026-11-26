@@ -18,7 +18,7 @@ use game::parts::{BlockHooks, EntityHooks};
 pub const ID: &str = "fras";
 
 /// FRAS's items that are not blocks.
-pub const ITEMS: [&str; 11] = [
+pub const ITEMS: [&str; 17] = [
     "wrench",
     "leather_belt",
     "hand_hammer",
@@ -30,11 +30,18 @@ pub const ITEMS: [&str; 11] = [
     "rust_flakes",
     "red_oxide_pigment",
     "red_oxide_paint",
+    // 0.4 (progression spec 3)
+    "iron_rod",
+    "iron_gear",
+    "rivet",
+    "iron_dust",
+    "copper_dust",
+    "gold_dust",
 ];
 
 /// The rusting blocks, each with a pre-painted item `painted_<name>` that
 /// places it painted (rust spec 7.2).
-pub const PAINTED: [&str; 19] = [
+pub const PAINTED: [&str; 21] = [
     "iron_shaft",
     "bearing",
     "clutch",
@@ -54,6 +61,8 @@ pub const PAINTED: [&str; 19] = [
     "heat_exchanger",
     "iron_radiator",
     "furnace_damper",
+    "iron_pulley",
+    "large_iron_pulley",
 ];
 
 #[derive(Default)]
@@ -72,6 +81,12 @@ impl Hooks for Fras {
             r.block_part(key, BlockHooks(block));
             if block == Block::Grinder {
                 r.block_container(&key, game::grinder::container());
+            }
+            if block.is_machine04() {
+                r.block_container(&key, game::machines::container(block));
+            }
+            if block.is_belt() || block == Block::BucketElevator {
+                r.block_container(&key, game::belts::inbox());
             }
             if block == Block::Firebox {
                 r.block_container(&key, game::firebox::container());
@@ -95,6 +110,16 @@ impl Hooks for Fras {
         r.menu_part("fras:firebox", game::firebox::FuelSlot);
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
+        for m in crate::sim::machine::Machine::ALL {
+            // The inline grinder shares the grinder's recipe type.
+            if m.recipe_type() == Some("fras:grinding") {
+                continue;
+            }
+            if let Some(kind) = m.recipe_type() {
+                r.register_recipe_type(kind);
+                r.register_raw_recipe_serializer(kind, kind);
+            }
+        }
         let wrench = r.item_key("fras:wrench");
         let leather_belt = r.item_key("fras:leather_belt");
         r.item_part(wrench, game::tools::Wrench);
@@ -177,12 +202,14 @@ impl Hooks for Fras {
     fn server_about_to_start(&self, _: &mut dyn ServerHost, _: &mut ServerAboutToStartEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::machines::clear();
         game::firebox::clear();
     }
 
     fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
         game::server::clear();
         game::grinder::clear();
+        game::machines::clear();
         game::firebox::clear();
     }
 
@@ -229,6 +256,7 @@ impl Hooks for Fras {
     fn tags_updated(&self, host: HostSide<'_>, _: &mut TagsUpdatedEvent) {
         if let HostSide::Server(host) = host {
             game::grinder::load(&*host);
+            game::machines::load(&*host);
             game::firebox::load(&*host);
         }
     }
@@ -261,6 +289,37 @@ impl Hooks for Fras {
     }
 
     /// After each level's tick: run its networks.
+    /// The debug tools' commands (`/fras ...`, operators).
+    fn register_commands(
+        &self,
+        _: &mut dyn ServerHost,
+        event: &mut mod_api::RegisterCommandsEvent<'_>,
+    ) {
+        event.commands.extend(game::debug::commands());
+    }
+
+    fn run_mod_command(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut mod_api::RunModCommandEvent<'_>,
+    ) -> Flow {
+        if game::debug::run(host, event.source, event.command) {
+            Flow::Cancel
+        } else {
+            Flow::Continue
+        }
+    }
+
+    /// Belt items are written to their blocks when the level saves
+    /// (logistics 10.2).
+    fn level_save(&self, host: &mut dyn ServerHost, event: &mut mod_api::LevelSaveEvent<'_>) {
+        if let Some(level) = host.level(event.dimension)
+            && let Some(dim) = game::server::dim_of(&*host, level)
+        {
+            game::belts::save(host, level, dim);
+        }
+    }
+
     fn level_tick_post(&self, host: HostSide, event: &mut LevelTickPostEvent) {
         if let HostSide::Server(host) = host {
             game::server::level_tick(host, event.level);

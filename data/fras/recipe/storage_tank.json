@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "PIP",
+    "PTP",
     "I I",
-    "PIP"
+    "PTP"
   ],
   "key": {
     "P": "fras:iron_plate",
+    "T": "fras:rivet",
     "I": "minecraft:iron_ingot"
   },
   "result": {

@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    "#fras:crushed_ores",
+    "minecraft:gravel",
+    "minecraft:flint",
+    "minecraft:iron_nugget",
+    "minecraft:gold_nugget",
+    "minecraft:copper_nugget",
+    "minecraft:redstone",
+    "minecraft:bone_meal",
+    "minecraft:clay_ball",
+    "minecraft:coal",
+    "minecraft:charcoal",
+    "fras:rust_flakes",
+    "fras:red_oxide_pigment",
+    "minecraft:raw_iron",
+    "minecraft:raw_copper",
+    "minecraft:raw_gold"
+  ]
+}

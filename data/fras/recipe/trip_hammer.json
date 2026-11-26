@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CS ",
+    "LBL",
+    "PPP"
+  ],
+  "key": {
+    "C": "fras:conveyor_belt",
+    "S": "fras:wooden_shaft",
+    "L": "#minecraft:logs",
+    "B": "minecraft:iron_block",
+    "P": "fras:iron_plate"
+  },
+  "result": {
+    "id": "fras:trip_hammer",
+    "count": 1
+  }
+}

@@ -1,0 +1,904 @@
+{
+  "variants": {
+    "drive=none,facing=north,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=north,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=north,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=north,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=north,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=none,facing=north,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=north,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=north,facing=north,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=north,facing=north,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=south,facing=north,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=south,facing=north,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=west,facing=north,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=west,facing=north,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter"
+    },
+    "drive=east,facing=north,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=east,facing=north,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right"
+    },
+    "drive=none,facing=east,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=east,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=north,facing=east,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=south,facing=east,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=west,facing=east,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=east,facing=east,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 90
+    },
+    "drive=none,facing=south,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=south,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=north,facing=south,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=south,facing=south,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=west,facing=south,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=east,facing=south,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 180
+    },
+    "drive=none,facing=west,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=false,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=true,slope=flat": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=false,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=true,slope=flat": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=false,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=true,slope=rising": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=false,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=true,slope=rising": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=none,facing=west,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=north,facing=west,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=south,facing=west,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=west,facing=west,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=false,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=left,powered=true,slope=falling": {
+      "model": "fras:block/diverter",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=false,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    },
+    "drive=east,facing=west,flap=right,powered=true,slope=falling": {
+      "model": "fras:block/diverter_right",
+      "y": 270
+    }
+  }
+}

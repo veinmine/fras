@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PBP",
+    "PGP",
+    "PBP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "B": "minecraft:bucket",
+    "G": "fras:iron_gear"
+  },
+  "result": {
+    "id": "fras:bucket_elevator",
+    "count": 4
+  }
+}

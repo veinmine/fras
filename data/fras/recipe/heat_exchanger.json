@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "PCP",
+    "PTP",
     "C C",
-    "PCP"
+    "PTP"
   ],
   "key": {
     "P": "fras:iron_plate",
+    "T": "fras:rivet",
     "C": "fras:copper_pipe"
   },
   "result": {

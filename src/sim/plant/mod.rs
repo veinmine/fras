@@ -148,6 +148,8 @@ pub enum End {
     /// A grinder's cooling inlet (water) and hot water outlet.
     CoolIn(Pos),
     CoolOut(Pos),
+    /// 0.4: a washer's water port (consumer of water or hot water).
+    Wash(Pos),
     // ---- Creative ----
     /// A creative source of the content it gives.
     Source(Pos, Content),
@@ -171,6 +173,7 @@ impl End {
             | End::ExIn(_)
             | End::ExOut(_)
             | End::Drain(_)
+            | End::Wash(_)
             | End::Void(_) => None,
         }
     }
@@ -180,6 +183,7 @@ impl End {
     pub fn accepts(self, c: Content) -> bool {
         match self {
             End::Feed(_) | End::Drain(_) => c.is_liquid(),
+            End::Wash(_) => matches!(c, Content::Water | Content::HotWater),
             End::Void(_) => c != Content::Steam,
             End::ExIn(_) => matches!(c, Content::Exhaust | Content::HotWater),
             End::Tank(_) => c != Content::Exhaust,
@@ -201,6 +205,7 @@ impl End {
             | End::Drain(q)
             | End::CoolIn(q)
             | End::CoolOut(q)
+            | End::Wash(q)
             | End::Source(q, _)
             | End::Void(q) => Some(q),
             End::Domes(_) | End::Feed(_) | End::Tank(_) => None,
@@ -359,6 +364,9 @@ pub struct Works {
     pub(crate) rot: HashMap<Pos, Rot>,
     /// Grinders' cooling water demand, mB/s.
     pub(crate) cool_demand: HashMap<Pos, f64>,
+    /// Washers' room (mB/s) and held content, and what they received.
+    pub(crate) wash_demand: HashMap<Pos, (f64, Option<Content>)>,
+    pub(crate) washed: HashMap<Pos, (Content, f64)>,
     // ---- Results ----
     pub(crate) events: Vec<Event>,
     pub(crate) drives: BTreeMap<Pos, Drive>,
@@ -517,6 +525,8 @@ impl Works {
         self.heat.remove(&pos);
         self.pump_sources.remove(&pos);
         self.cool_demand.remove(&pos);
+        self.wash_demand.remove(&pos);
+        self.washed.remove(&pos);
         self.govs.remove(&pos);
         self.dirty = true;
     }
@@ -543,6 +553,17 @@ impl Works {
     }
 
     /// A grinder's cooling demand now, mB/s (0 while idle).
+    /// What a washer's tank takes now, mB/s (its room), and the content it
+    /// holds (a tank with water takes no hot water and the other way round).
+    pub fn set_wash_demand(&mut self, pos: Pos, mb_s: f64, holds: Option<Content>) {
+        self.wash_demand.insert(pos, (mb_s.max(0.0), holds));
+    }
+
+    /// Water a washer received over the last step, mB, and its content.
+    pub fn take_washed(&mut self, pos: Pos) -> Option<(Content, f64)> {
+        self.washed.remove(&pos)
+    }
+
     pub fn set_cool_demand(&mut self, pos: Pos, mb_s: f64) {
         self.cool_demand.insert(pos, mb_s);
     }

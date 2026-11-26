@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fras:grinder",
+    "fras:conveyor_belt",
+    "#minecraft:planks"
+  ],
+  "result": {
+    "id": "fras:inline_grinder",
+    "count": 1
+  }
+}

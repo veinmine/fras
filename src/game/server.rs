@@ -68,6 +68,10 @@ pub struct Level {
     pub motor_ramps: HashMap<Pos, f64>,
     /// Gauges' histories for their screens.
     pub histories: HashMap<Pos, super::readout::History>,
+    /// Belts, bucket elevators and diverters (0.4).
+    pub belts: super::belts::Belts,
+    /// Work queued for the 0.4 machines.
+    pub machines: super::machines::Queue,
 }
 
 #[derive(Default)]
@@ -79,6 +83,8 @@ pub struct Server {
     /// level: (pulley, the broken partner).
     pub orphan_belts: Vec<(Pos, Pos)>,
     pub ticks: u64,
+    /// The debug tools' state.
+    pub debug: super::debug::Debug,
 }
 
 static SERVER: Mutex<Option<Server>> = Mutex::new(None);
@@ -182,6 +188,10 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         s.ticks += 1;
         s.ticks
     });
+    let started = std::time::Instant::now();
+    if dim == "minecraft:overworld" {
+        super::debug::check_run(host);
+    }
     super::world::queued(host, level, dim);
     if ticks % 40 == 0 {
         // Water wheels read their water again every 40 ticks (spec 8.2).
@@ -191,6 +201,7 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         });
     }
     super::world::wheels(host, level, dim);
+    let steam_runs = super::debug::steam_runs();
     super::steam::queued(host, level, dim);
     if ticks % 40 == 0 {
         // Flywheels check their plane every 2 s (a block placed diagonally
@@ -273,16 +284,34 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
             for (pos, load) in l.loads.drain() {
                 l.mech.set_load(pos, load);
             }
+            let t = std::time::Instant::now();
             l.mech.tick(&view);
-            (l.mech.take_events(), l.mech.take_sync())
+            let out = (l.mech.take_events(), l.mech.take_sync());
+            super::debug::time_local("rot", t);
+            out
         })
     };
     super::steam::tick_governors(dim);
     super::rust::ticks(host, level, dim);
+    let game_time = level.game_time(&*host).unwrap_or(0);
     for event in events {
+        if let crate::sim::rot::Event::Jammed(pos, jam) = &event {
+            super::debug::event(dim, game_time, "jam", *pos, jam.name().to_string());
+        }
         super::effects::event(host, level, &event);
     }
-    super::steam::after_rot(host, level, dim, ticks);
+    let t = std::time::Instant::now();
+    if steam_runs {
+        super::steam::after_rot(host, level, dim, ticks);
+    }
+    super::debug::time("steam", t);
+    super::machines::queued(host, level, dim);
+    let t = std::time::Instant::now();
+    super::belts::tick(host, level, dim);
+    super::debug::time("belts", t);
+    if ticks % 10 == 0 {
+        super::debug::warnings(dim, game_time);
+    }
     if ticks % 10 == 0 {
         super::effects::warnings(host, level, dim);
     }
@@ -295,4 +324,5 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         let fields = blocks::part_fields(sent.rpm, sent.jam, sent.warn, sent.sag, over, shear);
         merge(host, level, pos, fields);
     }
+    super::debug::time("level_tick", started);
 }

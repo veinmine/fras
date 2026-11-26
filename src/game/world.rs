@@ -101,7 +101,7 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
         check_bearing(host, level, pos);
     }
     for pos in larges {
-        if block_at(&*host, level, pos) == Some(Block::LargePulley)
+        if block_at(&*host, level, pos).is_some_and(Block::is_large_pulley)
             && !large_pulley_fits(&*host, level, pos)
         {
             break_block(host, level, pos);

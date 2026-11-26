@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "III",
-    "S S",
-    "III"
+    "PTP",
+    "G G",
+    "PTP"
   ],
   "key": {
-    "I": "minecraft:iron_ingot",
-    "S": "fras:iron_shaft"
+    "P": "fras:iron_plate",
+    "T": "fras:rivet",
+    "G": "fras:iron_gear"
   },
   "result": {
     "id": "fras:gearbox",

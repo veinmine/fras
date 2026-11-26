@@ -316,6 +316,77 @@ def creative_block(mark):
     return rows
 
 
+# ---- 0.4: factory parts and dusts ----------------------------------------------
+
+ROD = [
+    "................",
+    "............##..",
+    "...........#hm#.",
+    "..........#hm#..",
+    ".........#hm#...",
+    "........#hm#....",
+    ".......#hm#.....",
+    "......#hm#......",
+    ".....#hm#.......",
+    "....#hm#........",
+    "...#hm#.........",
+    "..#hm#..........",
+    ".#mm#...........",
+    "..##............",
+]
+GEAR = [
+    "................",
+    "......#..#......",
+    ".....#h##h#.....",
+    "..#.#hhhhmm#.#..",
+    ".#h#hhm##mmm#h#.",
+    "..#hhm#..#mmm#..",
+    "..#hm#....#mm#..",
+    ".#hhm#....#mmm#.",
+    ".#hmm#....#mmd#.",
+    "..#mm#....#md#..",
+    "..#mmm#..#mdd#..",
+    ".#m#mmm##mdd#d#.",
+    "..#.#mmddddd#.#.",
+    ".....#d##d#.....",
+    "......#..#......",
+]
+RIVETS = [
+    "................",
+    "................",
+    "....###.........",
+    "...#hhm#........",
+    "...#hmm#...###..",
+    "....#m#...#hhm#.",
+    "....#m#...#hmm#.",
+    "....#d#....#m#..",
+    "....###....#m#..",
+    "...........#d#..",
+    "......###..###..",
+    ".....#hhm#......",
+    ".....#hmm#......",
+    "......#m#.......",
+    "......#d#.......",
+    "......###.......",
+]
+DUST = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    ".......h........",
+    "......hmh.......",
+    ".....hmmmh..h...",
+    "....hmmmmmh.m...",
+    "...hmmmmdmmh....",
+    "..hmmmdmmmmmh...",
+    ".hmmmmmmmdmmmh..",
+    "hmmdmmmmmmmmmmh.",
+    "mmmmmmmmdmmmdmmm",
+]
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     block = os.path.join(ROOT, "assets/fras/textures/block")
@@ -335,6 +406,11 @@ def main():
         png(os.path.join(OUT, f"crushed_{metal}.png"), draw(CRUSHED, {"h": h, "m": m, "#": d}))
         if metal != "gold":
             png(os.path.join(OUT, f"{metal}_plate.png"), draw(PLATE, {"h": h, "m": m, "d": d, "#": DARK}))
+        png(os.path.join(OUT, f"{metal}_dust.png"), draw(DUST, {"h": h, "m": m, "d": d}))
+    h, m, d = METALS["iron"]
+    png(os.path.join(OUT, "iron_rod.png"), draw(ROD, {"h": h, "m": m, "#": DARK}))
+    png(os.path.join(OUT, "iron_gear.png"), draw(GEAR, {"h": h, "m": m, "d": d, "#": DARK}))
+    png(os.path.join(OUT, "rivet.png"), draw(RIVETS, {"h": h, "m": m, "d": d, "#": DARK}))
 
 
 if __name__ == "__main__":

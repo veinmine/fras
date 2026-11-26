@@ -50,6 +50,7 @@ fn kind_name(kind: Kind) -> Text {
         Kind::Radiator { copper: false } => "iron_radiator",
         Kind::Drain => "drain",
         Kind::Grinder => "grinder",
+        Kind::Washer => "washer",
         Kind::Source => "creative_steam_source",
         Kind::Void => "creative_drain",
     };

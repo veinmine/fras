@@ -1,7 +1,7 @@
 id = "fras"
 name = "Fire, Rust and Steam"
 version = "0.1.0"
-description = "A technology mod: shafts, gears and belts carry power from cranks and water wheels to machines. Speed sags under load, parts overspeed and jam, long shafts sag. Milestone 0.1 (mechanical)."
+description = "A technology mod: shafts, gears and belts carry power from cranks, water wheels and steam engines to machines; boilers, governors, rust, and in 0.4 conveyor belts, elevators and machines that make the parts for better machines. Milestone 0.4 (factory)."
 authors = ["veinmine"]
 license = "GPL-3.0-or-later"
 api = "0.2"

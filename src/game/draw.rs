@@ -206,6 +206,10 @@ fn stubs(draw: &mut dyn BlockEntityDrawContext, pos: Pos, spec: &Spec, rpm: f64,
 }
 
 pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmitEvent<'_>) {
+    if super::belt_draw::handles(block) {
+        super::belt_draw::submit(block, host, event);
+        return;
+    }
     if block.steam_drawn() {
         super::steam_draw::submit(block, host, event);
         return;
@@ -292,12 +296,18 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 faces(axis, collar, collar),
             );
         }
-        Block::Pulley | Block::LargePulley => {
-            let r = pulley_radius(block == Block::LargePulley);
+        b if b.is_pulley() => {
+            let large = b.is_large_pulley();
+            let (wood, end) = if matches!(b, Block::IronPulley | Block::LargeIronPulley) {
+                (iron(), iron())
+            } else {
+                (LOG, LOG_END)
+            };
+            let r = pulley_radius(large);
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
-            axle(draw, axis, [0.0, 16.0], 2.0, LOG, LOG_END);
+            axle(draw, axis, [0.0, 16.0], 2.0, wood, end);
             draw.still();
-            let sides = pulley_sides(block == Block::LargePulley);
+            let sides = pulley_sides(large);
             disc(draw, pos, axis, rpm, r, sides, [5.0, 11.0]);
             if let Some(belt) = blocks::belt(nbt)
                 && (belt.partner.x, belt.partner.y, belt.partner.z) > (pos.x, pos.y, pos.z)
@@ -309,7 +319,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                     pos,
                     belt.partner,
                     axis,
-                    lie(block == Block::LargePulley),
+                    lie(large),
                     lie(blocks::get_bool(nbt, "belt_big")),
                     belt.crossed,
                 );
@@ -682,9 +692,13 @@ fn draw_belt(
 
 /// Culling bounds for parts that draw beyond their block.
 pub fn bounds(block: Block, event: &mut BlockEntityRenderBoundingBoxEvent<'_>) {
+    if super::belt_draw::handles(block) {
+        super::belt_draw::bounds(block, event);
+        return;
+    }
     let b = &mut *event.bounds;
     match block {
-        Block::WaterWheel | Block::LargePulley => {
+        Block::WaterWheel | Block::LargePulley | Block::LargeIronPulley => {
             *b = [
                 b[0].min(-1.5),
                 b[1].min(-1.5),
@@ -696,7 +710,7 @@ pub fn bounds(block: Block, event: &mut BlockEntityRenderBoundingBoxEvent<'_>) {
         }
         _ => super::steam_draw::bounds(block, b),
     }
-    if matches!(block, Block::Pulley | Block::LargePulley)
+    if block.is_pulley()
         && let Some(belt) = blocks::belt(&event.entity.nbt)
     {
         let d = [

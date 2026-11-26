@@ -1,0 +1,20 @@
+{
+  "type": "fras:washing",
+  "ingredient": "fras:crushed_copper",
+  "results": [
+    {
+      "id": "fras:copper_dust"
+    },
+    {
+      "id": "fras:copper_dust",
+      "chance": 0.3333
+    },
+    {
+      "id": "minecraft:gold_nugget",
+      "chance": 0.1
+    }
+  ],
+  "revolutions": 2.5,
+  "load": 4.0,
+  "water": 50.0
+}

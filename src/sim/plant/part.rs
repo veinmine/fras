@@ -50,6 +50,9 @@ pub enum Kind {
     Drain,
     /// The grinder, for its water cooling (cooling spec 9).
     Grinder,
+    /// 0.4: the washer's water port (machines spec 4.3): water or hot water
+    /// into its tank, on any face but its socket.
+    Washer,
     // ---- Creative ----
     /// An endless source of steam (up to a set pressure), water or hot water
     /// (`Spec::fluid`) at a set rate (`Spec::amount`), on every face.

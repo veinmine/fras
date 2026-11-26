@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "IFI",
+    "LCL"
+  ],
+  "key": {
+    "P": "fras:iron_plate",
+    "S": "fras:iron_shaft",
+    "I": "minecraft:iron_ingot",
+    "F": "minecraft:flint",
+    "L": "#minecraft:logs",
+    "C": "fras:conveyor_belt"
+  },
+  "result": {
+    "id": "fras:lathe",
+    "count": 1
+  }
+}

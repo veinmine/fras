@@ -2,13 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "NRN",
-    "NGN"
+    "NAN",
+    "NGN",
+    " D "
   ],
   "key": {
     "N": "minecraft:iron_nugget",
-    "R": "minecraft:redstone",
-    "G": "minecraft:glass_pane"
+    "A": "minecraft:glass_pane",
+    "G": "fras:iron_gear",
+    "D": "minecraft:redstone"
   },
   "result": {
     "id": "fras:tachometer",

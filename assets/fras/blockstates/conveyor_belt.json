@@ -1,0 +1,234 @@
+{
+  "variants": {
+    "drive=none,facing=north,slope=flat": {
+      "model": "fras:block/conveyor_belt"
+    },
+    "drive=north,facing=north,slope=flat": {
+      "model": "fras:block/conveyor_belt"
+    },
+    "drive=south,facing=north,slope=flat": {
+      "model": "fras:block/conveyor_belt"
+    },
+    "drive=west,facing=north,slope=flat": {
+      "model": "fras:block/conveyor_belt"
+    },
+    "drive=east,facing=north,slope=flat": {
+      "model": "fras:block/conveyor_belt"
+    },
+    "drive=none,facing=north,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising"
+    },
+    "drive=north,facing=north,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising"
+    },
+    "drive=south,facing=north,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising"
+    },
+    "drive=west,facing=north,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising"
+    },
+    "drive=east,facing=north,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising"
+    },
+    "drive=none,facing=north,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 180
+    },
+    "drive=north,facing=north,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 180
+    },
+    "drive=south,facing=north,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 180
+    },
+    "drive=west,facing=north,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 180
+    },
+    "drive=east,facing=north,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 180
+    },
+    "drive=none,facing=east,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 90
+    },
+    "drive=north,facing=east,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 90
+    },
+    "drive=south,facing=east,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 90
+    },
+    "drive=west,facing=east,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 90
+    },
+    "drive=east,facing=east,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 90
+    },
+    "drive=none,facing=east,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 90
+    },
+    "drive=north,facing=east,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 90
+    },
+    "drive=south,facing=east,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 90
+    },
+    "drive=west,facing=east,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 90
+    },
+    "drive=east,facing=east,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 90
+    },
+    "drive=none,facing=east,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 270
+    },
+    "drive=north,facing=east,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 270
+    },
+    "drive=south,facing=east,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 270
+    },
+    "drive=west,facing=east,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 270
+    },
+    "drive=east,facing=east,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 270
+    },
+    "drive=none,facing=south,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 180
+    },
+    "drive=north,facing=south,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 180
+    },
+    "drive=south,facing=south,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 180
+    },
+    "drive=west,facing=south,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 180
+    },
+    "drive=east,facing=south,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 180
+    },
+    "drive=none,facing=south,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 180
+    },
+    "drive=north,facing=south,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 180
+    },
+    "drive=south,facing=south,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 180
+    },
+    "drive=west,facing=south,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 180
+    },
+    "drive=east,facing=south,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 180
+    },
+    "drive=none,facing=south,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 0
+    },
+    "drive=north,facing=south,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 0
+    },
+    "drive=south,facing=south,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 0
+    },
+    "drive=west,facing=south,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 0
+    },
+    "drive=east,facing=south,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 0
+    },
+    "drive=none,facing=west,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 270
+    },
+    "drive=north,facing=west,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 270
+    },
+    "drive=south,facing=west,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 270
+    },
+    "drive=west,facing=west,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 270
+    },
+    "drive=east,facing=west,slope=flat": {
+      "model": "fras:block/conveyor_belt",
+      "y": 270
+    },
+    "drive=none,facing=west,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 270
+    },
+    "drive=north,facing=west,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 270
+    },
+    "drive=south,facing=west,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 270
+    },
+    "drive=west,facing=west,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 270
+    },
+    "drive=east,facing=west,slope=rising": {
+      "model": "fras:block/conveyor_belt_rising",
+      "y": 270
+    },
+    "drive=none,facing=west,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 90
+    },
+    "drive=north,facing=west,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 90
+    },
+    "drive=south,facing=west,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 90
+    },
+    "drive=west,facing=west,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 90
+    },
+    "drive=east,facing=west,slope=falling": {
+      "model": "fras:block/conveyor_belt_falling",
+      "y": 90
+    }
+  }
+}
