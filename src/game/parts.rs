@@ -554,6 +554,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Governor => super::governor::tick(host, event),
             Block::PressureGauge | Block::SightGlass => gauge_tick(self.0, host, event),
             b if b.is_creative() => super::creative::tick(b, host, event),
+            b if super::setpoint::has(b) => super::setpoint::tick(b, host, event),
             _ => *event.reply = BlockEntityTickReply::Unchanged,
         }
     }
@@ -688,6 +689,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Governor => super::governor::screen(event),
             b if b.is_creative() => super::creative::screen(event),
             b if super::readout::Readout::of(b).is_some() => super::readout::screen(event),
+            b if super::setpoint::has(b) => super::setpoint::screen(b, event),
             _ => None,
         }
     }
@@ -698,6 +700,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Firebox => super::firebox::screen_draw(host, event),
             Block::Governor => super::governor::screen_draw(host, event),
             b if b.is_creative() => super::creative::screen_draw(b, host, event),
+            b if super::setpoint::has(b) => super::setpoint::screen_draw(b, host, event),
             b => super::readout::screen_draw(b, host, event),
         }
     }
@@ -711,6 +714,7 @@ impl BlockEntityPart for EntityHooks {
             Block::Governor => super::governor::screen_click(host, event),
             b if b.is_creative() => super::creative::screen_click(b, host, event),
             b if super::readout::Readout::of(b).is_some() => super::readout::screen_click(event),
+            b if super::setpoint::has(b) => super::setpoint::screen_click(b, event),
             _ => None,
         }
     }
@@ -722,6 +726,8 @@ impl BlockEntityPart for EntityHooks {
             super::creative::menu_button(self.0, host, event);
         } else if super::readout::Readout::of(self.0).is_some() {
             super::readout::menu_button(event);
+        } else if super::setpoint::has(self.0) {
+            super::setpoint::menu_button(self.0, host, event);
         }
     }
 }

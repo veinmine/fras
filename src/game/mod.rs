@@ -14,6 +14,7 @@ pub mod pipes;
 pub mod readout;
 pub mod rust;
 pub mod server;
+pub mod setpoint;
 pub mod shell_model;
 pub mod steam;
 pub mod steam_draw;

@@ -50,6 +50,20 @@ pub fn next_set(set: f64) -> f64 {
     }
 }
 
+/// Its screen's fine step, bar.
+pub const FINE_STEP: f64 = 0.1;
+
+/// The set pressure moved by `delta` bar on its screen: kept to tenths and
+/// within the range.
+pub fn adjust(set: f64, delta: f64) -> f64 {
+    tenths(set + delta)
+}
+
+/// A set pressure rounded to tenths, within the range.
+pub fn tenths(v: f64) -> f64 {
+    ((v / FINE_STEP).round() * FINE_STEP).clamp(SET_MIN, SET_MAX)
+}
+
 fn snap(v: f64) -> f64 {
     ((v / SET_STEP).round() * SET_STEP).clamp(SET_MIN, SET_MAX)
 }
@@ -94,6 +108,21 @@ mod tests {
         assert_eq!(next_set(7.5), 8.0);
         assert_eq!(next_set(8.0), 1.0);
         assert_eq!(flap(0.5), 2);
+    }
+
+    #[test]
+    fn the_screen_sets_it_in_tenths() {
+        assert!((adjust(3.0, 0.1) - 3.1).abs() < 1e-9);
+        assert!((adjust(3.1, -1.0) - 2.1).abs() < 1e-9);
+        assert_eq!(adjust(7.95, 1.0), SET_MAX);
+        assert_eq!(adjust(1.05, -0.1), SET_MIN);
+        // Repeated steps don't drift.
+        let mut s = 1.0;
+        for _ in 0..70 {
+            s = adjust(s, 0.1);
+        }
+        assert_eq!(s, SET_MAX);
+        assert_eq!(format!("{:.1}", adjust(2.0, 0.3)), "2.3");
     }
 
     #[test]

@@ -1216,6 +1216,10 @@ def main():
     # Readouts: one hidden slot, data [value, red line, extra, head, range, 120 samples].
     for name in ["tachometer", "pressure_gauge", "sight_glass"]:
         write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 125})
+    # Set pressure screens (game/setpoint.rs): the damper's data [set, bar, opening, status, red line,
+    # head, range, 120 samples], the emergency valve's [set, bar, red line, state, mB/s].
+    write(f"data/{NS}/horizon/menu/furnace_damper.json", {"slots": 1, "data_slots": 127})
+    write(f"data/{NS}/horizon/menu/emergency_valve.json", {"slots": 1, "data_slots": 5})
     items = dict(ITEMS)
     items.update(regulation_items())
     for name, decl in items.items():
