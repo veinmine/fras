@@ -760,7 +760,6 @@ fn step(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, belts: &mut Belts)
             let mut world = World {
                 host,
                 level,
-                dim,
                 belts,
                 kind: ls.kind,
                 blocks: ls.line.blocks.clone(),
@@ -804,7 +803,6 @@ fn step(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, belts: &mut Belts)
             if out.eventful() {
                 ls.need_sync = true;
             }
-            place_byproducts(host, level, dim, &mut ls);
             carry_entities(host, level, &mut ls);
         }
         belts.lines[li] = Some(ls);
@@ -913,8 +911,7 @@ fn drain_inboxes(host: &mut dyn ServerHost, level: LevelRef, ls: &mut LineState)
     }
 }
 
-/// Block indices with a station: diverters, machines working on the belt
-/// above, counters.
+/// Block indices with a station: diverters, counters.
 fn stations(host: &dyn Host, level: LevelRef, ls: &LineState, belts: &Belts) -> Vec<usize> {
     if ls.kind != LineKind::Belt {
         return Vec::new();
@@ -922,13 +919,8 @@ fn stations(host: &dyn Host, level: LevelRef, ls: &LineState, belts: &Belts) -> 
     let mut out = Vec::new();
     for (i, pos) in ls.line.blocks.iter().enumerate() {
         let here = block_at(host, level, *pos);
-        let station = here == Some(Block::Diverter)
-            || belts.counters.contains_key(pos)
-            || (here == Some(Block::ConveyorBelt)
-                && ls.line.slopes[i] == Slope::Flat
-                && block_at(host, level, pos.offset(Dir::Up))
-                    .and_then(Block::machine)
-                    .is_some_and(|m| m.works_on_belt()));
+        let _ = i;
+        let station = here == Some(Block::Diverter) || belts.counters.contains_key(pos);
         if station {
             out.push(i);
         }
@@ -940,7 +932,6 @@ fn stations(host: &dyn Host, level: LevelRef, ls: &LineState, belts: &Belts) -> 
 struct World<'a> {
     host: &'a mut dyn ServerHost,
     level: LevelRef,
-    dim: Dim,
     belts: &'a mut Belts,
     kind: LineKind,
     blocks: Vec<Pos>,
@@ -984,21 +975,12 @@ impl Stations<ItemStack> for World<'_> {
                     _ => Action::Pass,
                 }
             }
-            Some(Block::ConveyorBelt) => {
-                let above = pos.offset(Dir::Up);
-                if super::machines::belt_arrive(&*self.host, self.level, self.dim, above, item) {
-                    Action::Hold
-                } else {
-                    Action::Pass
-                }
-            }
             _ => Action::Pass,
         }
     }
 
-    fn poll(&mut self, index: usize, item: &mut ItemStack) -> bool {
-        let above = self.blocks[index].offset(Dir::Up);
-        super::machines::belt_poll(&*self.host, self.dim, above, item)
+    fn poll(&mut self, _: usize, _: &mut ItemStack) -> bool {
+        false
     }
 
     fn deliver(&mut self, item: &ItemStack) -> bool {
@@ -1056,6 +1038,49 @@ pub fn flap_dir(host: &dyn Host, level: LevelRef, pos: Pos, heading: Dir) -> Dir
         left.opposite()
     } else {
         left
+    }
+}
+
+/// Offer one item to the block at `target`, moving along `dir`, with a belt
+/// end's rules (logistics 5.1): what line machines and the trommel use for
+/// their outputs. Whether it left (taken, or fell into the air).
+pub fn offer(
+    host: &mut dyn ServerHost,
+    level: LevelRef,
+    dim: Dim,
+    target: Pos,
+    dir: Dir,
+    item: &ItemStack,
+    speed: f64,
+) -> bool {
+    let mut belts = with_level(dim, |l| std::mem::take(&mut l.belts));
+    let d = deliver(host, level, &mut belts, target, dir, item, speed);
+    match d {
+        Delivery::Taken(_) => belts.stats.delivered += 1,
+        Delivery::Fell => belts.stats.dropped += 1,
+        _ => {}
+    }
+    with_level(dim, |l| {
+        let queued = std::mem::replace(&mut l.belts, belts);
+        l.belts.absorb(queued);
+    });
+    let t = level.game_time(&*host).unwrap_or(0);
+    match d {
+        Delivery::Taken(_) => {
+            super::debug::event(
+                dim,
+                t,
+                "delivered",
+                target,
+                item.item().id(&*host).to_string(),
+            );
+            true
+        }
+        Delivery::Fell => {
+            super::debug::event(dim, t, "drop", target, item.item().id(&*host).to_string());
+            true
+        }
+        Delivery::Solid | Delivery::Full => false,
     }
 }
 
@@ -1120,6 +1145,17 @@ fn deliver(
     {
         return Delivery::Solid;
     }
+    // A 0.4 machine's inbox takes one item at a time from a belt: the item
+    // waits on the belt until the machine's built-in belt or drum takes it,
+    // so a stopped machine backs the line up (machines spec 2.2).
+    if block_at(&*host, level, target).is_some_and(Block::is_machine04)
+        && host
+            .block_entity(level, target.to_array())
+            .and_then(|e| e.item_slot(&*host, 0).ok().flatten())
+            .is_some()
+    {
+        return Delivery::Full;
+    }
     if let Some(storage) = level.capability(
         host,
         &STORAGE,
@@ -1157,47 +1193,6 @@ fn deliver(
     let motion = [dx as f64 * speed, 0.05, dz as f64 * speed];
     let _ = level.spawn_item_with_motion(host, at[0], at[1], at[2], item.clone(), motion, 10);
     Delivery::Fell
-}
-
-/// Byproducts waiting in belt machines go onto the belt in front of the
-/// hold point, behind the main result (logistics 7.3).
-fn place_byproducts(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, ls: &mut LineState) {
-    if ls.kind != LineKind::Belt {
-        return;
-    }
-    let forward = ls.v >= 0.0;
-    for (i, pos) in ls.line.blocks.clone().iter().enumerate() {
-        let above = pos.offset(Dir::Up);
-        let pending = with_level(dim, |l| {
-            l.belt_jobs.get(&above).map_or(0, |j| j.pending.len())
-        });
-        if pending == 0 {
-            continue;
-        }
-        let c = i as f64 + 0.5;
-        let x = if forward {
-            c + belt::SPACING
-        } else {
-            c - belt::SPACING
-        };
-        if x < 0.0 || x > ls.line.length() || !ls.line.room_at(x) {
-            continue;
-        }
-        let next = with_level(dim, |l| {
-            l.belt_jobs.get_mut(&above).and_then(|j| {
-                if j.pending.is_empty() {
-                    None
-                } else {
-                    Some(j.pending.remove(0))
-                }
-            })
-        });
-        if let Some(stack) = next {
-            let _ = ls.line.insert(x, stack);
-            ls.need_sync = true;
-        }
-    }
-    let _ = (host, level);
 }
 
 /// Players, mobs and dropped items on a moving belt ride it; dropped items

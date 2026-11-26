@@ -44,7 +44,7 @@ The changed recipes keep their ids, so a recipe book that knew the old ones show
    pulley to a small one (iron pulleys run to 192 RPM). Belts from leather or wool.
 4. The first line: ingots → lathe → rods → trip hammer → rivets; ingots → trip hammer → plates → lathe → gears.
 5. Gearbox, iron gears, clutch, governor, damper, iron boiler and the rest.
-6. The ore line: washer, trommel, bucket elevator, diverter, sawmill.
+6. The ore line: inline grinder, washer, trommel, bucket elevator, diverter, sawmill.
 
 `cargo test` checks the tree (`src/game/recipe_tree.rs`): everything is reachable from vanilla items and the
 machines, and nothing gated can be made without rods, gears or rivets.

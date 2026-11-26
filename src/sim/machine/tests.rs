@@ -2,7 +2,7 @@
 
 use super::*;
 use crate::sim::fluid::Content;
-use crate::sim::grind::Work;
+use crate::sim::grind::{Stack, Work};
 
 struct TestItems;
 
@@ -11,11 +11,11 @@ impl Items for TestItems {
         match tag {
             "minecraft:planks" => item.ends_with("_planks"),
             TAG_FINE => {
-                matches!(item, "minecraft:sand" | "minecraft:red_sand")
-                    || item.ends_with("_dust")
-                    || item.starts_with("fras:crushed_")
+                matches!(item, "minecraft:sand" | "minecraft:red_sand") || item.ends_with("_dust")
             }
-            TAG_MEDIUM => trommel_medium().iter().any(|s| s == item),
+            TAG_MEDIUM => {
+                item.starts_with("fras:crushed_") || trommel_medium().iter().any(|s| s == item)
+            }
             _ => false,
         }
     }
@@ -80,8 +80,12 @@ fn yields_match_the_spec() {
     let w = washing();
     let dust = average(&w, "fras:crushed_iron", "fras:iron_dust", 30_000);
     assert!((dust - 4.0 / 3.0).abs() < 0.02, "{dust}");
-    let red = average(&w, "fras:crushed_iron", "minecraft:redstone", 30_000);
-    assert!((red - 0.1).abs() < 0.01, "{red}");
+    let nugget = average(&w, "fras:crushed_iron", "minecraft:iron_nugget", 30_000);
+    assert!((nugget - 0.1).abs() < 0.01, "{nugget}");
+    assert_eq!(
+        average(&w, "fras:crushed_iron", "minecraft:redstone", 1000),
+        0.0
+    );
     assert!(average(&w, "fras:crushed_gold", "minecraft:copper_nugget", 1).min(1.0) >= 0.0);
     assert_eq!(
         average(&hammering(), "fras:iron_rod", "fras:rivet", 10),
@@ -284,7 +288,6 @@ fn the_tank_takes_water_or_hot_water_never_mixed() {
 fn belt_mode_refuses_multi_item_recipes_and_unknown_items() {
     let recipes = hammering();
     assert!(belt_accepts("minecraft:iron_ingot", &recipes, &TestItems));
-    assert!(!belt_accepts("minecraft:sand", &recipes, &TestItems));
     assert!(!belt_accepts("minecraft:dirt", &recipes, &TestItems));
 }
 
@@ -349,36 +352,77 @@ fn belt_mode_replaces_the_item_and_queues_the_rest() {
     assert_eq!(work.pending.len(), 7);
 }
 
+fn insert(drum: &mut Drum<String>, item: &str, from_low: bool) -> bool {
+    drum.insert(item.to_string(), item, from_low, &TestItems)
+        .is_ok()
+}
+
 #[test]
-fn the_trommel_sorts_by_tag_and_a_blocked_outlet_stops_only_its_class() {
+fn the_trommel_sorts_by_tag_counted_from_the_entry_end() {
+    let s = state(Machine::Trommel, 64.0);
+    // Fed at the low end: fines under block 0, mediums 1, oversize 2.
     let mut drum = Drum::default();
     for item in [
         "fras:iron_dust",
-        "minecraft:gravel",
+        "fras:crushed_iron",
         "minecraft:cobblestone",
     ] {
-        assert!(drum.insert(item, &TestItems));
+        assert!(insert(&mut drum, item, true));
     }
-    let s = state(Machine::Trommel, 64.0);
     for _ in 0..40 {
-        drum.tick(&s, &TestItems);
+        drum.tick(&s);
     }
     assert!(drum.items.is_empty());
-    assert_eq!(drum.outlets[0].as_ref().unwrap().item, "fras:iron_dust");
-    assert_eq!(drum.outlets[1].as_ref().unwrap().item, "minecraft:gravel");
-    assert_eq!(
-        drum.outlets[2].as_ref().unwrap().item,
-        "minecraft:cobblestone"
-    );
-    // The fine outlet holds iron dust: copper dust waits, gravel still goes.
-    assert!(drum.insert("fras:copper_dust", &TestItems));
-    assert!(drum.insert("minecraft:gravel", &TestItems));
+    assert_eq!(drum.outlets[0], ["fras:iron_dust"]);
+    assert_eq!(drum.outlets[1], ["fras:crushed_iron"]);
+    assert_eq!(drum.outlets[2], ["minecraft:cobblestone"]);
+    // Fed at the high end: the other way round.
+    let mut drum = Drum::default();
+    for item in ["fras:iron_dust", "minecraft:iron_nugget", "minecraft:dirt"] {
+        assert!(insert(&mut drum, item, false));
+    }
     for _ in 0..40 {
-        drum.tick(&s, &TestItems);
+        drum.tick(&s);
+    }
+    assert_eq!(drum.outlets[2], ["fras:iron_dust"]);
+    assert_eq!(drum.outlets[1], ["minecraft:iron_nugget"]);
+    assert_eq!(drum.outlets[0], ["minecraft:dirt"]);
+}
+
+#[test]
+fn fines_fall_before_mediums_and_oversize_last() {
+    let s = state(Machine::Trommel, 64.0);
+    let mut drum = Drum::default();
+    insert(&mut drum, "minecraft:sand", true);
+    insert(&mut drum, "minecraft:gravel", true);
+    insert(&mut drum, "minecraft:stone", true);
+    let mut order = Vec::new();
+    for _ in 0..40 {
+        drum.tick(&s);
+        for k in 0..3 {
+            if !drum.outlets[k].is_empty() && !order.contains(&k) {
+                order.push(k);
+            }
+        }
+    }
+    assert_eq!(order, [0, 1, 2]);
+}
+
+#[test]
+fn a_full_outlet_stops_only_its_class() {
+    let s = state(Machine::Trommel, 64.0);
+    let mut drum = Drum::default();
+    drum.outlets[0] = vec!["fras:iron_dust".to_string(); TROMMEL_OUTLET_HOLD];
+    insert(&mut drum, "fras:copper_dust", true);
+    insert(&mut drum, "minecraft:gravel", true);
+    for _ in 0..40 {
+        drum.tick(&s);
     }
     assert_eq!(drum.items.len(), 1);
     assert_eq!(drum.items[0].item, "fras:copper_dust");
-    assert_eq!(drum.outlets[1].as_ref().unwrap().count, 2);
+    assert_eq!(drum.outlets[1], ["minecraft:gravel"]);
+    let t = drum.tick(&s);
+    assert_eq!(t.status, Status::OutputFull);
 }
 
 #[test]
@@ -386,9 +430,9 @@ fn a_full_drum_refuses_and_its_load_grows() {
     let mut drum = Drum::default();
     assert_eq!(drum.load(), 2.0);
     for _ in 0..8 {
-        assert!(drum.insert("minecraft:dirt", &TestItems));
+        assert!(insert(&mut drum, "minecraft:dirt", true));
     }
-    assert!(!drum.insert("minecraft:dirt", &TestItems));
+    assert!(!insert(&mut drum, "minecraft:dirt", false));
     assert_eq!(drum.load(), 4.0);
 }
 
@@ -397,7 +441,8 @@ fn the_default_trommel_classes() {
     for (item, size) in [
         ("minecraft:sand", Size::Fine),
         ("fras:gold_dust", Size::Fine),
-        ("fras:crushed_copper", Size::Fine),
+        ("fras:crushed_copper", Size::Medium),
+        ("minecraft:gold_nugget", Size::Medium),
         ("minecraft:redstone", Size::Medium),
         ("minecraft:raw_iron", Size::Medium),
         ("minecraft:cobblestone", Size::Oversize),

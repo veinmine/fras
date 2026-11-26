@@ -14,6 +14,7 @@
     "fras:bucket_elevator",
     "fras:washer",
     "fras:trip_hammer",
-    "fras:sawmill"
+    "fras:sawmill",
+    "fras:inline_grinder"
   ]
 }

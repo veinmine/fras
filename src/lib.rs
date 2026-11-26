@@ -111,14 +111,14 @@ impl Hooks for Fras {
         r.register_recipe_type("fras:grinding");
         r.register_raw_recipe_serializer("fras:grinding", "fras:grinding");
         for m in crate::sim::machine::Machine::ALL {
-            if m == crate::sim::machine::Machine::Grinder {
+            // The inline grinder shares the grinder's recipe type.
+            if m.recipe_type() == Some("fras:grinding") {
                 continue;
             }
             if let Some(kind) = m.recipe_type() {
                 r.register_recipe_type(kind);
                 r.register_raw_recipe_serializer(kind, kind);
             }
-            r.menu_part(&format!("fras:{}", m.name()), game::machines::InputSlot(m));
         }
         let wrench = r.item_key("fras:wrench");
         let leather_belt = r.item_key("fras:leather_belt");

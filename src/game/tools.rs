@@ -16,7 +16,7 @@ use crate::sim::geom::{Axis, Dir, Pos};
 use crate::sim::rot::part::{BELT_MAX_DISTANCE, CRANK_STALL, CRANK_TOP, WHEEL_TOP};
 use crate::sim::rot::{BeltEnd, Jam, Kind, Material, Shape};
 
-fn tr(key: &str, args: Vec<String>) -> Text {
+pub(crate) fn tr(key: &str, args: Vec<String>) -> Text {
     Text::translate(key, args.into_iter().map(Text::literal).collect())
 }
 
@@ -85,14 +85,12 @@ pub fn wrench(
     if block.is_belt() || block == Block::BucketElevator {
         return Some(belt_wrench(host, player, level, dim, pos, block, sneaking));
     }
-    // The trommel's second block stands for the first.
-    if block == Block::Trommel
-        && server::property(&*host, level, pos, "part").as_deref() == Some("end")
-        && let Some(f) = server::property(&*host, level, pos, "facing")
-            .as_deref()
-            .and_then(Dir::from_name)
+    // A line machine's top and a trommel's other blocks stand for the
+    // block that is the part on the network (machines spec 2.3, 8.2).
+    if block.is_machine04()
+        && let Some(part) = super::machines::part_pos(&*host, level, pos, block)
     {
-        pos = pos.offset(f.opposite());
+        pos = part;
     }
     if sneaking {
         for line in inspect(&*host, level, dim, pos, block) {
@@ -443,21 +441,7 @@ fn configure(
                 .unwrap_or(Dir::North);
             set_property(host, level, pos, "facing", socket.clockwise().name())
         }
-        Block::Washer | Block::TripHammer | Block::Lathe | Block::Sawmill => {
-            let socket = prop(&*host, "facing")
-                .as_deref()
-                .and_then(Dir::from_name)
-                .unwrap_or(Dir::North);
-            set_property(host, level, pos, "facing", socket.clockwise().name())
-        }
-        Block::Trommel => {
-            // The socket swaps to the other long side (machines spec 8.2).
-            let socket = prop(&*host, "socket")
-                .as_deref()
-                .and_then(Dir::from_name)
-                .unwrap_or(Dir::East);
-            set_property(host, level, pos, "socket", socket.opposite().name())
-        }
+        b if b.is_machine04() => super::machines::cycle_socket(host, level, dim, pos, b),
         b if b.is_pulley() => {
             let Some(entity) = host.block_entity(level, pos.to_array()) else {
                 return false;

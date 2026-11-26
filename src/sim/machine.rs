@@ -1,18 +1,19 @@
-//! 0.4's machines, free of the game (machines spec): each machine's numbers,
-//! the recipes they ship with, belt mode (working on an item held on the
-//! belt below, logistics spec 7) and the trommel's drum (machines spec 8).
+//! 0.4's machines, free of the game (machines spec 1.1): each machine's
+//! numbers, the recipes they ship with, the line machines' built-in belt
+//! (`station`, machines spec 2.4) and the trommel's drum (machines spec 8).
 //!
 //! The recipe model, the space check, progress and the status line are the
 //! grinder's (`sim::grind`), shared by every recipe machine.
 
 use crate::sim::grind::{
-    self, Ingredient, Items, MachineState, Output, Recipe, Stack, Status, find, progress_per_tick,
+    self, Ingredient, Items, MachineState, Output, Recipe, Status, find, progress_per_tick,
 };
 
 /// A machine with one shaft socket and a working range.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Machine {
     Grinder,
+    InlineGrinder,
     Washer,
     TripHammer,
     Lathe,
@@ -21,8 +22,9 @@ pub enum Machine {
 }
 
 impl Machine {
-    pub const ALL: [Machine; 6] = [
+    pub const ALL: [Machine; 7] = [
         Machine::Grinder,
+        Machine::InlineGrinder,
         Machine::Washer,
         Machine::TripHammer,
         Machine::Lathe,
@@ -33,6 +35,7 @@ impl Machine {
     pub fn name(self) -> &'static str {
         match self {
             Machine::Grinder => "grinder",
+            Machine::InlineGrinder => "inline_grinder",
             Machine::Washer => "washer",
             Machine::TripHammer => "trip_hammer",
             Machine::Lathe => "lathe",
@@ -44,7 +47,7 @@ impl Machine {
     /// Its recipe type (`None`: the trommel sorts by tags).
     pub fn recipe_type(self) -> Option<&'static str> {
         Some(match self {
-            Machine::Grinder => "fras:grinding",
+            Machine::Grinder | Machine::InlineGrinder => "fras:grinding",
             Machine::Washer => "fras:washing",
             Machine::TripHammer => "fras:hammering",
             Machine::Lathe => "fras:turning",
@@ -56,7 +59,7 @@ impl Machine {
     /// The working range, RPM (machines spec 13.1).
     pub fn range(self) -> (f64, f64) {
         match self {
-            Machine::Grinder => grind::working_range(false),
+            Machine::Grinder | Machine::InlineGrinder => grind::working_range(false),
             Machine::Washer => (8.0, 64.0),
             Machine::TripHammer => (16.0, 64.0),
             Machine::Lathe => (128.0, 224.0),
@@ -67,7 +70,7 @@ impl Machine {
 
     pub fn inertia(self) -> f64 {
         match self {
-            Machine::Grinder | Machine::Washer | Machine::Sawmill => 4.0,
+            Machine::Grinder | Machine::InlineGrinder | Machine::Washer | Machine::Sawmill => 4.0,
             Machine::TripHammer | Machine::Trommel => 6.0,
             Machine::Lathe => 2.0,
         }
@@ -76,7 +79,7 @@ impl Machine {
     /// The load a recipe file without `load` gets, Nm.
     pub fn default_load(self) -> f64 {
         match self {
-            Machine::Grinder | Machine::Sawmill => 6.0,
+            Machine::Grinder | Machine::InlineGrinder | Machine::Sawmill => 6.0,
             Machine::Washer | Machine::Lathe => 4.0,
             Machine::TripHammer => 8.0,
             Machine::Trommel => TROMMEL_BASE_LOAD,
@@ -91,7 +94,7 @@ impl Machine {
     /// What the wrench needs to repair it (machines spec 13.1).
     pub fn repair(self) -> &'static [(&'static str, u32)] {
         match self {
-            Machine::Grinder => &[("minecraft:flint", 1)],
+            Machine::Grinder | Machine::InlineGrinder => &[("minecraft:flint", 1)],
             Machine::Washer => &[("minecraft:iron_nugget", 1), ("#minecraft:planks", 1)],
             Machine::Lathe => &[("minecraft:iron_nugget", 1), ("minecraft:flint", 1)],
             Machine::TripHammer | Machine::Sawmill | Machine::Trommel => {
@@ -100,9 +103,10 @@ impl Machine {
         }
     }
 
-    /// Whether it can work on a belt below it (machines spec 3).
-    pub fn works_on_belt(self) -> bool {
-        matches!(self, Machine::Washer | Machine::TripHammer)
+    /// Whether it is a two-block line machine with a built-in belt
+    /// (machines spec 2.3): all but the 0.1 grinder and the trommel.
+    pub fn is_line(self) -> bool {
+        !matches!(self, Machine::Grinder | Machine::Trommel)
     }
 
     /// Strikes per revolution, for the GUI's count (the trip hammer's cam).
@@ -131,9 +135,9 @@ pub const TROMMEL_MAX_LOAD: f64 = 4.0;
 /// Dust smelts in this many ticks (blast furnace: half).
 pub const DUST_SMELT_TICKS: u32 = 100;
 
-// ---- Belt mode -------------------------------------------------------------------
+// ---- Work on one item -------------------------------------------------------------------
 
-/// A belt machine's work on the item it holds (logistics 7, machines 3).
+/// A line machine's work on the item at its work point (machines spec 2.4).
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct BeltWork {
     pub progress: f64,
@@ -143,10 +147,10 @@ pub struct BeltWork {
     pub pending: Vec<String>,
 }
 
-/// Whether a belt machine holds an item arriving under it: it has a recipe
-/// with count 1 for it. A machine that can't work on it yet (jammed, too
-/// slow, out of water, byproducts still waiting) holds it all the same and
-/// the line backs up (logistics 7); only items with no recipe pass.
+/// Whether a line machine stops an item at its work point: it has a recipe
+/// for it (count 1). A machine that can't work on it yet (jammed, too slow,
+/// out of water, byproducts still waiting) holds it all the same and the
+/// line backs up (machines spec 2.4); only items with no recipe pass.
 pub fn belt_accepts(item: &str, recipes: &[Recipe], items: &dyn Items) -> bool {
     find(recipes, item, items).is_some_and(|r| r.count == 1)
 }
@@ -263,20 +267,66 @@ impl Size {
 pub const TAG_FINE: &str = "fras:trommel/fine";
 pub const TAG_MEDIUM: &str = "fras:trommel/medium";
 
-/// An item tumbling in the drum.
+/// Trommel blocks in a formed drum (machines spec 8.2).
+pub const TROMMEL_BLOCKS: usize = 3;
+/// Items an outlet holds while it waits to push them out.
+pub const TROMMEL_OUTLET_HOLD: usize = 8;
+
+/// An item tumbling in the drum, moving away from the end it came in.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Tumbling {
-    pub item: String,
+pub struct Tumbling<T> {
+    pub item: T,
     pub size: Size,
+    /// Revolutions so far: it crosses the drum in `TROMMEL_REVS`.
     pub progress: f64,
+    /// It came in at the low end (the block with the smallest coordinate).
+    pub from_low: bool,
 }
 
-/// The trommel's drum and its three outlet buffers.
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct Drum {
-    pub items: Vec<Tumbling>,
-    /// One slot per class: fine, medium, oversize.
-    pub outlets: [Option<Stack>; 3],
+impl<T> Tumbling<T> {
+    /// The block it falls out of (0 = low end): its class counted from the
+    /// end it came in, fines first (8.2).
+    pub fn outlet(&self) -> usize {
+        let k = self.size.index();
+        if self.from_low {
+            k
+        } else {
+            TROMMEL_BLOCKS - 1 - k
+        }
+    }
+
+    /// Where it falls: the middle of its outlet's block, counted from its
+    /// entry end, as revolutions.
+    pub fn falls_at(&self) -> f64 {
+        (self.size.index() as f64 + 0.5) / TROMMEL_BLOCKS as f64 * TROMMEL_REVS
+    }
+
+    /// Its position along the drum, blocks from the low end (for drawing).
+    pub fn along(&self) -> f64 {
+        let x = (self.progress / TROMMEL_REVS).clamp(0.0, 1.0) * TROMMEL_BLOCKS as f64;
+        if self.from_low {
+            x
+        } else {
+            TROMMEL_BLOCKS as f64 - x
+        }
+    }
+}
+
+/// The trommel's drum and the outlets under its three blocks.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Drum<T> {
+    pub items: Vec<Tumbling<T>>,
+    /// Items waiting under each block (0 = low end), pushed out one at a time.
+    pub outlets: [Vec<T>; TROMMEL_BLOCKS],
+}
+
+impl<T> Default for Drum<T> {
+    fn default() -> Self {
+        Drum {
+            items: Vec::new(),
+            outlets: [Vec::new(), Vec::new(), Vec::new()],
+        }
+    }
 }
 
 /// One tick of the trommel.
@@ -288,32 +338,39 @@ pub struct DrumTick {
     pub sorted: usize,
 }
 
-impl Drum {
+impl<T> Drum<T> {
     /// Whether the drum takes another item (8.3: a full drum refuses).
     pub fn has_room(&self) -> bool {
         self.items.len() < TROMMEL_CAPACITY
     }
 
-    /// Put an item in; false when full.
-    pub fn insert(&mut self, item: &str, items: &dyn Items) -> bool {
+    /// Put an item in at one end; false when full.
+    pub fn insert(
+        &mut self,
+        item: T,
+        id: &str,
+        from_low: bool,
+        items: &dyn Items,
+    ) -> Result<(), T> {
         if !self.has_room() {
-            return false;
+            return Err(item);
         }
         self.items.push(Tumbling {
-            item: item.to_owned(),
-            size: Size::of(item, items),
+            item,
+            size: Size::of(id, items),
             progress: 0.0,
+            from_low,
         });
-        true
+        Ok(())
     }
 
     pub fn load(&self) -> f64 {
         (TROMMEL_BASE_LOAD + TROMMEL_LOAD_PER_ITEM * self.items.len() as f64).min(TROMMEL_MAX_LOAD)
     }
 
-    /// Tumble every item; those done fall into their outlet if it has room.
-    /// A blocked outlet stops only its class (8.3).
-    pub fn tick(&mut self, state: &MachineState, items: &dyn Items) -> DrumTick {
+    /// Tumble every item; those at their outlet fall into it if it has room.
+    /// A full outlet stops only the items bound for it (8.2).
+    pub fn tick(&mut self, state: &MachineState) -> DrumTick {
         let (min, max) = state.range;
         let has_work = !self.items.is_empty() && !state.jammed;
         let status = if state.jammed {
@@ -340,42 +397,28 @@ impl Drum {
             return out;
         }
         let step = progress_per_tick(state.rpm, min, max);
-        let mut blocked = false;
         let mut keep = Vec::with_capacity(self.items.len());
+        let mut waiting = 0;
         for mut t in std::mem::take(&mut self.items) {
-            t.progress += step;
-            if t.progress + 1e-9 >= TROMMEL_REVS {
-                let slot = &mut self.outlets[t.size.index()];
-                let max_stack = items.max_stack(&t.item).max(1);
-                match slot {
-                    None => {
-                        *slot = Some(Stack::new(&t.item, 1));
-                        out.sorted += 1;
-                        continue;
-                    }
-                    Some(s) if s.item == t.item && s.count < max_stack => {
-                        s.count += 1;
-                        out.sorted += 1;
-                        continue;
-                    }
-                    _ => {
-                        t.progress = TROMMEL_REVS;
-                        blocked = true;
-                    }
+            let at = t.falls_at();
+            t.progress = (t.progress + step).min(at);
+            if t.progress + 1e-9 >= at {
+                let k = t.outlet();
+                if self.outlets[k].len() < TROMMEL_OUTLET_HOLD {
+                    self.outlets[k].push(t.item);
+                    out.sorted += 1;
+                    continue;
                 }
+                waiting += 1;
             }
             keep.push(t);
         }
-        self.items = keep;
-        if blocked && out.status == Status::Grinding && out.sorted == 0 && self.all_blocked() {
+        if waiting > 0 && waiting == keep.len() && out.sorted == 0 && out.status == Status::Grinding
+        {
             out.status = Status::OutputFull;
         }
+        self.items = keep;
         out
-    }
-
-    /// Every item left is done and waiting for its outlet.
-    fn all_blocked(&self) -> bool {
-        self.items.iter().all(|t| t.progress >= TROMMEL_REVS - 1e-9)
     }
 }
 
@@ -418,7 +461,7 @@ fn item(s: &str) -> Ingredient {
 /// The washer's recipes (machines spec 4.2).
 pub fn washing() -> Vec<Recipe> {
     let byproduct = [
-        ("iron", "minecraft:redstone"),
+        ("iron", "minecraft:iron_nugget"),
         ("copper", "minecraft:gold_nugget"),
         ("gold", "minecraft:copper_nugget"),
     ];
@@ -481,26 +524,6 @@ pub fn hammering() -> Vec<Recipe> {
             1,
             vec![out("fras:rivet", 8, 1.0)],
             3.0,
-            8.0,
-            0.0,
-        ),
-        recipe(
-            "hammering",
-            "sand",
-            item("minecraft:sand"),
-            4,
-            vec![out("minecraft:sandstone", 1, 1.0)],
-            1.0,
-            8.0,
-            0.0,
-        ),
-        recipe(
-            "hammering",
-            "red_sand",
-            item("minecraft:red_sand"),
-            4,
-            vec![out("minecraft:red_sandstone", 1, 1.0)],
-            1.0,
             8.0,
             0.0,
         ),
@@ -614,7 +637,7 @@ pub fn sawing() -> Vec<Recipe> {
 /// The built-in recipes of a machine.
 pub fn builtin(machine: Machine) -> Vec<Recipe> {
     match machine {
-        Machine::Grinder => grind::builtin(),
+        Machine::Grinder | Machine::InlineGrinder => grind::builtin(),
         Machine::Washer => washing(),
         Machine::TripHammer => hammering(),
         Machine::Lathe => turning(),
@@ -625,21 +648,17 @@ pub fn builtin(machine: Machine) -> Vec<Recipe> {
 
 /// Default trommel classes (machines spec 8.3), as the tag files list them.
 pub fn trommel_fine() -> Vec<String> {
-    let mut v: Vec<String> = [
-        "minecraft:sand",
-        "minecraft:red_sand",
-        "#fras:dusts",
-        "#fras:crushed_ores",
-    ]
-    .iter()
-    .map(|s| s.to_string())
-    .collect();
+    let mut v: Vec<String> = ["minecraft:sand", "minecraft:red_sand", "#fras:dusts"]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
     v.sort();
     v
 }
 
 pub fn trommel_medium() -> Vec<String> {
     [
+        "#fras:crushed_ores",
         "minecraft:gravel",
         "minecraft:flint",
         "minecraft:iron_nugget",
@@ -706,6 +725,8 @@ impl Tank {
         (WASHER_TANK - self.amount).max(0.0)
     }
 }
+
+pub mod station;
 
 #[cfg(test)]
 mod tests;

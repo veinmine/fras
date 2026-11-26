@@ -1,15 +1,142 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
+    "belt": "minecraft:block/brown_wool",
     "particle": "minecraft:block/dark_oak_planks",
-    "t0": "minecraft:block/iron_block",
-    "t1": "minecraft:block/stripped_oak_log"
+    "t0": "minecraft:block/stripped_spruce_log",
+    "t1": "minecraft:block/red_terracotta",
+    "t2": "minecraft:block/iron_block"
   },
   "elements": [
     {
       "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
         1,
-        4,
+        5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t0"
+        },
+        "south": {
+          "texture": "#t0"
+        },
+        "east": {
+          "texture": "#t0"
+        },
+        "west": {
+          "texture": "#t0"
+        },
+        "up": {
+          "texture": "#t0"
+        },
+        "down": {
+          "texture": "#t0"
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t0"
+        },
+        "south": {
+          "texture": "#t0"
+        },
+        "east": {
+          "texture": "#t0"
+        },
+        "west": {
+          "texture": "#t0"
+        },
+        "up": {
+          "texture": "#t0"
+        },
+        "down": {
+          "texture": "#t0"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        0
+      ],
+      "to": [
+        15,
+        6,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#belt"
+        },
+        "south": {
+          "texture": "#belt"
+        },
+        "east": {
+          "texture": "#belt"
+        },
+        "west": {
+          "texture": "#belt"
+        },
+        "up": {
+          "texture": "#belt"
+        },
+        "down": {
+          "texture": "#belt"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5.02,
+        7
+      ],
+      "to": [
+        15,
+        6.02,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t1"
+        },
+        "south": {
+          "texture": "#t1"
+        },
+        "east": {
+          "texture": "#t1"
+        },
+        "west": {
+          "texture": "#t1"
+        },
+        "up": {
+          "texture": "#t1"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        6,
         1
       ],
       "to": [
@@ -41,7 +168,7 @@
     {
       "from": [
         1,
-        4,
+        6,
         14
       ],
       "to": [
@@ -72,12 +199,12 @@
     },
     {
       "from": [
-        1,
-        4,
+        0,
+        6,
         2
       ],
       "to": [
-        2,
+        1,
         14,
         14
       ],
@@ -104,45 +231,13 @@
     },
     {
       "from": [
-        14,
-        4,
-        2
-      ],
-      "to": [
         15,
-        14,
-        14
-      ],
-      "faces": {
-        "north": {
-          "texture": "#particle"
-        },
-        "south": {
-          "texture": "#particle"
-        },
-        "east": {
-          "texture": "#particle"
-        },
-        "west": {
-          "texture": "#particle"
-        },
-        "up": {
-          "texture": "#particle"
-        },
-        "down": {
-          "texture": "#particle"
-        }
-      }
-    },
-    {
-      "from": [
-        2,
-        4,
+        6,
         2
       ],
       "to": [
+        16,
         14,
-        5,
         14
       ],
       "faces": {
@@ -169,157 +264,29 @@
     {
       "from": [
         1,
-        8,
+        10,
         0.8
       ],
       "to": [
         15,
-        9,
+        11,
         1
       ],
       "faces": {
         "north": {
-          "texture": "#t0"
+          "texture": "#t2"
         },
         "south": {
-          "texture": "#t0"
+          "texture": "#t2"
         },
         "east": {
-          "texture": "#t0"
+          "texture": "#t2"
         },
         "west": {
-          "texture": "#t0"
+          "texture": "#t2"
         },
         "up": {
-          "texture": "#t0"
-        }
-      }
-    },
-    {
-      "from": [
-        1,
-        0,
-        1
-      ],
-      "to": [
-        3,
-        4,
-        3
-      ],
-      "faces": {
-        "north": {
-          "texture": "#t1"
-        },
-        "south": {
-          "texture": "#t1"
-        },
-        "east": {
-          "texture": "#t1"
-        },
-        "west": {
-          "texture": "#t1"
-        },
-        "up": {
-          "texture": "#t1"
-        },
-        "down": {
-          "texture": "#t1"
-        }
-      }
-    },
-    {
-      "from": [
-        13,
-        0,
-        1
-      ],
-      "to": [
-        15,
-        4,
-        3
-      ],
-      "faces": {
-        "north": {
-          "texture": "#t1"
-        },
-        "south": {
-          "texture": "#t1"
-        },
-        "east": {
-          "texture": "#t1"
-        },
-        "west": {
-          "texture": "#t1"
-        },
-        "up": {
-          "texture": "#t1"
-        },
-        "down": {
-          "texture": "#t1"
-        }
-      }
-    },
-    {
-      "from": [
-        1,
-        0,
-        13
-      ],
-      "to": [
-        3,
-        4,
-        15
-      ],
-      "faces": {
-        "north": {
-          "texture": "#t1"
-        },
-        "south": {
-          "texture": "#t1"
-        },
-        "east": {
-          "texture": "#t1"
-        },
-        "west": {
-          "texture": "#t1"
-        },
-        "up": {
-          "texture": "#t1"
-        },
-        "down": {
-          "texture": "#t1"
-        }
-      }
-    },
-    {
-      "from": [
-        13,
-        0,
-        13
-      ],
-      "to": [
-        15,
-        4,
-        15
-      ],
-      "faces": {
-        "north": {
-          "texture": "#t1"
-        },
-        "south": {
-          "texture": "#t1"
-        },
-        "east": {
-          "texture": "#t1"
-        },
-        "west": {
-          "texture": "#t1"
-        },
-        "up": {
-          "texture": "#t1"
-        },
-        "down": {
-          "texture": "#t1"
+          "texture": "#t2"
         }
       }
     }

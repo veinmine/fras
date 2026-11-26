@@ -47,6 +47,16 @@ fn with_prop(level: &dyn LevelHost, state: BlockState, key: &str, value: &str) -
 
 /// The horizontal side with a FRAS shaft-like part whose axis points at
 /// `pos` (a machine's socket goes there, grinder spec 5.1).
+/// Whether a vertical shaft-like part stands under `pos`.
+fn shaft_below(level: &dyn LevelHost, pos: Pos) -> bool {
+    level
+        .block_state(pos.offset(Dir::Down).to_array())
+        .is_some_and(|s| {
+            let (name, props) = state_props(level, s);
+            name.starts_with("fras:") && props.iter().any(|(k, v)| k == "axis" && v == "y")
+        })
+}
+
 fn socket_toward_shaft(level: &dyn LevelHost, pos: Pos) -> Option<Dir> {
     Dir::HORIZONTAL.into_iter().find(|d| {
         let Some(s) = level.block_state(pos.offset(*d).to_array()) else {
@@ -105,11 +115,33 @@ impl BlockPart for BlockHooks {
             }
             Block::Crank => state = set(state, "facing", face.opposite().name()),
             Block::Tachometer => state = set(state, "facing", face.name()),
-            Block::Washer | Block::TripHammer | Block::Lathe | Block::Sawmill => {
-                // As the grinder (machines spec 2.4).
-                let socket =
-                    socket_toward_shaft(level, pos_of(ctx.pos)).unwrap_or(facing.opposite());
-                state = set(state, "facing", socket.name());
+            Block::Washer
+            | Block::TripHammer
+            | Block::Lathe
+            | Block::Sawmill
+            | Block::InlineGrinder => {
+                // Placed like a door: the drive here, the machine above it,
+                // which must be free; the built-in belt runs away from the
+                // player; the socket faces an adjacent shaft (machines spec 2.3).
+                let pos = pos_of(ctx.pos);
+                let free = level
+                    .block_state(pos.offset(Dir::Up).to_array())
+                    .is_some_and(|s| {
+                        let (name, _) = state_props(level, s);
+                        matches!(
+                            name.as_str(),
+                            "minecraft:air" | "minecraft:cave_air" | "minecraft:short_grass"
+                        )
+                    });
+                if !free {
+                    return Some(None);
+                }
+                let socket = socket_toward_shaft(level, pos)
+                    .or_else(|| shaft_below(level, pos).then_some(Dir::Down))
+                    .unwrap_or(Dir::Down);
+                state = set(state, "facing", facing.name());
+                state = set(state, "half", "lower");
+                state = set(state, "socket", socket.name());
             }
             // ---- 0.4: belts (logistics 3.1, 8.1, 9) ----
             Block::ConveyorBelt => state = set(state, "facing", facing.name()),
@@ -119,26 +151,10 @@ impl BlockPart for BlockHooks {
             }
             Block::BucketElevator => state = set(state, "facing", facing.name()),
             Block::Trommel => {
-                // Two blocks, like a bed: the drum runs away from the player
-                // and needs the block in front free (machines spec 8.2).
-                let pos = pos_of(ctx.pos);
-                let ahead = pos.offset(facing);
-                let free = level.block_state(ahead.to_array()).is_some_and(|s| {
-                    let (name, _) = state_props(level, s);
-                    matches!(
-                        name.as_str(),
-                        "minecraft:air" | "minecraft:cave_air" | "minecraft:short_grass"
-                    )
-                });
-                if !free {
-                    return Some(None);
-                }
-                state = set(state, "facing", facing.name());
-                state = set(state, "part", "start");
-                let socket = socket_toward_shaft(level, pos)
-                    .filter(|d| d.axis() != facing.axis())
-                    .unwrap_or(facing.clockwise());
-                state = set(state, "socket", socket.name());
+                // Formed with its neighbours once placed (machines spec 8.2).
+                state = set(state, "part", "none");
+                state = set(state, "socket", "none");
+                state = set(state, "axis", facing.axis().name());
             }
             Block::Grinder => {
                 // Facing an adjacent shaft-like part whose axis points at it,
@@ -337,7 +353,13 @@ impl BlockPart for BlockHooks {
             }
         }
         if self.0 == Block::Trommel && !same_block {
-            super::machines::trommel_changed(dim, pos, mine_new);
+            super::machines::trommel_changed(dim, pos);
+        }
+        if self.0.is_line_machine() && !same_block {
+            super::machines::line_changed(dim, pos, mine_new);
+        }
+        if (self.0.is_line_machine() || self.0 == Block::Trommel) && mine_new && !same_block {
+            super::machines::neighbour(dim, pos);
         }
         with_level(dim, |l| {
             if mine_new {
@@ -368,7 +390,7 @@ impl BlockPart for BlockHooks {
                 l.wheel_torque.remove(&pos);
                 l.tachometers.remove(&pos);
                 l.histories.remove(&pos);
-                l.belt_jobs.remove(&pos);
+                l.machines.signals.remove(&pos);
                 l.grinder_signal.remove(&pos);
             }
         });
@@ -379,6 +401,9 @@ impl BlockPart for BlockHooks {
         let pos = pos_of(event.pos);
         if self.0.is_belt() || self.0 == Block::BucketElevator {
             super::belts::neighbour(dim, pos, self.0 == Block::Diverter);
+        }
+        if self.0.is_line_machine() || self.0 == Block::Trommel {
+            super::machines::neighbour(dim, pos);
         }
         with_level(dim, |l| match self.0 {
             Block::Bearing => {
@@ -441,7 +466,7 @@ impl BlockPart for BlockHooks {
             Block::Washer if item == Some(keys.water_bucket) => {
                 super::machines::bucket(host, event.click)
             }
-            b if b.is_machine04() => Some(super::machines::open(host, event.click)),
+            b if b.is_machine04() => Some(super::machines::use_on(host, event.click)),
             b if b.has_screen() => Some(super::grinder::open(host, event.click)),
             Block::CopperBoiler | Block::IronBoiler | Block::StorageTank => {
                 super::pipes::bucket(host, event.click)
@@ -467,7 +492,7 @@ impl BlockPart for BlockHooks {
             b if b.is_belt() || b == Block::BucketElevator => {
                 super::belts::use_on(host, event.click)
             }
-            b if b.is_machine04() => Some(super::machines::open(host, event.click)),
+            b if b.is_machine04() => Some(super::machines::use_on(host, event.click)),
             b if b.has_screen() => Some(super::grinder::open(host, event.click)),
             Block::ManualValve | Block::SteamRelease => hand_on_vent(self.0, host, event.click),
             _ => None,
@@ -497,12 +522,6 @@ impl BlockPart for BlockHooks {
     ) {
         if self.0 == Block::Grinder {
             super::grinder::refresh_signal(&*host, event.level, pos_of(event.pos));
-        } else if self.0 == Block::Trommel {
-            let slots = super::machines::TROMMEL_SLOTS;
-            super::machines::refresh_signal(&*host, event.level, pos_of(event.pos), slots);
-        } else if self.0.is_machine04() {
-            let slots = super::machines::SLOTS;
-            super::machines::refresh_signal(&*host, event.level, pos_of(event.pos), slots);
         }
     }
 
@@ -533,7 +552,7 @@ impl BlockPart for BlockHooks {
             }
             b if b.is_machine04() => {
                 event.output =
-                    with_level(dim, |l| l.grinder_signal.get(&pos).copied().unwrap_or(0));
+                    with_level(dim, |l| l.machines.signals.get(&pos).copied().unwrap_or(0));
             }
             Block::Diverter => event.output = super::belts::diverter_signal(dim, pos),
             Block::PressureGauge | Block::SightGlass => {

@@ -949,6 +949,27 @@ def belt_shapes():
     return {"properties": ["facing", "slope"], "values": values}
 
 
+LINE_MACHINES = ["washer", "trip_hammer", "lathe", "sawmill", "inline_grinder"]
+SOCKET_FACES = HORIZONTAL + ["down"]
+
+
+def line_machine(template, hardness, tool, particle):
+    return (
+        {
+            "template": template,
+            "properties": {"hardness": hardness, "occludes": False},
+            "state_properties": {
+                "facing": HORIZ_ENUM,
+                "half": {"type": "enum", "values": ["lower", "upper"]},
+                "socket": {"type": "enum", "values": SOCKET_FACES},
+            },
+            "default_state": {"facing": "north", "half": "lower", "socket": "down"},
+        },
+        tool,
+        particle,
+    )
+
+
 FACTORY_BLOCKS = {
     "conveyor_belt": (
         {
@@ -990,45 +1011,24 @@ FACTORY_BLOCKS = {
         "axe",
         "minecraft:block/spruce_planks",
     ),
-    "washer": (
-        {"template": WOOD, "properties": {"hardness": 2.5, "occludes": False}, "state_properties": {"facing": HORIZ_ENUM}, "default_state": {"facing": "north"}},
-        "axe",
-        "minecraft:block/dark_oak_planks",
-    ),
-    "trip_hammer": (
-        {"template": WOOD, "properties": {"hardness": 2.5, "occludes": False}, "state_properties": {"facing": HORIZ_ENUM}, "default_state": {"facing": "north"}},
-        "axe",
-        "minecraft:block/stripped_spruce_log",
-    ),
-    "lathe": (
-        {
-            "template": IRON,
-            "properties": {"hardness": 3.0, "occludes": False},
-            "state_properties": {"facing": HORIZ_ENUM},
-            "default_state": {"facing": "north"},
-            "shapes": {"default": [[0, 0, 0, 1, px(12), 1]]},
-        },
-        "pickaxe",
-        "minecraft:block/iron_block",
-    ),
-    "sawmill": (
-        {
-            "template": WOOD,
-            "properties": {"hardness": 2.5, "occludes": False},
-            "state_properties": {"facing": HORIZ_ENUM},
-            "default_state": {"facing": "north"},
-            "shapes": {"default": [[0, 0, 0, 1, px(12), 1]]},
-            "collision_shapes": {"default": [[0, 0, 0, 1, px(12), 1]]},
-        },
-        "axe",
-        "minecraft:block/spruce_planks",
-    ),
+    # Line machines (machines spec 2.3): two blocks, placed like a door; the
+    # top is the machine with its built-in belt, the bottom the drive.
+    "washer": line_machine(WOOD, 2.5, "axe", "minecraft:block/dark_oak_planks"),
+    "trip_hammer": line_machine(WOOD, 2.5, "axe", "minecraft:block/stripped_spruce_log"),
+    "lathe": line_machine(IRON, 3.0, "pickaxe", "minecraft:block/iron_block"),
+    "sawmill": line_machine(WOOD, 2.5, "axe", "minecraft:block/spruce_planks"),
+    "inline_grinder": line_machine(WOOD, 2.5, "axe", "minecraft:block/stripped_oak_log"),
+    # Three in a row form a trommel (machines spec 8.2).
     "trommel": (
         {
             "template": IRON,
             "properties": {"hardness": 3.0, "occludes": False},
-            "state_properties": {"facing": HORIZ_ENUM, "part": {"type": "enum", "values": ["start", "end"]}, "socket": HORIZ_ENUM},
-            "default_state": {"facing": "north", "part": "start", "socket": "east"},
+            "state_properties": {
+                "part": {"type": "enum", "values": ["none", "end", "middle"]},
+                "axis": {"type": "enum", "values": ["x", "z"]},
+                "socket": {"type": "enum", "values": ["none"] + HORIZONTAL},
+            },
+            "default_state": {"part": "none", "axis": "x", "socket": "none"},
         },
         "pickaxe",
         "minecraft:block/iron_bars",
@@ -1297,6 +1297,9 @@ def regulation_items():
 
 def loot(name):
     entry = {"type": "minecraft:item", "name": f"{NS}:{name}"}
+    if name in LINE_MACHINES:
+        # The drive carries the drop (machines spec 2.3).
+        entry["condition"] = {"type": "minecraft:block_state_property", "block": f"{NS}:{name}", "properties": {"half": "lower"}}
     if name in RUSTING:
         entry = {"type": "minecraft:alternatives", "children": [
             {"type": "minecraft:item", "name": f"{NS}:painted_{name}",
@@ -1380,41 +1383,50 @@ def factory_models():
     m["block/bucket_elevator"] = block_model({}, casing, spruce)
     m["block/bucket_elevator_boot"] = block_model({}, casing + [el([1, 0, 1], [15, 4, 15], {"side": spruce})], spruce)
     m["block/bucket_elevator_head"] = block_model({}, casing + [el([1, 12, 1], [15, 16, 15], {"side": spruce}), el([5, 9, 0], [11, 14, 2], {"side": iron})], spruce)
-    # Machines: frames as models, moving parts drawn.
-    m["block/washer"] = block_model({}, [
-        el([1, 4, 1], [15, 14, 2], dark), el([1, 4, 14], [15, 14, 15], dark),
-        el([1, 4, 2], [2, 14, 14], dark), el([14, 4, 2], [15, 14, 14], dark),
-        el([2, 4, 2], [14, 5, 14], dark),
-        el([1, 8, 0.8], [15, 9, 1], iron, skip=("down",)),
-        el([1, 0, 1], [3, 4, 3], log), el([13, 0, 1], [15, 4, 3], log),
-        el([1, 0, 13], [3, 4, 15], log), el([13, 0, 13], [15, 4, 15], log),
+    # Line machines: the top carries the built-in belt (north = the output)
+    # under the machine's frame; moving parts are drawn.
+    andesite = "minecraft:block/polished_andesite"
+    belt = {"belt": wool}
+    m["block/washer"] = block_model(belt, belt_flat + [
+        el([1, 6, 1], [15, 14, 2], dark), el([1, 6, 14], [15, 14, 15], dark),
+        el([0, 6, 2], [1, 14, 14], dark), el([15, 6, 2], [16, 14, 14], dark),
+        el([1, 10, 0.8], [15, 11, 1], iron, skip=("down",)),
     ], dark)
-    m["block/trip_hammer"] = block_model({}, [
-        el([0, 0, 6], [2, 16, 10], frame), el([14, 0, 6], [16, 16, 10], frame),
+    m["block/trip_hammer"] = block_model(belt, belt_flat + [
+        el([0, 5, 6], [1, 16, 10], frame), el([15, 5, 6], [16, 16, 10], frame),
         el([0, 14, 6], [16, 16, 10], frame),
-        el([3, 0, 3], [13, 4, 13], "minecraft:block/anvil"),
     ], frame)
-    m["block/lathe"] = block_model({}, [
-        el([1, 0, 1], [3, 8, 15], iron), el([13, 0, 1], [15, 8, 15], iron),
-        el([1, 8, 2], [15, 10, 14], iron),
-        el([1, 10, 4], [5, 14, 12], "minecraft:block/polished_andesite"),
-        el([11, 10, 5], [14, 13, 11], "minecraft:block/polished_andesite"),
+    m["block/lathe"] = block_model(belt, belt_flat + [
+        el([0, 5, 4], [1, 12, 12], iron), el([15, 5, 4], [16, 12, 12], iron),
+        el([1, 9, 3], [4, 13, 13], andesite),
+        el([12, 9, 4], [15, 12, 12], andesite),
     ], iron)
-    m["block/sawmill"] = block_model({}, [
-        el([0, 10, 0], [16, 12, 16], {"side": spruce, "up": spruce}),
-        el([0, 0, 0], [2, 10, 2], log), el([14, 0, 0], [16, 10, 2], log),
-        el([0, 0, 14], [2, 10, 16], log), el([14, 0, 14], [16, 10, 16], log),
+    m["block/sawmill"] = block_model(belt, belt_flat + [
+        el([0, 5, 0], [1, 12, 16], {"side": spruce}), el([15, 5, 0], [16, 12, 16], {"side": spruce}),
+        el([0, 12, 0], [16, 13, 5], spruce), el([0, 12, 11], [16, 13, 16], spruce),
     ], spruce)
-    m["block/trommel"] = block_model({}, [
-        el([0, 0, 0], [16, 3, 2], frame), el([0, 0, 14], [16, 3, 16], frame),
-        el([1, 3, 1], [3, 5, 15], iron),
-        el([4, 0, 4], [12, 2, 12], bars),
-    ], bars)
-    m["block/trommel_end"] = block_model({}, [
-        el([0, 0, 0], [16, 3, 2], frame), el([0, 0, 14], [16, 3, 16], frame),
-        el([13, 3, 1], [15, 5, 15], iron),
-        el([4, 0, 4], [12, 2, 12], bars),
-    ], bars)
+    m["block/inline_grinder"] = block_model(belt, belt_flat + [
+        el([0, 5, 2], [1, 14, 14], log), el([15, 5, 2], [16, 14, 14], log),
+        el([1, 12, 2], [15, 14, 14], {"side": log, "up": "minecraft:block/smooth_stone"}),
+    ], log)
+    # The drive: a timber frame; the socket's hub faces north (or down).
+    drive = [
+        el([0, 0, 0], [2, 16, 2], frame), el([14, 0, 0], [16, 16, 2], frame),
+        el([0, 0, 14], [2, 16, 16], frame), el([14, 0, 14], [16, 16, 16], frame),
+        el([2, 13, 2], [14, 16, 14], {"side": spruce, "up": spruce, "down": spruce}),
+        el([5, 5, 5], [11, 11, 11], iron),
+    ]
+    m["block/machine_drive"] = block_model({}, drive + [el([6, 6, 0], [10, 10, 5], andesite)], frame)
+    m["block/machine_drive_down"] = block_model({}, drive + [el([6, 0, 6], [10, 5, 10], andesite)], frame)
+    # The trommel (drum along x): a loose block, an end with a mouth, the middle.
+    cradle = [el([0, 0, 0], [16, 3, 2], frame), el([0, 0, 14], [16, 3, 16], frame), el([4, 0, 4], [12, 2, 12], bars)]
+    drum = [el([0, 4, 3], [16, 13, 4], bars), el([0, 4, 12], [16, 13, 13], bars), el([0, 12, 4], [16, 13, 12], bars), el([0, 3, 4], [16, 4, 12], bars)]
+    hub = [el([6, 6, 0], [10, 10, 3], andesite)]
+    m["block/trommel"] = block_model({}, cradle + [el([2, 3, 2], [14, 14, 14], bars)], bars)
+    m["block/trommel_end"] = block_model({}, cradle + drum + [el([7, 4, 4], [9, 13, 12], iron)], bars)
+    m["block/trommel_middle"] = block_model({}, cradle + drum, bars)
+    m["block/trommel_end_socket"] = block_model({}, cradle + drum + [el([7, 4, 4], [9, 13, 12], iron)] + hub, bars)
+    m["block/trommel_middle_socket"] = block_model({}, cradle + drum + hub, bars)
     for name in ["iron_pulley", "large_iron_pulley"]:
         m[f"block/{name}"] = {"textures": {"particle": iron}, "elements": []}
     m["item/iron_pulley"] = block_model(
@@ -1427,7 +1439,7 @@ def factory_models():
         [bar("z", 0, 16, 2, "#side", "#side"), bar("z", 5, 11, 8, "#disc", "#disc")],
         iron,
     )
-    for name in ["conveyor_belt", "diverter", "bucket_elevator", "washer", "trip_hammer", "lathe", "sawmill", "trommel"]:
+    for name in ["conveyor_belt", "diverter", "bucket_elevator", "trommel"] + LINE_MACHINES:
         m[f"item/{name}"] = {"parent": f"{NS}:block/{name}"}
     for name in FACTORY_ITEMS:
         m[f"item/{name}"] = {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{name}"}}
@@ -1462,16 +1474,29 @@ def factory_blockstate(name):
         return {"variants": v}
     if name == "trommel":
         v = {}
-        for f, r in NORTH_Y.items():
-            for part in ["start", "end"]:
-                for sock in HORIZONTAL:
-                    model = "trommel" if part == "start" else "trommel_end"
-                    # The model's drum runs along x; north-facing turns it to z.
-                    rr = {"y": (r.get("y", 0) + 90) % 360}
-                    v[f"facing={f},part={part},socket={sock}"] = dict({"model": f"{NS}:block/{model}"}, **rr)
+        for part in ["none", "end", "middle"]:
+            for axis in ["x", "z"]:
+                for sock in ["none"] + HORIZONTAL:
+                    model = "trommel" if part == "none" else f"trommel_{part}"
+                    if part != "none" and sock != "none":
+                        model += "_socket"
+                        # The hub faces north in the model.
+                        y = NORTH_Y[sock].get("y", 0)
+                    else:
+                        y = 0 if axis == "x" else 90
+                    rr = {"y": y} if y else {}
+                    v[f"axis={axis},part={part},socket={sock}"] = dict({"model": f"{NS}:block/{model}"}, **rr)
         return {"variants": v}
-    if name in ("washer", "trip_hammer", "lathe", "sawmill"):
-        return {"variants": {f"facing={f}": dict({"model": f"{NS}:block/{name}"}, **r) for f, r in NORTH_Y.items()}}
+    if name in LINE_MACHINES:
+        v = {}
+        for f, r in NORTH_Y.items():
+            for sock in SOCKET_FACES:
+                v[f"facing={f},half=upper,socket={sock}"] = dict({"model": f"{NS}:block/{name}"}, **r)
+                if sock == "down":
+                    v[f"facing={f},half=lower,socket={sock}"] = {"model": f"{NS}:block/machine_drive_down"}
+                else:
+                    v[f"facing={f},half=lower,socket={sock}"] = dict({"model": f"{NS}:block/machine_drive"}, **NORTH_Y[sock])
+        return {"variants": v}
     return {"variants": {"": {"model": f"{NS}:block/{name}"}}}
 
 
@@ -1503,7 +1528,7 @@ def machine_recipes():
     """The four machine recipe types (machines spec 4.2 to 7.2); `sim::machine`
     holds the same tables and a test compares them."""
     out = {}
-    for metal, by in [("iron", "minecraft:redstone"), ("copper", "minecraft:gold_nugget"), ("gold", "minecraft:copper_nugget")]:
+    for metal, by in [("iron", "minecraft:iron_nugget"), ("copper", "minecraft:gold_nugget"), ("gold", "minecraft:copper_nugget")]:
         dust = f"{NS}:{metal}_dust"
         out[f"washing/crushed_{metal}"] = machine_recipe(
             "washing", f"{NS}:crushed_{metal}", [res(dust), res(dust, 1, 0.3333), res(by, 1, 0.1)], 2.5, 4.0, 50.0)
@@ -1511,8 +1536,6 @@ def machine_recipes():
     out["hammering/iron_ingot"] = machine_recipe("hammering", "minecraft:iron_ingot", [res(f"{NS}:iron_plate")], 2.0, 8.0)
     out["hammering/copper_ingot"] = machine_recipe("hammering", "minecraft:copper_ingot", [res(f"{NS}:copper_plate")], 2.0, 8.0)
     out["hammering/iron_rod"] = machine_recipe("hammering", f"{NS}:iron_rod", [res(f"{NS}:rivet", 8)], 3.0, 8.0)
-    out["hammering/sand"] = machine_recipe("hammering", "minecraft:sand", [res("minecraft:sandstone")], 1.0, 8.0, count=4)
-    out["hammering/red_sand"] = machine_recipe("hammering", "minecraft:red_sand", [res("minecraft:red_sandstone")], 1.0, 8.0, count=4)
     out["turning/iron_ingot"] = machine_recipe("turning", "minecraft:iron_ingot", [res(f"{NS}:iron_rod", 2)], 8.0, 4.0)
     out["turning/iron_plate"] = machine_recipe("turning", f"{NS}:iron_plate", [res(f"{NS}:iron_gear")], 12.0, 4.0)
     out["turning/copper_plate"] = machine_recipe("turning", f"{NS}:copper_plate", [res(f"{NS}:copper_pipe", 3)], 8.0, 3.0)
@@ -1532,6 +1555,7 @@ def factory_recipes():
     p, t, g, r, s, i = f"{NS}:iron_plate", f"{NS}:rivet", f"{NS}:iron_gear", f"{NS}:iron_rod", f"{NS}:iron_shaft", "minecraft:iron_ingot"
     planks, logs = "#minecraft:planks", "#minecraft:logs"
     c, d = f"{NS}:copper_pipe", "minecraft:redstone"
+    belt = f"{NS}:conveyor_belt"
     out = {
         # Progression 4.2: replaced in place (same ids).
         "iron_shaft_from_rods": shaped(["R", "R"], {"R": r}, s, 4),
@@ -1549,11 +1573,12 @@ def factory_recipes():
         "bucket_elevator": shaped(["PBP", "PGP", "PBP"], {"P": planks, "B": "minecraft:bucket", "G": g}, f"{NS}:bucket_elevator", 4),
         "diverter": shapeless([f"{NS}:conveyor_belt", p, d], f"{NS}:diverter"),
         # Machines 13.2.
-        "trip_hammer": shaped([" S ", "LBL", "PPP"], {"S": f"{NS}:wooden_shaft", "L": logs, "B": "minecraft:iron_block", "P": p}, f"{NS}:trip_hammer"),
-        "lathe": shaped(["PSP", "IFI", "LLL"], {"P": p, "S": s, "I": i, "F": "minecraft:flint", "L": logs}, f"{NS}:lathe"),
-        "washer": shaped(["PGP", "CKC", "PPP"], {"P": planks, "G": g, "C": c, "K": "minecraft:bucket"}, f"{NS}:washer"),
-        "sawmill": shaped(["IGI", "PSP", "PPP"], {"I": i, "G": g, "P": planks, "S": s}, f"{NS}:sawmill"),
-        "trommel": shaped(["BBB", "G S", "BBB"], {"B": "minecraft:iron_bars", "G": g, "S": s}, f"{NS}:trommel"),
+        "trip_hammer": shaped(["CS ", "LBL", "PPP"], {"C": belt, "S": f"{NS}:wooden_shaft", "L": logs, "B": "minecraft:iron_block", "P": p}, f"{NS}:trip_hammer"),
+        "lathe": shaped(["PSP", "IFI", "LCL"], {"P": p, "S": s, "I": i, "F": "minecraft:flint", "L": logs, "C": belt}, f"{NS}:lathe"),
+        "washer": shaped(["PGP", "KUK", "PCP"], {"P": planks, "G": g, "K": c, "U": "minecraft:bucket", "C": belt}, f"{NS}:washer"),
+        "sawmill": shaped(["IGI", "PSP", "PCP"], {"I": i, "G": g, "P": planks, "S": s, "C": belt}, f"{NS}:sawmill"),
+        "inline_grinder": shapeless([f"{NS}:grinder", belt, planks], f"{NS}:inline_grinder"),
+        "trommel": shaped(["BBB", "G S", "BBB"], {"B": "minecraft:iron_bars", "G": g, "S": s}, f"{NS}:trommel", 3),
         # Progression 4.4.
         "iron_pulley": shaped([" I ", "ISI", " I "], {"I": i, "S": s}, f"{NS}:iron_pulley"),
         "large_iron_pulley": shaped(["III", "ISI", "III"], {"I": i, "S": s}, f"{NS}:large_iron_pulley"),
@@ -1573,19 +1598,19 @@ def factory_recipes():
 
 
 def factory_data():
-    # Machine menus: input slot 0, results 1-4; data [progress, rpm, status,
-    # max, tank, belt mode, min, strikes needed].
-    for name in ["washer", "trip_hammer", "lathe", "sawmill"]:
-        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 5, "data_slots": 8, "results": [1, 2, 3, 4]})
-    # The trommel: input, three outlet buffers.
-    write(f"data/{NS}/horizon/menu/trommel.json", {"slots": 4, "data_slots": 8, "results": [1, 2, 3]})
+    # Machine menus (machines spec 2.5): one hidden inbox slot, information
+    # only; data [progress or drum count, rpm, status, max, tank, 0, min,
+    # strikes needed or drum capacity].
+    for name in LINE_MACHINES + ["trommel"]:
+        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 8})
     for path, recipe in machine_recipes().items():
         write(f"data/{NS}/recipe/{path}.json", recipe)
     tags = {
         "dusts": [f"{NS}:{m}_dust" for m in ["iron", "copper", "gold"]],
         "belt_fabrics": ["minecraft:leather", "#minecraft:wool"],
-        "trommel/fine": ["minecraft:sand", "minecraft:red_sand", f"#{NS}:dusts", f"#{NS}:crushed_ores"],
+        "trommel/fine": ["minecraft:sand", "minecraft:red_sand", f"#{NS}:dusts"],
         "trommel/medium": [
+            f"#{NS}:crushed_ores",
             "minecraft:gravel", "minecraft:flint", "minecraft:iron_nugget", "minecraft:gold_nugget",
             "minecraft:copper_nugget", "minecraft:redstone", "minecraft:bone_meal", "minecraft:clay_ball",
             "minecraft:coal", "minecraft:charcoal", f"{NS}:rust_flakes", f"{NS}:red_oxide_pigment",

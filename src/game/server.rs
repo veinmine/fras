@@ -70,8 +70,6 @@ pub struct Level {
     pub histories: HashMap<Pos, super::readout::History>,
     /// Belts, bucket elevators and diverters (0.4).
     pub belts: super::belts::Belts,
-    /// Belt machines over a belt, by machine position.
-    pub belt_jobs: HashMap<Pos, super::machines::BeltJob>,
     /// Work queued for the 0.4 machines.
     pub machines: super::machines::Queue,
 }

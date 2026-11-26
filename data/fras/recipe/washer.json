@@ -3,14 +3,15 @@
   "category": "misc",
   "pattern": [
     "PGP",
-    "CKC",
-    "PPP"
+    "KUK",
+    "PCP"
   ],
   "key": {
     "P": "#minecraft:planks",
     "G": "fras:iron_gear",
-    "C": "fras:copper_pipe",
-    "K": "minecraft:bucket"
+    "K": "fras:copper_pipe",
+    "U": "minecraft:bucket",
+    "C": "fras:conveyor_belt"
   },
   "result": {
     "id": "fras:washer",

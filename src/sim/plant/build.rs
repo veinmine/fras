@@ -9,7 +9,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use super::*;
 use crate::sim::fluid::route;
-use crate::sim::geom::Dir;
+use crate::sim::geom::{Axis, Dir};
 use crate::sim::multi::{boiler, engine, shape};
 use crate::sim::rot::View;
 use crate::sim::steam::PIPE_STEAM;
@@ -418,7 +418,9 @@ impl Works {
                     None
                 }
             }
-            Kind::Washer => (face != s.dir).then_some(Role::Fit(End::Wash(pos))),
+            // The top block's left and right sides (machines spec 4.3).
+            Kind::Washer => (face.axis() != Axis::Y && face.axis() != s.dir.axis())
+                .then_some(Role::Fit(End::Wash(pos))),
             Kind::Pump => (face == s.dir.opposite()).then_some(Role::Fit(End::Pump(pos))),
             Kind::Source => s.fluid.map(|c| Role::Fit(End::Source(pos, c))),
             Kind::Void => Some(Role::Fit(End::Void(pos))),

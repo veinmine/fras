@@ -1,132 +1,113 @@
 {
   "variants": {
-    "facing=north,part=start,socket=north": {
+    "axis=x,part=none,socket=none": {
+      "model": "fras:block/trommel"
+    },
+    "axis=x,part=none,socket=north": {
+      "model": "fras:block/trommel"
+    },
+    "axis=x,part=none,socket=south": {
+      "model": "fras:block/trommel"
+    },
+    "axis=x,part=none,socket=west": {
+      "model": "fras:block/trommel"
+    },
+    "axis=x,part=none,socket=east": {
+      "model": "fras:block/trommel"
+    },
+    "axis=z,part=none,socket=none": {
       "model": "fras:block/trommel",
       "y": 90
     },
-    "facing=north,part=start,socket=south": {
+    "axis=z,part=none,socket=north": {
       "model": "fras:block/trommel",
       "y": 90
     },
-    "facing=north,part=start,socket=west": {
+    "axis=z,part=none,socket=south": {
       "model": "fras:block/trommel",
       "y": 90
     },
-    "facing=north,part=start,socket=east": {
+    "axis=z,part=none,socket=west": {
       "model": "fras:block/trommel",
       "y": 90
     },
-    "facing=north,part=end,socket=north": {
+    "axis=z,part=none,socket=east": {
+      "model": "fras:block/trommel",
+      "y": 90
+    },
+    "axis=x,part=end,socket=none": {
+      "model": "fras:block/trommel_end"
+    },
+    "axis=x,part=end,socket=north": {
+      "model": "fras:block/trommel_end_socket"
+    },
+    "axis=x,part=end,socket=south": {
+      "model": "fras:block/trommel_end_socket",
+      "y": 180
+    },
+    "axis=x,part=end,socket=west": {
+      "model": "fras:block/trommel_end_socket",
+      "y": 270
+    },
+    "axis=x,part=end,socket=east": {
+      "model": "fras:block/trommel_end_socket",
+      "y": 90
+    },
+    "axis=z,part=end,socket=none": {
       "model": "fras:block/trommel_end",
       "y": 90
     },
-    "facing=north,part=end,socket=south": {
-      "model": "fras:block/trommel_end",
+    "axis=z,part=end,socket=north": {
+      "model": "fras:block/trommel_end_socket"
+    },
+    "axis=z,part=end,socket=south": {
+      "model": "fras:block/trommel_end_socket",
+      "y": 180
+    },
+    "axis=z,part=end,socket=west": {
+      "model": "fras:block/trommel_end_socket",
+      "y": 270
+    },
+    "axis=z,part=end,socket=east": {
+      "model": "fras:block/trommel_end_socket",
       "y": 90
     },
-    "facing=north,part=end,socket=west": {
-      "model": "fras:block/trommel_end",
+    "axis=x,part=middle,socket=none": {
+      "model": "fras:block/trommel_middle"
+    },
+    "axis=x,part=middle,socket=north": {
+      "model": "fras:block/trommel_middle_socket"
+    },
+    "axis=x,part=middle,socket=south": {
+      "model": "fras:block/trommel_middle_socket",
+      "y": 180
+    },
+    "axis=x,part=middle,socket=west": {
+      "model": "fras:block/trommel_middle_socket",
+      "y": 270
+    },
+    "axis=x,part=middle,socket=east": {
+      "model": "fras:block/trommel_middle_socket",
       "y": 90
     },
-    "facing=north,part=end,socket=east": {
-      "model": "fras:block/trommel_end",
+    "axis=z,part=middle,socket=none": {
+      "model": "fras:block/trommel_middle",
       "y": 90
     },
-    "facing=east,part=start,socket=north": {
-      "model": "fras:block/trommel",
+    "axis=z,part=middle,socket=north": {
+      "model": "fras:block/trommel_middle_socket"
+    },
+    "axis=z,part=middle,socket=south": {
+      "model": "fras:block/trommel_middle_socket",
       "y": 180
     },
-    "facing=east,part=start,socket=south": {
-      "model": "fras:block/trommel",
-      "y": 180
-    },
-    "facing=east,part=start,socket=west": {
-      "model": "fras:block/trommel",
-      "y": 180
-    },
-    "facing=east,part=start,socket=east": {
-      "model": "fras:block/trommel",
-      "y": 180
-    },
-    "facing=east,part=end,socket=north": {
-      "model": "fras:block/trommel_end",
-      "y": 180
-    },
-    "facing=east,part=end,socket=south": {
-      "model": "fras:block/trommel_end",
-      "y": 180
-    },
-    "facing=east,part=end,socket=west": {
-      "model": "fras:block/trommel_end",
-      "y": 180
-    },
-    "facing=east,part=end,socket=east": {
-      "model": "fras:block/trommel_end",
-      "y": 180
-    },
-    "facing=south,part=start,socket=north": {
-      "model": "fras:block/trommel",
+    "axis=z,part=middle,socket=west": {
+      "model": "fras:block/trommel_middle_socket",
       "y": 270
     },
-    "facing=south,part=start,socket=south": {
-      "model": "fras:block/trommel",
-      "y": 270
-    },
-    "facing=south,part=start,socket=west": {
-      "model": "fras:block/trommel",
-      "y": 270
-    },
-    "facing=south,part=start,socket=east": {
-      "model": "fras:block/trommel",
-      "y": 270
-    },
-    "facing=south,part=end,socket=north": {
-      "model": "fras:block/trommel_end",
-      "y": 270
-    },
-    "facing=south,part=end,socket=south": {
-      "model": "fras:block/trommel_end",
-      "y": 270
-    },
-    "facing=south,part=end,socket=west": {
-      "model": "fras:block/trommel_end",
-      "y": 270
-    },
-    "facing=south,part=end,socket=east": {
-      "model": "fras:block/trommel_end",
-      "y": 270
-    },
-    "facing=west,part=start,socket=north": {
-      "model": "fras:block/trommel",
-      "y": 0
-    },
-    "facing=west,part=start,socket=south": {
-      "model": "fras:block/trommel",
-      "y": 0
-    },
-    "facing=west,part=start,socket=west": {
-      "model": "fras:block/trommel",
-      "y": 0
-    },
-    "facing=west,part=start,socket=east": {
-      "model": "fras:block/trommel",
-      "y": 0
-    },
-    "facing=west,part=end,socket=north": {
-      "model": "fras:block/trommel_end",
-      "y": 0
-    },
-    "facing=west,part=end,socket=south": {
-      "model": "fras:block/trommel_end",
-      "y": 0
-    },
-    "facing=west,part=end,socket=west": {
-      "model": "fras:block/trommel_end",
-      "y": 0
-    },
-    "facing=west,part=end,socket=east": {
-      "model": "fras:block/trommel_end",
-      "y": 0
+    "axis=z,part=middle,socket=east": {
+      "model": "fras:block/trommel_middle_socket",
+      "y": 90
     }
   }
 }

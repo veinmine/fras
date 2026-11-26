@@ -15,9 +15,28 @@
         "west",
         "east"
       ]
+    },
+    "half": {
+      "type": "enum",
+      "values": [
+        "lower",
+        "upper"
+      ]
+    },
+    "socket": {
+      "type": "enum",
+      "values": [
+        "north",
+        "south",
+        "west",
+        "east",
+        "down"
+      ]
     }
   },
   "default_state": {
-    "facing": "north"
+    "facing": "north",
+    "half": "lower",
+    "socket": "down"
   }
 }

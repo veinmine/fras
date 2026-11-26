@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "#fras:crushed_ores",
     "minecraft:gravel",
     "minecraft:flint",
     "minecraft:iron_nugget",

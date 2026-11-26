@@ -6,7 +6,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "fras:trip_hammer"
+          "name": "fras:trip_hammer",
+          "condition": {
+            "type": "minecraft:block_state_property",
+            "block": "fras:trip_hammer",
+            "properties": {
+              "half": "lower"
+            }
+          }
         }
       ],
       "condition": {

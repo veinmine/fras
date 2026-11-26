@@ -6,7 +6,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "fras:washer"
+          "name": "fras:washer",
+          "condition": {
+            "type": "minecraft:block_state_property",
+            "block": "fras:washer",
+            "properties": {
+              "half": "lower"
+            }
+          }
         }
       ],
       "condition": {

@@ -7,25 +7,25 @@
     "requires_tool": false
   },
   "state_properties": {
-    "facing": {
-      "type": "enum",
-      "values": [
-        "north",
-        "south",
-        "west",
-        "east"
-      ]
-    },
     "part": {
       "type": "enum",
       "values": [
-        "start",
-        "end"
+        "none",
+        "end",
+        "middle"
+      ]
+    },
+    "axis": {
+      "type": "enum",
+      "values": [
+        "x",
+        "z"
       ]
     },
     "socket": {
       "type": "enum",
       "values": [
+        "none",
         "north",
         "south",
         "west",
@@ -34,8 +34,8 @@
     }
   },
   "default_state": {
-    "facing": "north",
-    "part": "start",
-    "socket": "east"
+    "part": "none",
+    "axis": "x",
+    "socket": "none"
   }
 }

@@ -1,10 +1,10 @@
 //! `/fras scenario <name>`: ready-made setups for testing, built east of
 //! where the command runs (logistics 12, machines 10).
 //!
-//! - `ore_line`: the 0.4 reference ore line on creative engines at 64 RPM:
-//!   a chest of raw iron, a hopper, a belt into a grinder, a belt under it
-//!   through a washer in belt mode into a trommel, and chests at the
-//!   trommel's three outlets.
+//! - `ore_line`: the 0.4 reference ore line on creative engines at 64 RPM,
+//!   its belts at eye level: a chest of raw ore, a hopper, a belt through
+//!   an inline grinder and a washer into a three-block trommel, and chests
+//!   under the trommel's three outlets.
 //! - `test_engine`: a single-cylinder steam engine on a creative steam
 //!   source at 4 bar, driving a load bank of 32 Nm through an iron shaft.
 //!
@@ -22,9 +22,10 @@ pub const NAMES: [&str; 2] = ["ore_line", "test_engine"];
 const BELT: &str = "fras:conveyor_belt[facing=east]";
 const ENGINE: &str = "fras:creative_engine[facing=south]";
 
-/// The ore line's blocks, relative to its origin (belts at y 0 and -1).
+/// The ore line's blocks, relative to its origin: belts and machine tops
+/// at y 0, drives at y -1 (machines spec 2.3, 10).
 const ORE_LINE: &[([i32; 3], &str)] = &[
-    // Feed: chest → hopper → belt 1 (y 0, x 0..7) → grinder (x 8).
+    // Feed: chest → hopper → belt 1 (x 0..4) → inline grinder (x 5).
     ([0, 2, 0], "minecraft:chest"),
     ([0, 1, 0], "minecraft:hopper[facing=down]"),
     ([0, 0, 0], BELT),
@@ -32,56 +33,52 @@ const ORE_LINE: &[([i32; 3], &str)] = &[
     ([2, 0, 0], BELT),
     ([3, 0, 0], BELT),
     ([4, 0, 0], BELT),
-    ([5, 0, 0], BELT),
+    ([2, 0, -1], ENGINE),
+    (
+        [5, -1, 0],
+        "fras:inline_grinder[facing=east,half=lower,socket=north]",
+    ),
+    (
+        [5, 0, 0],
+        "fras:inline_grinder[facing=east,half=upper,socket=down]",
+    ),
+    ([5, -1, -1], ENGINE),
+    // Belt 2 (x 6..7) → washer (x 8), water piped into its top's south side.
     ([6, 0, 0], BELT),
     ([7, 0, 0], BELT),
-    ([3, 0, -1], ENGINE),
-    ([8, 0, 0], "fras:grinder[facing=north]"),
-    ([8, 0, -1], ENGINE),
-    // The grinder pushes down onto belt 2 (y -1, x 7..15). It starts under
-    // belt 1's last block: starting under the grinder would make it belt
-    // 1's diagonal neighbour, and the two would join into one sloped line
-    // that skips the grinder (logistics 3.1).
-    ([7, -1, 0], BELT),
-    ([8, -1, 0], BELT),
-    ([9, -1, 0], BELT),
-    ([10, -1, 0], BELT),
-    ([11, -1, 0], BELT),
-    ([12, -1, 0], BELT),
-    ([13, -1, 0], BELT),
-    ([14, -1, 0], BELT),
-    ([15, -1, 0], BELT),
-    ([13, -1, -1], ENGINE),
-    // The washer rides over belt 2 at x 11, water piped from a creative
-    // source on its south side.
-    ([11, 0, 0], "fras:washer[facing=north]"),
-    ([11, 0, -1], ENGINE),
-    ([11, 0, 1], "fras:copper_pipe[north=true,south=true]"),
-    ([11, 0, 2], "fras:creative_water_source"),
-    // The trommel at x 16-17, its outlets into chests.
+    ([6, 0, -1], ENGINE),
     (
-        [16, -1, 0],
-        "fras:trommel[facing=east,part=start,socket=north]",
+        [8, -1, 0],
+        "fras:washer[facing=east,half=lower,socket=north]",
     ),
-    (
-        [17, -1, 0],
-        "fras:trommel[facing=east,part=end,socket=north]",
-    ),
-    ([16, -1, -1], ENGINE),
-    ([16, -2, 0], "minecraft:chest"),
-    ([17, -2, 0], "minecraft:chest"),
-    ([18, -1, 0], "minecraft:chest"),
+    ([8, 0, 0], "fras:washer[facing=east,half=upper,socket=down]"),
+    ([8, -1, -1], ENGINE),
+    ([8, 0, 1], "fras:copper_pipe[north=true,south=true]"),
+    ([8, 0, 2], "fras:creative_water_source"),
+    // Belt 3 (x 9..10) → the trommel's west end (x 11..13), its outlets
+    // into chests; it forms and takes its socket by itself.
+    ([9, 0, 0], BELT),
+    ([10, 0, 0], BELT),
+    ([9, 0, -1], ENGINE),
+    ([11, 0, 0], "fras:trommel[axis=x,part=none,socket=none]"),
+    ([12, 0, 0], "fras:trommel[axis=x,part=none,socket=none]"),
+    ([13, 0, 0], "fras:trommel[axis=x,part=none,socket=none]"),
+    ([12, 0, -1], ENGINE),
+    ([11, -1, 0], "minecraft:chest"),
+    ([12, -1, 0], "minecraft:chest"),
+    ([13, -1, 0], "minecraft:chest"),
 ];
 
 /// The ore line's engines: where, RPM, reversed. Positive rotation about
 /// +z runs an east-heading belt west (`belt::drive_sign`), so the belt
 /// drives turn the other way.
-const ORE_LINE_ENGINES: [([i32; 3], f64, bool); 5] = [
-    ([3, 0, -1], 64.0, true),
-    ([13, -1, -1], 64.0, true),
-    ([8, 0, -1], 64.0, false),
-    ([11, 0, -1], 64.0, false),
-    ([16, -1, -1], 64.0, false),
+const ORE_LINE_ENGINES: [([i32; 3], f64, bool); 6] = [
+    ([2, 0, -1], 64.0, true),
+    ([6, 0, -1], 64.0, true),
+    ([9, 0, -1], 64.0, true),
+    ([5, -1, -1], 64.0, false),
+    ([8, -1, -1], 64.0, false),
+    ([12, 0, -1], 64.0, false),
 ];
 
 fn run(host: &mut dyn ServerHost, dim: Dim, line: &str) -> bool {
@@ -140,19 +137,20 @@ fn clear(host: &mut dyn ServerHost, dim: Dim, o: Pos, from: [i32; 3], to: [i32; 
 /// belt on its own creative engine at 64 RPM, so the line runs at the
 /// spec's speed whatever the engines' load.
 fn ore_line(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) -> String {
-    // Origin two blocks east, one up, so the belts sit at y+1 and y.
+    // Origin two blocks east, one up: the belts at eye level, the drives
+    // and outlet chests on the floor.
     let o = Pos::new(at.x + 2, at.y + 1, at.z);
-    clear(host, dim, o, [-1, -2, -2], [19, 3, 2]);
+    clear(host, dim, o, [-1, -1, -2], [15, 3, 2]);
     run(
         host,
         dim,
         &format!(
             "fill {} {} {} {} {} {} minecraft:stone",
             o.x - 1,
-            o.y - 3,
+            o.y - 2,
             o.z - 2,
-            o.x + 19,
-            o.y - 3,
+            o.x + 15,
+            o.y - 2,
             o.z + 2
         ),
     );
@@ -193,17 +191,17 @@ fn ore_line(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, at: Pos) -> St
         o.x,
         o.y - 2,
         o.z,
-        o.x + 18,
+        o.x + 13,
         o.x,
         o.y + 2,
         o.z,
-        o.x + 16,
-        o.y - 2,
+        o.x + 11,
+        o.y - 1,
         o.z,
-        o.x + 17,
-        o.y - 2,
+        o.x + 12,
+        o.y - 1,
         o.z,
-        o.x + 18,
+        o.x + 13,
         o.y - 1,
         o.z
     )
@@ -266,16 +264,26 @@ mod tests {
     }
 
     #[test]
-    fn ore_line_belts_are_two_lines_around_the_grinder() {
-        let one = chain(Pos::new(0, 0, 0), &belt_at);
-        assert_eq!(one.first(), Some(&Pos::new(0, 0, 0)));
-        assert_eq!(one.last(), Some(&Pos::new(7, 0, 0)));
-        let two = chain(Pos::new(8, -1, 0), &belt_at);
-        assert!(
-            two.iter().all(|p| p.y == -1),
-            "belt 2 joined belt 1: {two:?}"
-        );
-        assert_eq!(two.last(), Some(&Pos::new(15, -1, 0)));
+    fn ore_line_belts_are_three_lines_between_the_machines() {
+        for (start, end) in [(0, 4), (6, 7), (9, 10)] {
+            let line = chain(Pos::new(start, 0, 0), &belt_at);
+            assert_eq!(line.first(), Some(&Pos::new(start, 0, 0)));
+            assert_eq!(line.last(), Some(&Pos::new(end, 0, 0)));
+        }
+    }
+
+    #[test]
+    fn ore_line_machines_stand_on_their_drives() {
+        for (a, b) in ORE_LINE {
+            if b.contains("half=upper") {
+                let below = ORE_LINE
+                    .iter()
+                    .find(|(q, _)| *q == [a[0], a[1] - 1, a[2]])
+                    .map(|(_, k)| *k);
+                let lower = b.replace("half=upper,socket=down", "half=lower,socket=north");
+                assert_eq!(below, Some(lower.as_str()), "{b} at {a:?}");
+            }
+        }
     }
 
     #[test]

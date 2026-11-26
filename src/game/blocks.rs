@@ -63,6 +63,7 @@ pub enum Block {
     Trommel,
     IronPulley,
     LargeIronPulley,
+    InlineGrinder,
     // ---- Creative (debugging) ----
     CreativeEngine,
     LoadBank,
@@ -73,7 +74,7 @@ pub enum Block {
 }
 
 impl Block {
-    pub const ALL: [Block; 52] = [
+    pub const ALL: [Block; 53] = [
         Block::ShaftWood,
         Block::ShaftIron,
         Block::Bearing,
@@ -120,6 +121,7 @@ impl Block {
         Block::Trommel,
         Block::IronPulley,
         Block::LargeIronPulley,
+        Block::InlineGrinder,
         Block::CreativeEngine,
         Block::LoadBank,
         Block::CreativeSteam,
@@ -175,6 +177,7 @@ impl Block {
             Block::Lathe => "lathe",
             Block::Sawmill => "sawmill",
             Block::Trommel => "trommel",
+            Block::InlineGrinder => "inline_grinder",
             Block::IronPulley => "iron_pulley",
             Block::LargeIronPulley => "large_iron_pulley",
             Block::CreativeEngine => "creative_engine",
@@ -238,15 +241,25 @@ impl Block {
             Block::Lathe => Machine::Lathe,
             Block::Sawmill => Machine::Sawmill,
             Block::Trommel => Machine::Trommel,
+            Block::InlineGrinder => Machine::InlineGrinder,
             _ => return None,
         })
     }
 
-    /// The 0.4 machines with a recipe screen (not the grinder, which has its own).
+    /// The 0.4 machines with an info screen (not the grinder, which has its own).
     pub fn is_machine04(self) -> bool {
+        self.is_line_machine() || self == Block::Trommel
+    }
+
+    /// The two-block line machines (machines spec 2.3).
+    pub fn is_line_machine(self) -> bool {
         matches!(
             self,
-            Block::Washer | Block::TripHammer | Block::Lathe | Block::Sawmill | Block::Trommel
+            Block::Washer
+                | Block::TripHammer
+                | Block::Lathe
+                | Block::Sawmill
+                | Block::InlineGrinder
         )
     }
 
@@ -420,6 +433,10 @@ impl Block {
         nbt: &Compound,
     ) -> Option<PlantSpec> {
         let kind = self.plant_kind()?;
+        // The washer's tank is in its top block (machines spec 4.3).
+        if self == Block::Washer && get("half").as_deref() != Some("upper") {
+            return None;
+        }
         let flag = |key: &str| get(key).as_deref() == Some("true");
         let dir = |key: &str, default: Dir| {
             get(key)
@@ -545,14 +562,19 @@ impl Block {
             Block::ConveyorBelt | Block::BucketElevator => {
                 Shape::Socket(get("drive").as_deref().and_then(Dir::from_name)?)
             }
-            Block::Washer | Block::TripHammer | Block::Lathe | Block::Sawmill => {
-                Shape::Socket(dir("facing", Dir::North))
-            }
-            Block::Trommel => {
-                if get("part").as_deref() == Some("end") {
+            // The drive (lower half) is the part; the machine on top isn't.
+            b if b.is_line_machine() => {
+                if get("half").as_deref() == Some("upper") {
                     return None;
                 }
-                Shape::Socket(dir("socket", Dir::East))
+                Shape::Socket(dir("socket", Dir::Down))
+            }
+            // A formed trommel's part is the block with the socket (8.2).
+            Block::Trommel => {
+                if get("part").is_none_or(|p| p == "none") {
+                    return None;
+                }
+                Shape::Socket(get("socket").as_deref().and_then(Dir::from_name)?)
             }
             Block::BevelGearWood | Block::BevelGearIron => {
                 let input = dir("input", Dir::West);

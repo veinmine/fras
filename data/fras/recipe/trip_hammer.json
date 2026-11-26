@@ -2,11 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    " S ",
+    "CS ",
     "LBL",
     "PPP"
   ],
   "key": {
+    "C": "fras:conveyor_belt",
     "S": "fras:wooden_shaft",
     "L": "#minecraft:logs",
     "B": "minecraft:iron_block",

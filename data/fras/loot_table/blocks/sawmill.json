@@ -6,7 +6,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "fras:sawmill"
+          "name": "fras:sawmill",
+          "condition": {
+            "type": "minecraft:block_state_property",
+            "block": "fras:sawmill",
+            "properties": {
+              "half": "lower"
+            }
+          }
         }
       ],
       "condition": {

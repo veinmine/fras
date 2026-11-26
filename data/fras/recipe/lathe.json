@@ -4,14 +4,15 @@
   "pattern": [
     "PSP",
     "IFI",
-    "LLL"
+    "LCL"
   ],
   "key": {
     "P": "fras:iron_plate",
     "S": "fras:iron_shaft",
     "I": "minecraft:iron_ingot",
     "F": "minecraft:flint",
-    "L": "#minecraft:logs"
+    "L": "#minecraft:logs",
+    "C": "fras:conveyor_belt"
   },
   "result": {
     "id": "fras:lathe",

@@ -273,7 +273,6 @@ mod tests {
         for size in ["fine", "medium", "oversize"] {
             keys.push(format!("fras.trommel.{size}"));
         }
-        keys.push("fras.machine.belt_mode".into());
         keys.push("fras.tag.minecraft.wool".into());
         keys.push("fras.tag.minecraft.planks".into());
         keys.push("death.attack.fras.machine".into());

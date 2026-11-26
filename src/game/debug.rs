@@ -567,6 +567,11 @@ fn machine_json(
     pos: Pos,
     block: Option<Block>,
 ) -> Value {
+    // A machine answers from the block that keeps its state: a line
+    // machine's top, a formed trommel's middle.
+    let pos = block
+        .and_then(|b| super::machines::state_pos(host, level, pos, b))
+        .unwrap_or(pos);
     let Some(entity) = host.block_entity(level, pos.to_array()) else {
         return Value::Null;
     };
@@ -581,34 +586,50 @@ fn machine_json(
         })
         .collect();
     let (job, made, signal) = with_level(dim, |l| {
+        let station = l.machines.stations.get(&pos).map(|st| {
+            json!({
+                "items": st.entries.iter().map(|e| json!({
+                    "item": e.item.item().id(host).to_string(),
+                    "x": e.x,
+                    "done": e.done,
+                })).collect::<Vec<_>>(),
+                "progress": st.work.progress,
+                "recipe": st.work.recipe,
+                "pending": st.pending.len(),
+            })
+        });
+        let drum = l.machines.drums.get(&pos).map(|d| {
+            json!({
+                "items": d.items.iter().map(|t| json!({
+                    "item": t.item.item().id(host).to_string(),
+                    "size": t.size.index(),
+                    "progress": t.progress,
+                    "from_low": t.from_low,
+                })).collect::<Vec<_>>(),
+                "outlets": d.outlets.iter().map(Vec::len).collect::<Vec<_>>(),
+            })
+        });
         (
-            l.belt_jobs.get(&pos).map(|j| {
-                json!({
-                    "held": j.held,
-                    "status": j.status.key(),
-                    "progress": j.work.progress,
-                    "needed": j.needed,
-                    "load": j.load,
-                    "pending": j.pending.len(),
-                    "completed": j.completed,
-                    "water": j.state.water,
-                })
-            }),
+            station.or(drum),
             l.machines.made.get(&pos).copied(),
-            l.grinder_signal.get(&pos).copied(),
+            l.machines
+                .signals
+                .get(&pos)
+                .or_else(|| l.grinder_signal.get(&pos))
+                .copied(),
         )
     });
     let data = entity.data_slots(host).unwrap_or_default();
     json!({
         "machine": block.and_then(Block::machine).map(|m| m.name()),
+        "state_pos": [pos.x, pos.y, pos.z],
         "slots": slots,
         "menu_data": data,
         "status": data.get(2).map(|c| crate::sim::grind::Status::from_code(*c).key()),
         "progress": blocks::get_f64(&nbt, "progress"),
         "recipe": blocks::get_str(&nbt, "recipe"),
         "tank_mb": blocks::get_f64(&nbt, "tank"),
-        "belt_mode": blocks::get_bool(&nbt, "m_hold"),
-        "belt_job": job,
+        "line": job,
         "made": made,
         "comparator": signal,
         "nbt": nbt_json(&nbt),

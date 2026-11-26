@@ -37,9 +37,22 @@ on. It never stops the line. A comparator reads 15 for 2 ticks whenever an item 
 
 ## Machines
 
-All five follow the grinder ([grinder.md](grinder.md)): one input and 2×2 outputs (the trommel differs), push
-one item every 8 ticks into the inventory or belt below, take items tossed on top, a socket the wrench turns,
-a GUI with a speed bar and a status line, the container comparator signal, a cheap repair.
+The washer, trip hammer, lathe, sawmill and inline grinder are **line machines**, two blocks tall and placed like
+a door (the block above must be free). The top block is the machine, with a built-in belt at eye level running
+straight through it from its back (input) to its front (output): it lines up with ordinary belts on either side.
+The bottom block is the **drive**: one socket, on any side or underneath, that finds an adjacent shaft by itself
+when placed and moves to another shaft if its own goes; the wrench cycles it through the faces that have a shaft.
+Breaking either half breaks the machine; the drive carries the drop.
+
+There are no slots. Items come in from a belt end at the back or a chute from above, a hopper on either half, or
+a right-click with an item the machine has a recipe for (one at a time). The built-in belt moves at the
+machine's own speed (|RPM| ÷ 32 blocks a second) and holds 2 items. Each item stops in the middle, is worked,
+turns into its result, and rides on; byproducts follow it out of the front. Items with no recipe ride straight
+through. At the front the machine hands items on like a belt end (belt, inventory, or the floor); if that is
+blocked, the item waits, the machine stops, and the line behind it backs up. Nothing is lost.
+
+The screen shows information only: progress, speed against the working range, status, and the washer's water.
+A comparator reads 0 empty, 7 with one item, 11 with two, 15 when the output is blocked.
 
 | Machine | Range (RPM) | Load | Repair | Does |
 | --- | --- | --- | --- | --- |
@@ -47,34 +60,34 @@ a GUI with a speed bar and a status line, the container comparator signal, a che
 | Trip hammer | 16 to 64 | 8 Nm | 2 iron nuggets | Plates and rivets; 2 strikes per revolution |
 | Lathe | 128 to 224 | 4 Nm (3 copper) | 1 iron nugget, 1 flint | Rods, gears, copper pipe |
 | Sawmill | 32 to 128 | 6 Nm (3 sticks) | 2 iron nuggets | Logs to 6 planks, planks to 3 sticks |
+| Inline grinder | 12 to 96 | 6 Nm | 1 flint | The grinder's one-item recipes, inline |
 | Trommel | 8 to 96 | 2 Nm + 0.25 per item | 2 iron nuggets | Sorts by size into three outlets |
 
-**Belt mode:** the washer and trip hammer placed directly on a flat belt block work on the items riding under
-them: the item stops under the machine, turns into the result, and byproducts land right behind it. Items
-with no recipe pass by. Anywhere else they work from their input slot (slot mode, where 4 sand → sandstone
-also works on the hammer).
+The 0.1 grinder stays as it was ([grinder.md](grinder.md)).
 
-**Hazards:** the trip hammer's head hurts anything under it (2 per strike, in belt mode), the saw blade 1 every
-half second.
+**Hazards:** the trip hammer's head hurts anything standing in its top block (2 per strike), the saw blade 1
+every half second.
 
-**Washer water:** a 1,000 mB tank filled by a water pipe or a water bucket; 50 mB per crushed ore, 200 mB per
-iron nugget (which becomes rust flakes).
+**Washer water:** a 1,000 mB tank filled by a water pipe on the left or right side of the top block, or a water
+bucket; 50 mB per crushed ore, 200 mB per iron nugget (which becomes rust flakes). Dry, it holds its item.
 
-**Trommel:** two blocks long, placed like a bed. Input at the start end and the top of the first block. Fines
-(`#fras:trommel/fine`: sand, dusts, crushed ore) fall under the first block, mediums (`#fras:trommel/medium`:
-gravel, flint, nuggets, raw ore, coal, …) under the second, everything else rolls out of the far end. The drum
-holds 8 items, each tumbling one revolution.
+**Trommel:** three trommel blocks in a straight row form one drum, like a boiler; crafted 3 at a time. A row of
+4 or more, or a row with another trommel block touching its side, doesn't form (right-click says why). It has
+no direction: items go in at either end face or the top of either end block. The outlets are all underneath,
+counted from the end the item entered: fines (`#fras:trommel/fine`: sand, red sand, dusts) under the entry
+block, mediums (`#fras:trommel/medium`: crushed and raw ore, nuggets, gravel, flint, redstone, coal, …) under
+the middle, everything else under the far end. A shaft on any long side drives it, one socket at a time, chosen
+by itself; the wrench cycles it. The drum holds 8 items; a full outlet stops only its own class.
 
 Recipes are data like the grinder's: `data/fras/recipe/{washing,hammering,turning,sawing}/*.json`, types
 `fras:washing` (with `water`), `fras:hammering`, `fras:turning`, `fras:sawing`.
 
 | Machine | Input | Result | Revolutions |
 | --- | --- | --- | --- |
-| Washer | Crushed iron / copper / gold | 1 dust, 1 in 3 a second; 10% redstone / gold nugget / copper nugget | 2.5 |
+| Washer | Crushed iron / copper / gold | 1 dust, 1 in 3 a second; 10% iron nugget / gold nugget / copper nugget | 2.5 |
 | Washer | Iron nugget | Rust flakes | 64 |
 | Trip hammer | Iron / copper ingot | Iron / copper plate | 2 |
 | Trip hammer | Iron rod | 8 rivets | 3 |
-| Trip hammer | 4 sand / red sand (slot mode) | Sandstone / red sandstone | 1 |
 | Lathe | Iron ingot | 2 iron rods | 8 |
 | Lathe | Iron plate | Iron gear | 12 |
 | Lathe | Copper plate | 3 copper pipes | 8 |
@@ -86,5 +99,6 @@ Dust smelts into an ingot in 100 ticks (50 in a blast furnace).
 
 ## The reference ore line
 
-Raw ore → grinder → belt under a washer (dust) → trommel: fines to furnaces, mediums (missed raw ore) back to
-the grinder or a chest, oversize to a chest. `/fras scenario ore_line` builds one ([debugging.md](debugging.md)).
+Raw ore → belt → inline grinder → washer (dust) → trommel: fines (dust) to furnaces, mediums (missed crushed or
+raw ore, nuggets) back to the grinder or a chest, oversize to a chest. Keep rock crushing (sand) on its own line:
+sand sorts as fines too. `/fras scenario ore_line` builds one ([debugging.md](debugging.md)).

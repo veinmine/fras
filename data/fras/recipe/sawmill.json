@@ -4,13 +4,14 @@
   "pattern": [
     "IGI",
     "PSP",
-    "PPP"
+    "PCP"
   ],
   "key": {
     "I": "minecraft:iron_ingot",
     "G": "fras:iron_gear",
     "P": "#minecraft:planks",
-    "S": "fras:iron_shaft"
+    "S": "fras:iron_shaft",
+    "C": "fras:conveyor_belt"
   },
   "result": {
     "id": "fras:sawmill",

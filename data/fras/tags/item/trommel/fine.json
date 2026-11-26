@@ -3,7 +3,6 @@
   "values": [
     "minecraft:sand",
     "minecraft:red_sand",
-    "#fras:dusts",
-    "#fras:crushed_ores"
+    "#fras:dusts"
   ]
 }

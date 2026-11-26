@@ -15,33 +15,28 @@
         "west",
         "east"
       ]
+    },
+    "half": {
+      "type": "enum",
+      "values": [
+        "lower",
+        "upper"
+      ]
+    },
+    "socket": {
+      "type": "enum",
+      "values": [
+        "north",
+        "south",
+        "west",
+        "east",
+        "down"
+      ]
     }
   },
   "default_state": {
-    "facing": "north"
-  },
-  "shapes": {
-    "default": [
-      [
-        0,
-        0,
-        0,
-        1,
-        0.75,
-        1
-      ]
-    ]
-  },
-  "collision_shapes": {
-    "default": [
-      [
-        0,
-        0,
-        0,
-        1,
-        0.75,
-        1
-      ]
-    ]
+    "facing": "north",
+    "half": "lower",
+    "socket": "down"
   }
 }

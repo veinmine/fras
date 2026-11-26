@@ -2,8 +2,9 @@
 //! (logistics 11, machines 4.5 to 8.5). The frames are block models; this
 //! draws what moves: rollers, the items riding a line (on the line's
 //! controller block, from its snapshot, extrapolated each frame), paddle
-//! drums, the hammer's head, the lathe's work, the saw blade and the
-//! trommel's drum.
+//! drums, the hammer's head, the lathe's chuck, the saw blade, the items
+//! on the machines' built-in belts, and the trommel's drum and what tumbles
+//! in it.
 
 use mod_api::{
     BlockEntityDrawContext, BlockEntityRenderBoundingBoxEvent, BlockEntitySubmitEvent, ClientHost,
@@ -31,8 +32,13 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     let state = event.state;
     let get = |key: &str| prop(host, state, key);
     let jammed = blocks::get_str(&nbt, "jam").is_some_and(|j| !j.is_empty());
+    let upper = get("half").as_deref() == Some("upper");
+    // A machine's top and a trommel's middle draw at the speed their part
+    // last reported (machines spec 2.3).
     let rpm = if jammed {
         0.0
+    } else if upper || block == Block::Trommel {
+        blocks::get_f64(&nbt, "m_rpm").unwrap_or(0.0)
     } else {
         blocks::get_f64(&nbt, "rpm").unwrap_or(0.0)
     };
@@ -104,34 +110,49 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 moving |= line_items(draw, host, &nbt, facing, true);
             }
         }
-        Block::Washer => {
-            // The paddle drum, along the socket's axis.
-            let socket = facing;
+        b if b.is_line_machine() && !upper => {
+            // The drive: a hub turning in its socket.
+            let socket = get("socket")
+                .as_deref()
+                .and_then(Dir::from_name)
+                .unwrap_or(Dir::Down);
             let axis = socket.axis();
-            spin(draw, pos, 0, axis, [0.5, 10.0 / 16.0, 0.5], rpm, 0.0);
+            let range = if socket.is_positive() {
+                [8.0, 16.0]
+            } else {
+                [0.0, 8.0]
+            };
+            spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
+            axle(draw, axis, range, 2.0, IRON, IRON);
+            draw.still();
+        }
+        Block::Washer => {
+            // The paddle drum across the belt.
+            let axis = facing.clockwise().axis();
+            spin(draw, pos, 0, axis, [0.5, 11.0 / 16.0, 0.5], rpm, 0.0);
             boxed(
                 draw,
-                span(axis, [2.0, 14.0], [7.0, 9.0], [4.0, 16.0]),
+                span(axis, [2.0, 14.0], [10.0, 12.0], [7.0, 16.0]),
                 faces(axis, DARK, DARK),
             );
             boxed(
                 draw,
-                span(axis, [2.0, 14.0], [4.0, 12.0], [9.0, 11.0]),
+                span(axis, [2.0, 14.0], [7.0, 15.0], [10.0, 12.0]),
                 faces(axis, DARK, DARK),
             );
             draw.still();
             let tank = blocks::get_f64(&nbt, "tank").unwrap_or(0.0);
             if tank > 1.0 {
                 let h =
-                    4.0 + 6.0 * (tank / crate::sim::machine::WASHER_TANK).clamp(0.0, 1.0) as f32;
+                    6.5 + 3.0 * (tank / crate::sim::machine::WASHER_TANK).clamp(0.0, 1.0) as f32;
                 let n = Some(CubeFace::new(WATER));
                 boxed(
                     draw,
-                    ([2.5, 4.0, 2.5], [13.5, h, 13.5]),
+                    ([1.5, 6.0, 2.5], [14.5, h, 13.5]),
                     [None, n, None, None, None, None],
                 );
             }
-            shown(draw, host, &nbt, [0.5, 0.8, 0.5], 0.4, rpm, false);
+            moving |= station_items(draw, host, &nbt, facing);
         }
         Block::TripHammer => {
             // The head rises on the cam and drops twice a revolution: drawn
@@ -145,76 +166,82 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             } else {
                 2.0 / 16.0
             };
-            let on_belt = blocks::get_bool(&nbt, "m_hold");
-            let bottom = if on_belt { -9.0 } else { 6.0 };
             draw.push();
             draw.translate([0.0, lift, 0.0]);
             let n = Some(CubeFace::new(IRON));
             boxed(
                 draw,
-                ([5.0, bottom, 5.0], [11.0, bottom + 5.0, 11.0]),
+                ([5.0, 6.5, 5.0], [11.0, 11.5, 11.0]),
                 [n, n, n, n, n, n],
             );
             draw.pop();
-            let axis = facing.axis();
+            let axis = facing.clockwise().axis();
             spin(draw, pos, 0, axis, [0.5, 14.0 / 16.0, 0.5], rpm, 0.0);
             boxed(
                 draw,
-                span(axis, [1.0, 15.0], [7.0, 9.0], [13.0, 15.0]),
+                span(axis, [1.0, 15.0], [13.0, 15.0], [7.0, 9.0]),
                 faces(axis, LOG, LOG_END),
             );
             draw.still();
-            if !on_belt {
-                shown(draw, host, &nbt, [0.5, 0.42, 0.5], 0.35, 0.0, true);
-            }
+            moving |= station_items(draw, host, &nbt, facing);
         }
         Block::Lathe => {
-            let axis = facing.axis();
-            shown_spinning(draw, host, &nbt, pos, axis, rpm);
-            spin(draw, pos, 1, axis, CENTER, rpm, 0.0);
-            let range = if facing.is_positive() {
-                [13.0, 16.0]
-            } else {
-                [0.0, 3.0]
-            };
+            // The chuck, across the belt over the work point.
+            let axis = facing.clockwise().axis();
+            spin(draw, pos, 1, axis, [0.5, 11.0 / 16.0, 0.5], rpm, 0.0);
             boxed(
                 draw,
-                span(axis, range, [4.0, 12.0], [4.0, 12.0]),
+                span(axis, [4.0, 7.0], [9.0, 13.0], [6.0, 10.0]),
                 faces(axis, IRON, IRON),
             );
             draw.still();
+            moving |= station_items(draw, host, &nbt, facing);
         }
         Block::Sawmill => {
-            // The blade stands out of the table, across the socket's axis.
-            let axis = facing.axis();
+            // The blade stands over the belt, in line with it.
+            let axis = facing.clockwise().axis();
             spin(draw, pos, 0, axis, [0.5, 12.0 / 16.0, 0.5], rpm * 3.0, 0.0);
             let n = Some(CubeFace::new(IRON));
             boxed(
                 draw,
-                span(axis, [7.75, 8.25], [2.0, 14.0], [6.0, 18.0]),
+                span(axis, [7.75, 8.25], [6.5, 17.5], [2.0, 14.0]),
                 [n, n, n, n, n, n],
             );
             draw.still();
+            moving |= station_items(draw, host, &nbt, facing);
         }
-        Block::Trommel if get("part").as_deref() != Some("end") => {
-            {
-                // The drum spans both blocks along the facing.
-                let axis = facing.axis();
-                let (lo, hi) = if facing.is_positive() {
-                    (1.0, 31.0)
-                } else {
-                    (-15.0, 15.0)
-                };
-                let mut pivot = [0.5f32, 0.55, 0.5];
-                pivot[axis as usize] = (lo + hi) / 32.0;
-                spin(draw, pos, 0, axis, pivot, rpm, 0.0);
-                boxed(
-                    draw,
-                    span(axis, [lo, hi], [3.0, 13.0], [4.0, 14.0]),
-                    faces(axis, "block/iron_bars", IRON),
-                );
-                draw.still();
+        Block::InlineGrinder => {
+            // The millstone over the work point.
+            spin(draw, pos, 0, Axis::Y, [0.5, 0.5, 0.5], rpm, 0.0);
+            let n = Some(CubeFace::new("block/smooth_stone"));
+            boxed(
+                draw,
+                ([3.0, 8.0, 3.0], [13.0, 11.5, 13.0]),
+                [n, n, n, n, n, n],
+            );
+            draw.still();
+            moving |= station_items(draw, host, &nbt, facing);
+        }
+        Block::Trommel if get("part").as_deref() == Some("middle") => {
+            // The drum spans all three blocks along its axis.
+            let axis = if get("axis").as_deref() == Some("z") {
+                Axis::Z
+            } else {
+                Axis::X
+            };
+            spin(draw, pos, 0, axis, [0.5, 8.5 / 16.0, 0.5], rpm, 0.0);
+            let bars = faces(axis, "block/iron_bars", IRON);
+            for (u, v) in [
+                ([3.5, 4.0], [3.5, 13.5]),
+                ([12.5, 13.0], [3.5, 13.5]),
+                ([3.5, 13.0], [3.5, 4.0]),
+                ([3.5, 13.0], [13.0, 13.5]),
+            ] {
+                let (u, v) = if axis == Axis::X { (v, u) } else { (u, v) };
+                boxed(draw, span(axis, [-16.0, 32.0], u, v), bars);
             }
+            draw.still();
+            moving |= drum_items(draw, host, &nbt, axis);
         }
         _ => {}
     }
@@ -223,58 +250,127 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
     }
 }
 
-/// A machine's work item, still or spinning about the vertical.
-fn shown(
+/// The items on a machine's built-in belt (machines spec 2.2), from the
+/// last snapshot, moved on to this frame: each stops at the work point
+/// until worked, at the output end, or behind the one ahead. True while
+/// anything moves.
+fn station_items(
     draw: &mut dyn BlockEntityDrawContext,
     host: &dyn ClientHost,
     nbt: &Compound,
-    at: [f32; 3],
-    size: f32,
-    rpm: f64,
-    flat: bool,
-) {
-    let Some(stack) = super::machines::shown_item(host, nbt) else {
-        return;
+    facing: Dir,
+) -> bool {
+    use crate::sim::machine::station;
+    let Some(Tag::List(list)) = nbt.get(&"st".into()) else {
+        return false;
     };
-    draw.push();
-    if rpm.abs() > 0.1 && blocks::get_bool(nbt, "working") {
-        draw.spin([0.0, 1.0, 0.0], at, (rpm * 0.3) as f32, 0.0);
+    let v = blocks::get_f64(nbt, "st_v").unwrap_or(0.0);
+    let t0 = match nbt.get(&"st_t".into()) {
+        Some(Tag::Long(t)) => *t,
+        _ => 0,
+    };
+    let dt = ((draw.game_time() - t0) as f64).clamp(0.0, 200.0) + draw.partial() as f64;
+    let mut items: Vec<(f64, bool, mod_api::ItemStack)> = list
+        .iter()
+        .filter_map(|t| match t {
+            Tag::Compound(c) => {
+                let Some(Tag::Compound(i)) = c.get(&"i".into()) else {
+                    return None;
+                };
+                let stack = super::belts::stack_from_nbt(host, i)?;
+                Some((
+                    blocks::get_f64(c, "x").unwrap_or(0.0),
+                    blocks::get_bool(c, "d"),
+                    stack,
+                ))
+            }
+            _ => None,
+        })
+        .collect();
+    // Front first.
+    items.sort_by(|a, b| b.0.total_cmp(&a.0));
+    let mut ahead = f64::INFINITY;
+    let mut moving = false;
+    let [fx, _, fz] = facing.step();
+    for (k, (x, done, stack)) in items.iter().enumerate() {
+        let stop = if *done { 1.0 } else { station::WORK_POINT };
+        let limit = stop.min(ahead - station::SPACING).max(*x);
+        let now = (x + v * dt).min(limit);
+        moving |= v > 0.0 && now < limit;
+        ahead = now;
+        let p = [
+            0.5 + fx as f32 * (now - 0.5) as f32,
+            belt::BELT_TOP as f32 + 0.1,
+            0.5 + fz as f32 * (now - 0.5) as f32,
+        ];
+        draw.push();
+        draw.translate(p);
+        draw.scale([0.5, 0.5, 0.5]);
+        let _ = draw.item(stack, ItemDisplayContext::Ground, None, k as i32);
+        draw.pop();
     }
-    draw.translate(at);
-    if flat {
-        draw.rotate_about([1.0, 0.0, 0.0], 90.0, [0.0, 0.0, 0.0]);
-    }
-    draw.scale([size, size, size]);
-    let _ = draw.item(&stack, ItemDisplayContext::Fixed, None, 0);
-    draw.still();
-    draw.pop();
+    moving
 }
 
-/// The lathe's work between centres, turning about the socket's axis.
-fn shown_spinning(
+/// What tumbles in a trommel's drum, drawn in its middle block: each item
+/// moves from the end it came in toward the block it falls out of (8.4).
+fn drum_items(
     draw: &mut dyn BlockEntityDrawContext,
     host: &dyn ClientHost,
     nbt: &Compound,
-    pos: Pos,
     axis: Axis,
-    rpm: f64,
-) {
-    let Some(stack) = super::machines::shown_item(host, nbt) else {
-        return;
+) -> bool {
+    use crate::sim::machine::{Size, Tumbling};
+    let Some(Tag::List(list)) = nbt.get(&"drum".into()) else {
+        return false;
     };
-    let at = [0.5f32, 0.7, 0.5];
-    draw.push();
-    if blocks::get_bool(nbt, "working") {
-        spin(draw, pos, 0, axis, at, rpm, 0.0);
+    let v = blocks::get_f64(nbt, "st_v").unwrap_or(0.0);
+    let t0 = match nbt.get(&"st_t".into()) {
+        Some(Tag::Long(t)) => *t,
+        _ => 0,
+    };
+    let dt = ((draw.game_time() - t0) as f64).clamp(0.0, 200.0) + draw.partial() as f64;
+    let mut moving = false;
+    for (k, t) in list.iter().enumerate() {
+        let Tag::Compound(c) = t else {
+            continue;
+        };
+        let Some(Tag::Compound(i)) = c.get(&"i".into()) else {
+            continue;
+        };
+        let Some(stack) = super::belts::stack_from_nbt(host, i) else {
+            continue;
+        };
+        let size = match blocks::get_i32(c, "s").unwrap_or(2) {
+            0 => Size::Fine,
+            1 => Size::Medium,
+            _ => Size::Oversize,
+        };
+        let mut tum = Tumbling {
+            item: (),
+            size,
+            progress: blocks::get_f64(c, "p").unwrap_or(0.0),
+            from_low: blocks::get_bool(c, "lo"),
+        };
+        let falls = tum.falls_at();
+        let now = (tum.progress + v * dt).min(falls).max(tum.progress);
+        moving |= v > 0.0 && now < falls;
+        tum.progress = now;
+        // Blocks from the low end; the middle block starts one block in.
+        let along = (tum.along() - 1.0) as f32;
+        // Tumbling: a little lift and sway as the drum turns.
+        let wobble = ((now * 40.0 + k as f64 * 1.7).sin() * 0.08) as f32;
+        let mut p = [0.5f32, 0.35 + wobble.abs(), 0.5];
+        p[axis as usize] = along;
+        let across = if axis == Axis::X { 2 } else { 0 };
+        p[across] += wobble;
+        draw.push();
+        draw.translate(p);
+        draw.scale([0.4, 0.4, 0.4]);
+        let _ = draw.item(&stack, ItemDisplayContext::Ground, None, k as i32);
+        draw.pop();
     }
-    draw.translate(at);
-    if axis == Axis::X {
-        draw.rotate_about([0.0, 1.0, 0.0], 90.0, [0.0, 0.0, 0.0]);
-    }
-    draw.scale([0.4, 0.4, 0.4]);
-    let _ = draw.item(&stack, ItemDisplayContext::Fixed, None, 0);
-    draw.still();
-    draw.pop();
+    moving
 }
 
 /// Draw the items riding a line, from the controller's snapshot, where
@@ -351,8 +447,7 @@ fn line_items(
 }
 
 /// Culling bounds: a line's controller draws items along its whole path;
-/// the trommel's drum reaches into its second block; the hammer's head
-/// into the belt below.
+/// the trommel's drum reaches into the blocks on either side of its middle.
 pub fn bounds(block: Block, event: &mut BlockEntityRenderBoundingBoxEvent<'_>) {
     let b = &mut *event.bounds;
     let nbt = &event.entity.nbt;
@@ -377,7 +472,6 @@ pub fn bounds(block: Block, event: &mut BlockEntityRenderBoundingBoxEvent<'_>) {
                 b[5].max(2.0),
             ];
         }
-        Block::TripHammer => b[1] = b[1].min(-1.0),
         Block::Sawmill => b[4] = b[4].max(1.2),
         _ => {}
     }
