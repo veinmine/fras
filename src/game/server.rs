@@ -13,7 +13,7 @@ use mod_api::{Host, LevelRef, ServerHost};
 
 use super::blocks::{self, Block};
 use crate::sim::geom::{Chunk, Pos};
-use crate::sim::rot::part::{CRANK_STALL, CRANK_TOP};
+use crate::sim::rot::part::{CRANK_STALL, CRANK_TOP, motor_drive, motor_ramp};
 use crate::sim::rot::{Drive, Mechanics, Spec, View};
 
 /// A level, by its dimension id (`minecraft:overworld`).
@@ -62,6 +62,12 @@ pub struct Level {
     pub grinder_signal: HashMap<Pos, i32>,
     /// The steam plant (0.2).
     pub steam: super::steam::Steam,
+    /// Creative engines' settings this tick (signed RPM), from their block
+    /// entities, and the speed each is ramping through.
+    pub motors: HashMap<Pos, f64>,
+    pub motor_ramps: HashMap<Pos, f64>,
+    /// Gauges' histories for their screens.
+    pub histories: HashMap<Pos, super::readout::History>,
 }
 
 #[derive(Default)]
@@ -243,6 +249,26 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
                     Drive::default()
                 };
                 l.mech.set_drive(*pos, drive);
+            }
+            // Creative engines ramp toward their setting from the speed they
+            // turn at, so a reload or a resumed network doesn't jolt them.
+            let motors = std::mem::take(&mut l.motors);
+            let gone: Vec<Pos> = l
+                .motor_ramps
+                .keys()
+                .filter(|q| !motors.contains_key(q))
+                .copied()
+                .collect();
+            for pos in gone {
+                l.motor_ramps.remove(&pos);
+                l.mech.set_drive(pos, Drive::default());
+            }
+            for (pos, target) in motors {
+                let now = l.mech.speed(pos).map_or(0.0, |s| s.0);
+                let ramp = l.motor_ramps.get(&pos).copied().unwrap_or(now);
+                let ramp = motor_ramp(ramp, target, crate::sim::rot::solve::DT);
+                l.motor_ramps.insert(pos, ramp);
+                l.mech.set_drive(pos, motor_drive(ramp));
             }
             for (pos, load) in l.loads.drain() {
                 l.mech.set_load(pos, load);

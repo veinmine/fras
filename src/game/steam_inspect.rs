@@ -50,6 +50,8 @@ fn kind_name(kind: Kind) -> Text {
         Kind::Radiator { copper: false } => "iron_radiator",
         Kind::Drain => "drain",
         Kind::Grinder => "grinder",
+        Kind::Source => "creative_steam_source",
+        Kind::Void => "creative_drain",
     };
     Text::translate(format!("block.fras.{name}"), vec![])
 }
@@ -439,6 +441,16 @@ pub fn lines(
                 }
             }
             Block::Drain => match w.drain_flow(pos) {
+                Some((c, f)) if f > 1e-6 => out.push(Text::translate(
+                    "fras.inspect.drain",
+                    vec![Text::literal(num(f)), content_name(Some(c))],
+                )),
+                _ => out.push(tr("fras.inspect.drain_idle", vec![])),
+            },
+            Block::CreativeSteam | Block::CreativeWater => {
+                out.push(tr("fras.inspect.source", vec![num(w.source_gave(pos))]))
+            }
+            Block::CreativeDrain => match w.void_flow(pos) {
                 Some((c, f)) if f > 1e-6 => out.push(Text::translate(
                     "fras.inspect.drain",
                     vec![Text::literal(num(f)), content_name(Some(c))],

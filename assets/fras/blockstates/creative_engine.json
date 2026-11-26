@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "fras:block/creative_engine"
+    },
+    "facing=up": {
+      "model": "fras:block/creative_engine"
+    },
+    "facing=north": {
+      "model": "fras:block/creative_engine"
+    },
+    "facing=south": {
+      "model": "fras:block/creative_engine"
+    },
+    "facing=west": {
+      "model": "fras:block/creative_engine"
+    },
+    "facing=east": {
+      "model": "fras:block/creative_engine"
+    }
+  }
+}

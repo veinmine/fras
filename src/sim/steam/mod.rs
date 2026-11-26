@@ -42,6 +42,9 @@ pub const BOILER_WATER: f64 = 1000.0;
 pub const BOILER_STEAM: f64 = 100.0;
 pub const TANK_STEAM: f64 = 400.0;
 pub const PIPE_STEAM: f64 = 5.0;
+/// A creative steam source's own steam capacity, mB per bar (a boiler
+/// block's), so it keeps a pressure with no pipe between it and a cylinder.
+pub const SOURCE_STEAM: f64 = 100.0;
 /// One tank block's water, mB.
 pub const TANK_WATER: f64 = 4000.0;
 

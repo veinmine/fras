@@ -750,4 +750,5 @@ fn fifty_plants_step_and_rebuild_quickly() {
     assert!(pipes.as_millis() < 200, "{pipes:?}");
 }
 
+mod creative;
 mod v03;

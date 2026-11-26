@@ -930,6 +930,47 @@ for _name in RUSTING:
     _d["properties"]["random_ticks"] = {"property": "rust", "values": ["clean", "spotty", "rusty"]}
 
 
+# ---- Creative (debugging) blocks: no recipes, a tab of their own, and a
+# magenta and black hazard border so they never pass for real machines.
+CREATIVE_MARK = {
+    "creative_engine": "engine",
+    "load_bank": "load",
+    "creative_steam_source": "steam",
+    "creative_water_source": "water",
+    "creative_drain": "drain",
+    "creative_firebox": "fire",
+}
+CREATIVE_BLOCKS = {}
+for _name, _mark in CREATIVE_MARK.items():
+    _decl = {"template": IRON, "properties": {"hardness": 1.0, "push_reaction": "IMMOVEABLE"}}
+    if _name in ("creative_engine", "load_bank"):
+        _decl["properties"]["occludes"] = False
+        _decl["state_properties"] = {"facing": DIR_ENUM}
+        _decl["default_state"] = {"facing": "north"}
+        _decl["shapes"] = {"default": CASING}
+    CREATIVE_BLOCKS[_name] = (_decl, "pickaxe", f"{NS}:block/creative_{_mark}")
+    BLOCKS[_name] = CREATIVE_BLOCKS[_name]
+
+
+def creative_models():
+    m = {}
+    for name, mark in CREATIVE_MARK.items():
+        tex = f"{NS}:block/creative_{mark}"
+        if name in ("creative_engine", "load_bank"):
+            # A casing; its block entity draws the turning stub on the socket.
+            m[f"block/{name}"] = block_model({"all": tex}, [element([2, 2, 2], [14, 14, 14], {"side": "#all"})], tex)
+        else:
+            m[f"block/{name}"] = {"parent": "minecraft:block/cube_all", "textures": {"all": tex}}
+        m[f"item/{name}"] = {"parent": f"{NS}:block/{name}"}
+    return m
+
+
+def creative_blockstate(name):
+    if name in ("creative_engine", "load_bank"):
+        return {"variants": {f"facing={d}": {"model": f"{NS}:block/{name}"} for d in DIRS}}
+    return {"variants": {"": {"model": f"{NS}:block/{name}"}}}
+
+
 def regulation_models():
     m = {}
     iron, andesite, dark = "minecraft:block/iron_block", "minecraft:block/polished_andesite", "minecraft:block/anvil"
@@ -1153,7 +1194,9 @@ def main():
         # the tool tags only make mining faster.
         decl["properties"]["requires_tool"] = False
         write(f"data/{NS}/horizon/block/{name}.json", decl)
-        if name in REGULATION_BLOCKS:
+        if name in CREATIVE_BLOCKS:
+            states[name] = creative_blockstate(name)
+        elif name in REGULATION_BLOCKS:
             states[name] = regulation_blockstate(name)
         elif name in STEAM_BLOCKS:
             states[name] = steam_blockstate(name)
@@ -1167,6 +1210,12 @@ def main():
     write(f"data/{NS}/horizon/menu/grinder.json", {"slots": 5, "data_slots": 4, "results": [1, 2, 3, 4]})
     # The governor's: one hidden slot (menus need one), data [target, sens, speed, ball, throttle, engines, swing].
     write(f"data/{NS}/horizon/menu/governor.json", {"slots": 1, "data_slots": 7})
+    # Creative blocks: one hidden slot, data [setting 0, setting 1, status 0, status 1].
+    for name in CREATIVE_BLOCKS:
+        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 4})
+    # Readouts: one hidden slot, data [value, red line, extra, head, range, 120 samples].
+    for name in ["tachometer", "pressure_gauge", "sight_glass"]:
+        write(f"data/{NS}/horizon/menu/{name}.json", {"slots": 1, "data_slots": 125})
     items = dict(ITEMS)
     items.update(regulation_items())
     for name, decl in items.items():
@@ -1189,12 +1238,13 @@ def main():
     steam_data()
     for name, recipe in list(recipes().items()) + list(steam_recipes().items()) + list(regulation_recipes().items()):
         write(f"data/{NS}/recipe/{name}.json", recipe)
-    order = list(BLOCKS) + list(items)
+    order = [n for n in BLOCKS if n not in CREATIVE_BLOCKS] + list(items)
     write(f"data/{NS}/horizon/creative_tab/main.json", {"title": "Fire, Rust and Steam", "icon": f"{NS}:gearbox", "items": [f"{NS}:{n}" for n in order]})
+    write(f"data/{NS}/horizon/creative_tab/creative.json", {"title": "Fire, Rust and Steam: debugging", "icon": f"{NS}:creative_engine", "items": [f"{NS}:{n}" for n in CREATIVE_BLOCKS]})
 
 
 def models_all():
-    return list(models().items()) + list(steam_models().items()) + list(regulation_models().items())
+    return list(models().items()) + list(steam_models().items()) + list(regulation_models().items()) + list(creative_models().items())
 
 
 if __name__ == "__main__":
