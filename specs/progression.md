@@ -74,7 +74,7 @@ shaft), flywheel, pump. Iron pipe keeps its recipe (3 iron plates → 6): plates
 
 | Result | Was (0.1 to 0.3) | Now (0.4) |
 | --- | --- | --- |
-| **Iron shaft** | `I/I` (2 ingots) → 4 | `R/R` (2 iron rods) → 4, and `I/I` (2 ingots) → **2** by hand |
+| **Iron shaft** | `I/I` (2 ingots) → 4 | Unchanged by hand; new: `R/R` (2 iron rods, one ingot) → 4 |
 | **Gearbox** | `III/S S/III` (6 ingots, 2 iron shafts) | `PTP/G G/PTP` (4 iron plates, 2 rivets, 2 iron gears) |
 | **Iron bevel gear** ×2 | `I I/ S /I I` (4 ingots, iron shaft) | `GSG` (2 iron gears, an iron shaft) |
 | **Clutch** | `SRS` (2 iron shafts, redstone) | `SGS` / ` D ` (2 iron shafts, an iron gear, redstone dust) |
@@ -92,9 +92,9 @@ Why these and not others:
 
 - **The design doc's list** (6.4): iron shafts, governor, gearbox, the lathe (from plates), bigger boilers. The iron boiler
   is the bigger boiler; riveting it is period-correct and makes the trip hammer matter.
-- **The first engine stays reachable** without a lathe: the lathe's 48 RPM minimum (machines spec 6.3) wants an engine, so
-  the engine can't need lathe parts. Iron shafts keep a hand recipe at half the yield, so the steam cylinder and flywheel
-  can be made before the lathe, and rods make shafts at twice the old yield afterwards (question P2).
+- **The first engine stays reachable** without a lathe: the lathe's 128 RPM minimum (machines spec 6.3) wants an engine geared up through iron pulleys, so
+  the engine can't need lathe parts. Iron shafts keep their hand recipe unchanged, so the steam cylinder and flywheel can
+  be made before the lathe; rods make shafts at twice the yield afterwards (P2, decided).
 - **Regulation and cooling** (governor, damper, heat exchanger) were 0.3's reward for a running plant; gating them behind
   the lathe moves them after the first production line, which is the order a player meets them anyway.
 - **Pipes, valves, gauges, radiators** stay entry: a player needs them for the first boiler, and gating plumbing is tedious.
@@ -110,10 +110,26 @@ lathe, washer, sawmill, trommel, dust smelting (machines spec 13.2); the interme
 | Diverter | Hand-hammered | An iron plate |
 | Trip hammer | Hand-hammered | 3 iron plates, a block of iron |
 | Lathe | Hand-hammered | 2 iron plates, an iron shaft (hand recipe) |
+| Iron pulley, large iron pulley | Entry | — (iron ingots, an iron shaft; 4.4) |
 | Bucket elevator ×4 | Machine parts | An iron gear |
 | Washer | Machine parts | An iron gear |
 | Sawmill | Machine parts | An iron gear, an iron shaft |
 | Trommel | Machine parts | An iron gear, an iron shaft |
+
+### 4.4 Iron pulleys
+
+The rotational spec planned them ("wooden in 0.1; iron later", 7.5); 0.4 needs them, because the lathe runs at 128 RPM or
+more (machines spec 6.3) and wooden pulleys jam above 96.
+
+- **Iron pulley** and **large iron pulley**: the wooden pulleys' rules (rotational spec 7.5: ratio by diameter, leather belt,
+  24 Nm belt limit, 16 blocks), with a **maximum of 192 RPM** *(tune)*, inertia 3 and 6. Wooden and iron pulleys can share a
+  belt; each keeps its own limit.
+- **Recipes** (hand-made, so they come before the lathe): iron pulley ` I ` / `ISI` / ` I ` (4 iron ingots, an iron shaft);
+  large iron pulley `III` / `ISI` / `III` (8 iron ingots, an iron shaft). Iron parts rust (`specs/rust.md` 3), so they get
+  painted variants like every other iron part.
+- **The step-up to the lathe:** a line shaft at 64 to 96 RPM, a large iron pulley on it, a belt to a small iron pulley on the
+  lathe's countershaft: 128 to 192 RPM at the lathe, with the belt's 24 Nm far above the lathe's 4 Nm load. Run the line faster
+  than 96 RPM and the small pulley overspeeds: the engineer's problem, with a governor (after the lathe) or a valve (before).
 
 ---
 
@@ -126,7 +142,8 @@ item is needed before its machine exists.
 2. **First steam:** firebox, copper boiler, steam dome, copper pipe, valves, pump, **steam cylinder** (6 hand-hammered
    plates) and **flywheel**: an engine at up to the copper boiler's rated pressure.
 3. **First machines:** **lathe** (2 hand-hammered plates) and **trip hammer** (3 hand-hammered plates, a block of iron), on
-   the engine's shaft. Conveyor belts from leather or wool.
+   the engine's shaft. The lathe needs 128 RPM, which the first engine can't give under load (its top is 128 at 4 bar), so it
+   runs off a 2:1 step-up through **iron pulleys** (4.4). Conveyor belts from leather or wool.
 4. **First line:** ingots → lathe → rods; rods → trip hammer → rivets; ingots → trip hammer → plates; plates → lathe → gears.
    With a belt between them this is the first production line (design doc 6.4).
 5. **Better blocks:** gearbox, iron bevel gears, clutch, governor, damper, tachometer, iron boiler, storage tank, heat
@@ -134,7 +151,7 @@ item is needed before its machine exists.
 6. **The ore line:** washer, trommel, bucket elevator, diverter, sawmill; the reference ore line (machines spec 10).
 
 The **gearbox** moves from step 1 to step 5. Before it, ratios come from **pulleys** (large to small, 2:1, entry recipes),
-which is how a mill geared up anyway; the 0.1 exit criteria that gear a water wheel up 4× still work with two pulley
+which is how a mill geared up anyway, and the way to reach the lathe's speed is iron pulleys (4.4); the 0.1 exit criteria that gear a water wheel up 4× still work with two pulley
 stages (rotational spec 7.5, 24 Nm belt limit, well above a water wheel's output at speed).
 
 ---
@@ -196,7 +213,7 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
    items), the steps of section 5 are completed in order. Before a lathe and trip hammer exist, the gearbox, governor, iron
    boiler and washer can't be crafted; afterwards they can, from parts the machines made.
 4. **Parts:** the lathe turns ingots into 2 rods and plates into gears, the trip hammer heads a rod into 8 rivets and
-   hammers plates at one per ingot; iron shafts from rods come out at 4 per 2 rods, by hand at 2 per 2 ingots.
+   hammers plates at one per ingot; iron shafts from rods come out at 4 per 2 rods, by hand still 4 per 2 ingots.
 
 **Logistics:**
 
@@ -232,8 +249,8 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 ## 10. Changes to the design doc
 
 - 6.4: intermediate parts are iron plates, copper plates, iron rods, iron gears and rivets, with the yields in section 3; the
-  gated blocks are those in 4.2; the gearbox moves behind the lathe, and pulleys give ratios before it; iron shafts keep a hand
-  recipe at half yield.
+  gated blocks are those in 4.2; the gearbox moves behind the lathe, and pulleys give ratios before it; iron shafts keep their
+  hand recipe, rods make them at twice the yield; iron pulleys (max 192 RPM) join the wooden ones.
 - 13: materials add iron rods, iron gears, rivets and iron, copper and gold dust.
 
 ---
@@ -242,10 +259,9 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
 
-1. **P1. The gearbox needs lathe parts** (4.2), and pulleys give ratios before it (5). *Alternative:* the gearbox stays an
-   entry recipe and only the governor, damper, boiler and machines are gated.
-2. **P2. Iron shafts by hand drop to 2 per 2 ingots**, from rods 4 per 2 rods (one ingot) (4.2). *Alternative:* the hand
-   recipe stays at 4 per 2 ingots and rods give 8, or the hand recipe goes away and the first engine uses a wooden shaft.
+1. **P1. Decided (Marcin, 2026-11-26): the gearbox needs lathe parts** (4.2); pulleys give ratios before it (5).
+2. **P2. Decided (Marcin, 2026-11-26): the hand recipe for iron shafts stays** at 4 per 2 ingots ("making them by hand is
+   punishment enough"); rods give 4 per 2 rods, twice the yield per ingot (4.2).
 3. **P3. The first engine stays hand-made** (steam cylinder, flywheel and pump unchanged, 4.1), so the lathe can be driven by
    it. *Alternative:* the cylinder needs rods (a piston rod) and the first lathe runs off a water wheel, which needs the lathe's
    range lowered (machines spec, question M6).

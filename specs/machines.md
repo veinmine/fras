@@ -219,8 +219,10 @@ hammer now makes quickly (`specs/progression.md` 4).
 
 ### 6.3 Machine numbers and hazard
 
-- Range **48 to 192 RPM** *(tune)*: the lathe is the fast machine, the one that needs a gearbox, a geared-up pulley or an
-  engine. At 128 RPM a rod takes 3.75 s, a gear 5.6 s.
+- Range **128 to 224 RPM** *(tune)*: the lathe is the fast machine. No tier-1 source reaches 128 RPM under load directly
+  (the first engine's top is 128 at 4 bar), so a lathe always runs off a step-up: a 2:1 pair of **iron pulleys** before the
+  gearbox exists (`specs/progression.md` 4.4), a gearbox after. Wooden pulleys jam above 96. At 160 RPM a rod takes 3 s, a gear
+  4.5 s.
 - Inertia 2 (light), repair **1 iron nugget and 1 flint** (a new cutting tool).
 - No hazard beyond the rotational spec's overspeed.
 
@@ -392,7 +394,7 @@ runs itself", end to end.
 | --- | --- | --- | --- | --- |
 | Washer | 8 to 64 | 4 Nm (2 rusting) | 4 | 1 iron nugget, 1 planks |
 | Trip hammer | 16 to 64 | 8 Nm | 6 | 2 iron nuggets |
-| Lathe | 48 to 192 | 4 Nm (3 copper) | 2 | 1 iron nugget, 1 flint |
+| Lathe | 128 to 224 | 4 Nm (3 copper) | 2 | 1 iron nugget, 1 flint |
 | Sawmill | 32 to 128 | 6 Nm (3 sticks) | 4 | 2 iron nuggets |
 | Trommel | 8 to 96 | 2 Nm + 0.25 per item | 6 | 2 iron nuggets |
 
@@ -448,8 +450,8 @@ Each item states what this spec assumes. Reply by number; anything skipped stays
    hammer. *Alternative:* rivets from iron nuggets on the hammer (1 each), so the hammer alone makes them.
 5. **M5. The machines bite:** the saw 1 damage per half second on touch, the hammer 2 per strike under its head (5.4,
    7.3). *Alternative:* no hazards in tier 1 beyond steam.
-6. **M6. The lathe's range is 48 to 192 RPM** (6.3), so it needs gearing or an engine. *Alternative:* 24 to 128, so a
-   water wheel through two pulley stages can run it, making a lathe possible before the first engine.
+6. **M6. Marcin (2026-11-26): the lathe needs a pulley ratio.** Proposed: 128 to 224 RPM, reached through a 2:1 step-up on
+   new iron pulleys (max 192); wooden pulleys stay at 96 (6.3, `specs/progression.md` 4.4).
 7. **M7. The trommel sorts by tags into three outlets** (8.3). Fines are only what a furnace takes (sand, dusts, crushed
    ore), so redstone and bone meal count as medium; raw ores count as medium so they can loop back to the grinder. *Alternative:* a sieve with recipes (gravel → flint, sand → clay) instead of a sorter.
 8. **M8. Sawmill recipes are per wood kind**, modded logs only through datapacks (7.2).
