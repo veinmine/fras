@@ -9,7 +9,9 @@ pub const ZETA: f64 = 0.6;
 /// Target speed range and step, RPM at the socket.
 pub const TARGET_MIN: f64 = 8.0;
 pub const TARGET_MAX: f64 = 192.0;
-pub const TARGET_STEP: f64 = 8.0;
+pub const TARGET_STEP: f64 = 2.0;
+/// A big step (shift-click), RPM.
+pub const TARGET_BIG_STEP: f64 = 10.0;
 pub const DEFAULT_TARGET: f64 = 64.0;
 /// Sensitivity 1 to 5: the proportional band, RPM.
 pub const BANDS: [f64; 5] = [32.0, 16.0, 8.0, 4.0, 2.0];
@@ -56,9 +58,11 @@ pub fn throttle(x: f64, target: f64, band: f64) -> f64 {
     ((target - x) / band.max(1e-9)).clamp(0.0, 1.0)
 }
 
-/// The next target, cycling in 8 RPM steps (`up` or down), clamped.
-pub fn next_target(target: f64, up: bool) -> f64 {
-    let t = snap(target) + if up { TARGET_STEP } else { -TARGET_STEP };
+/// The next target: one step (2 RPM) or a big step (10 RPM), `up` or
+/// down, clamped to the range.
+pub fn next_target(target: f64, up: bool, big: bool) -> f64 {
+    let step = if big { TARGET_BIG_STEP } else { TARGET_STEP };
+    let t = snap(target) + if up { step } else { -step };
     t.clamp(TARGET_MIN, TARGET_MAX)
 }
 
@@ -248,9 +252,11 @@ mod tests {
         assert_eq!(throttle(50.0, 64.0, 32.0), 14.0 / 32.0);
         assert_eq!(throttle(70.0, 64.0, 32.0), 0.0);
         assert_eq!(throttle(0.0, 64.0, 2.0), 1.0);
-        assert_eq!(next_target(64.0, true), 72.0);
-        assert_eq!(next_target(8.0, false), 8.0);
-        assert_eq!(next_target(192.0, true), 192.0);
+        assert_eq!(next_target(64.0, true, false), 66.0);
+        assert_eq!(next_target(64.0, false, true), 54.0);
+        assert_eq!(next_target(8.0, false, false), 8.0);
+        assert_eq!(next_target(12.0, false, true), 8.0);
+        assert_eq!(next_target(192.0, true, true), 192.0);
         assert_eq!(band(1), 32.0);
         assert_eq!(band(9), 2.0);
         assert_eq!(clean_target(f64::NAN), DEFAULT_TARGET);

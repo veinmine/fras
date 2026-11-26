@@ -187,13 +187,15 @@ pub fn screen_draw(host: &dyn ClientHost, event: &mut ScreenDrawEvent<'_>) {
     super::text_in(draw, &note, [x + 8.0, y + 80.0], 160.0, grey);
 }
 
-pub fn screen_click(_: &dyn ClientHost, event: &mut ScreenClickEvent<'_>) -> Option<i32> {
+pub fn screen_click(host: &dyn ClientHost, event: &mut ScreenClickEvent<'_>) -> Option<i32> {
+    // Shift-clicking the target's buttons takes a big step: ids 4 and 5.
+    let shift = host.modifiers().bits & 0x0001 != 0;
     // `at` is in GUI pixels from the screen's top left, as the buttons are.
     let [ax, ay] = event.at;
     BUTTONS
         .into_iter()
         .find(|(_, x, y)| ax >= *x && ax < x + BUTTON && ay >= *y && ay < y + BUTTON)
-        .map(|(id, _, _)| id)
+        .map(|(id, _, _)| if shift && id < 2 { id + 4 } else { id })
 }
 
 /// A button pressed: step the target or sensitivity and tell the plant.
@@ -205,7 +207,11 @@ pub fn menu_button(host: &mut dyn ServerHost, event: &mut mod_api::MenuButtonEve
         govern::clean_target(blocks::get_f64(nbt, "target").unwrap_or(govern::DEFAULT_TARGET));
     let sens = blocks::get_i32(nbt, "sens").unwrap_or(govern::DEFAULT_SENS as i32);
     match id {
-        0 | 1 => blocks::put_f64(nbt, "target", govern::next_target(target, id == 1)),
+        0 | 1 | 4 | 5 => blocks::put_f64(
+            nbt,
+            "target",
+            govern::next_target(target, id % 2 == 1, id >= 4),
+        ),
         2 | 3 => blocks::put_i32(
             nbt,
             "sens",
