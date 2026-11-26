@@ -321,7 +321,7 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
     // Faint upright lines: every 15 s over a minute, every 1 or 2 minutes
     // over 5 or 10.
     let (minutes, _, every) = RANGES[range];
-    let parts = if every == 0 { 4 } else { minutes / every };
+    let parts = minutes.checked_div(every).unwrap_or(4);
     for q in 1..parts {
         let gx = cx + (cw * q as f32 / parts as f32).round();
         draw.fill([gx, cy, 1.0, ch], 0xFF2C_2C2C);
