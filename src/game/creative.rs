@@ -445,7 +445,7 @@ pub fn menu_button(
             .unwrap_or_else(|| host.dimension());
         // Read again after the block entity is written back (as governors).
         with_level(dim, |l| {
-            l.steam.governors_dirty.insert(pos);
+            l.steam.settings_dirty.insert(pos);
         });
     }
 }

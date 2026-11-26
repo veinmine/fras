@@ -202,6 +202,8 @@ impl Block {
                 | Block::PressureGauge
                 | Block::SightGlass
                 | Block::Governor
+                | Block::FurnaceDamper
+                | Block::EmergencyValve
         ) || self.is_creative()
     }
 
@@ -229,6 +231,8 @@ impl Block {
                 | Block::Tachometer
                 | Block::PressureGauge
                 | Block::SightGlass
+                | Block::FurnaceDamper
+                | Block::EmergencyValve
         ) || self.is_creative()
     }
 

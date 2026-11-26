@@ -142,7 +142,7 @@
   "tooltip.fras.steam_release": "Right-click to vent steam: up to 80 mB/s.",
   "tooltip.fras.steam_release.details": "Goes on a pipe end, a dome or a tank. The jet scalds 2 blocks out.",
   "tooltip.fras.emergency_valve": "Opens at its set pressure: up to 80 mB/s.",
-  "tooltip.fras.emergency_valve.details": "Set half a bar under the red line when placed. The wrench changes it in 0.5 bar steps.",
+  "tooltip.fras.emergency_valve.details": "Set half a bar under the red line when placed. Right-click it to set it in 0.1 bar steps; the wrench changes it in 0.5 bar steps.",
   "tooltip.fras.pump": "Draws 25 mB/s per water source it touches.",
   "tooltip.fras.pump.details": "Works between 8 and 128 RPM with a 4 Nm load. The outlet is opposite the shaft.",
   "tooltip.fras.steam_cylinder": "Stall 16 Nm per bar, top 32 RPM per bar.",
@@ -226,7 +226,7 @@
   "tooltip.fras.governor.details": "Put it in a steam pipe and turn its socket from the engine's shaft. Target 8 to 192 RPM; higher sensitivity holds speed tighter but can hunt.",
   "block.fras.furnace_damper": "Furnace Damper",
   "tooltip.fras.furnace_damper": "Turns the fire down as pressure nears its setting. Redstone shuts it.",
-  "tooltip.fras.furnace_damper.details": "Place it on a boiler. The wrench sets the pressure, 1 to 8 bar. All shut banks the fire.",
+  "tooltip.fras.furnace_damper.details": "Place it on a boiler. Right-click it to set the pressure, 1 to 8 bar in 0.1 bar steps, and see its opening. All shut banks the fire.",
   "block.fras.bellows": "Bellows",
   "tooltip.fras.bellows": "Blows a firebox: up to 50% more heat from the same fuel.",
   "tooltip.fras.bellows.details": "Place it against a firebox and turn it: 16 to 128 RPM, full boost at 64 RPM. One per firebox.",
@@ -381,5 +381,8 @@
   "fras.readout.ago": "%s min ago",
   "fras.creative.dampers": "Dampers",
   "fras.creative.obeyed": "Obeyed",
-  "fras.creative.ignored": "Ignored"
+  "fras.creative.ignored": "Ignored",
+  "fras.setpoint.pressure": "Pressure %s bar",
+  "fras.setpoint.opening_chart": "Flap opening (%%)",
+  "fras.setpoint.damper_how": "Fully open %s bar below the setting, shut at it."
 }

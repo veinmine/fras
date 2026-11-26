@@ -226,6 +226,6 @@ pub fn menu_button(host: &mut dyn ServerHost, event: &mut mod_api::MenuButtonEve
         .unwrap_or_else(|| host.dimension());
     // The block entity is written back after this call; read it again then.
     with_level(dim, |l| {
-        l.steam.governors_dirty.insert(pos);
+        l.steam.settings_dirty.insert(pos);
     });
 }

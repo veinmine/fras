@@ -59,8 +59,9 @@ pub struct Steam {
     pub fires: HashMap<Pos, (i32, i32, f64)>,
     pub puffs: Vec<(Pos, u32)>,
     // ---- 0.3 ----
-    /// Governors whose settings changed in their menu: read them again.
-    pub governors_dirty: BTreeSet<Pos>,
+    /// Parts whose settings changed in their menu (governors, dampers,
+    /// emergency valves, creative blocks): read them again.
+    pub settings_dirty: BTreeSet<Pos>,
     /// Rusting parts that took a random tick.
     pub rust_ticks: BTreeSet<Pos>,
     /// Positions inside an active scald area (rust spec 4: steam exposure).
@@ -157,7 +158,7 @@ pub fn queued(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
     let (banked, govs) = with_level(dim, |l| {
         (
             std::mem::take(&mut l.steam.banked),
-            std::mem::take(&mut l.steam.governors_dirty),
+            std::mem::take(&mut l.steam.settings_dirty),
         )
     });
     for (pos, on) in banked {

@@ -142,7 +142,7 @@
   "tooltip.fras.steam_release": "Prawy przycisk wypuszcza parę: do 80 mB/s.",
   "tooltip.fras.steam_release.details": "Montuje się na końcu rury, na kołpaku lub zbiorniku. Strumień parzy na 2 bloki.",
   "tooltip.fras.emergency_valve": "Otwiera się przy ustawionym ciśnieniu: do 80 mB/s.",
-  "tooltip.fras.emergency_valve.details": "Po postawieniu ustawiony pół bara poniżej czerwonej linii. Klucz zmienia go co 0,5 bar.",
+  "tooltip.fras.emergency_valve.details": "Po postawieniu ustawiony pół bara poniżej czerwonej linii. Kliknij go prawym, by ustawić go co 0,1 bar; klucz zmienia go co 0,5 bar.",
   "tooltip.fras.pump": "Pobiera 25 mB/s z każdego źródła wody, którego dotyka.",
   "tooltip.fras.pump.details": "Działa od 8 do 128 obr./min przy obciążeniu 4 Nm. Wylot jest naprzeciw wału.",
   "tooltip.fras.steam_cylinder": "Moment 16 Nm na bar, do 32 obr./min na bar.",
@@ -226,7 +226,7 @@
   "tooltip.fras.governor.details": "Wstaw go w rurę parową i napędzaj gniazdo z wału silnika. Prędkość zadana 8 do 192 obr./min; większa czułość trzyma prędkość dokładniej, ale regulator może się kołysać.",
   "block.fras.furnace_damper": "Szyber",
   "tooltip.fras.furnace_damper": "Przytłumia ogień, gdy ciśnienie zbliża się do nastawy. Czerwony kamień go zamyka.",
-  "tooltip.fras.furnace_damper.details": "Postaw go na kotle. Klucz ustawia ciśnienie, od 1 do 8 bar. Zamknięty do końca przytłumia ogień.",
+  "tooltip.fras.furnace_damper.details": "Postaw go na kotle. Kliknij go prawym, by ustawić ciśnienie od 1 do 8 bar co 0,1 bar i zobaczyć jego otwarcie. Zamknięty do końca przytłumia ogień.",
   "block.fras.bellows": "Miech",
   "tooltip.fras.bellows": "Dmucha w palenisko: do 50% więcej ciepła z tego samego paliwa.",
   "tooltip.fras.bellows.details": "Przystaw go do paleniska i napędzaj: 16 do 128 obr./min, pełne dmuchanie przy 64 obr./min. Jeden na palenisko.",
@@ -381,5 +381,8 @@
   "fras.readout.ago": "%s min temu",
   "fras.creative.dampers": "Szybry",
   "fras.creative.obeyed": "Działają",
-  "fras.creative.ignored": "Pomijane"
+  "fras.creative.ignored": "Pomijane",
+  "fras.setpoint.pressure": "Ciśnienie %s bar",
+  "fras.setpoint.opening_chart": "Otwarcie szybra (%%)",
+  "fras.setpoint.damper_how": "Całkiem otwarty %s bar poniżej nastawy, zamknięty przy niej."
 }

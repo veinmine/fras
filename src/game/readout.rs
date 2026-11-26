@@ -151,8 +151,22 @@ pub fn container(block: Block) -> ModContainer {
     }
 }
 
-fn fixed(v: f64, scale: f64) -> i32 {
+pub fn fixed(v: f64, scale: f64) -> i32 {
     (v * scale).round().clamp(-32767.0, 32767.0) as i32
+}
+
+/// Sample `v` (fixed point) into the history of the block at `pos`, and
+/// return the samples of `range` with the ring's head. Call it every tick:
+/// each range samples on its own ticks.
+pub fn sample(dim: super::server::Dim, pos: Pos, v: i32, range: usize) -> (Vec<i32>, usize) {
+    let range = range.min(RANGES.len() - 1);
+    let ticks = super::server::with(|s| s.ticks);
+    with_level(dim, |l| {
+        let h = l.histories.entry(pos).or_default();
+        h.sample(ticks, v);
+        let ring = &h.rings[range];
+        (ring.samples.clone(), ring.head)
+    })
 }
 
 /// Keep a gauge's history and menu data: `value`, `red` and `extra` (the
@@ -172,13 +186,7 @@ pub fn update(
     let s = kind.scale();
     let v = fixed(value, s);
     let range = range.min(RANGES.len() - 1);
-    let ticks = super::server::with(|s| s.ticks);
-    let (samples, head) = with_level(dim, |l| {
-        let h = l.histories.entry(pos).or_default();
-        h.sample(ticks, v);
-        let ring = &h.rings[range];
-        (ring.samples.clone(), ring.head)
-    });
+    let (samples, head) = sample(dim, pos, v, range);
     let extra = if kind == Readout::Level {
         extra.round() as i32
     } else {
@@ -208,7 +216,13 @@ const BUTTON_Y: f32 = 4.0;
 const BUTTON_H: f32 = 11.0;
 
 pub fn screen_click(event: &mut ScreenClickEvent<'_>) -> Option<i32> {
-    let [ax, ay] = event.at;
+    range_click(event.at)
+}
+
+/// The range button at `at` (from the screen's top left), if any: its id
+/// is the range, 0 to 2.
+pub fn range_click(at: [f32; 2]) -> Option<i32> {
+    let [ax, ay] = at;
     if ay < BUTTON_Y || ay >= BUTTON_Y + BUTTON_H {
         return None;
     }
@@ -220,10 +234,18 @@ pub fn screen_click(event: &mut ScreenClickEvent<'_>) -> Option<i32> {
 
 /// A range button pressed: show that range.
 pub fn menu_button(event: &mut mod_api::MenuButtonEvent<'_>) {
+    range_button(event);
+}
+
+/// A range button pressed (ids 0 to 2): save the range. Returns whether
+/// the id was one.
+pub fn range_button(event: &mut mod_api::MenuButtonEvent<'_>) -> bool {
     let id = event.context.id;
-    if (0..RANGES.len() as i32).contains(&id) {
+    let ok = (0..RANGES.len() as i32).contains(&id);
+    if ok {
         super::blocks::put_i32(&mut event.entity.nbt, "range", id);
     }
+    ok
 }
 
 /// The screen: no slots, no inventory.
@@ -241,7 +263,7 @@ pub fn screen(_: &mut ScreenEvent<'_>) -> Option<mod_api::Screen> {
     })
 }
 
-fn tr(host: &dyn ClientHost, key: &str, args: &[String]) -> String {
+pub fn tr(host: &dyn ClientHost, key: &str, args: &[String]) -> String {
     let mut t = host.translate(key).unwrap_or_else(|| key.to_string());
     for (i, a) in args.iter().enumerate() {
         t = t.replacen("%s", a, 1).replace(&format!("%{}$s", i + 1), a);
@@ -249,8 +271,8 @@ fn tr(host: &dyn ClientHost, key: &str, args: &[String]) -> String {
     t
 }
 
-const GREY: u32 = 0xFF40_4040;
-const RED: u32 = 0xFFD0_3030;
+pub const GREY: u32 = 0xFF40_4040;
+pub const RED: u32 = 0xFFD0_3030;
 const YELLOW: u32 = 0xFFD0_B020;
 const LINE: u32 = 0xFF60_E060;
 /// The area under the line: the line's green, translucent.
@@ -267,20 +289,7 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
     let points = Ring::ordered(&samples, head % SAMPLES);
     let [x, y] = event.origin;
     let draw = &mut *event.draw;
-    // The range buttons, the one shown pressed.
-    for (i, (bx, w)) in BUTTONS.iter().enumerate() {
-        let (bx, by) = (x + bx, y + BUTTON_Y);
-        let on = i == range;
-        draw.fill([bx, by, *w, BUTTON_H], 0xFF8B_8B8B);
-        draw.fill(
-            [bx + 1.0, by + 1.0, w - 2.0, BUTTON_H - 2.0],
-            if on { 0xFF60_6060 } else { 0xFFC6_C6C6 },
-        );
-        let text = format!("{}m", RANGES[i].0);
-        let tw = draw.text_width(&text);
-        let color = if on { 0xFFFF_FFFF } else { GREY };
-        draw.text(&text, [bx + (w - tw) / 2.0, by + 2.0], color, false);
-    }
+    range_buttons(draw, [x, y], range);
     // The reading, and its limits.
     draw.text(&kind.show(value), [x + 8.0, y + 18.0], GREY, false);
     let note = match kind {
@@ -295,8 +304,8 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         let color = if kind == Readout::Level { RED } else { GREY };
         draw.text(&note, [x + 168.0 - w, y + 18.0], color, false);
     }
-    // The chart: the last minute, scaled to round numbers that hold the
-    // samples and the red line, with a labelled line at each step.
+    // The chart: scaled to round numbers that hold the samples and the red
+    // line, with a labelled line at each step.
     let most = points.iter().map(|(_, v)| v.abs()).max().unwrap_or(0);
     let (top, step) = if kind == Readout::Level {
         (1000, 250)
@@ -308,13 +317,80 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         Readout::Level => format!("{}", v / 10),
         _ => super::num(v as f64 / kind.scale()),
     };
+    // Limits over the samples, so they stay visible.
+    let mut limits = Vec::new();
+    if kind != Readout::Level {
+        limits.push((red, RED));
+        if kind == Readout::Speed {
+            limits.push((extra, YELLOW));
+        }
+    }
+    chart(
+        draw,
+        host,
+        &Chart {
+            area: [x + 8.0, y + 32.0, 160.0, 72.0],
+            points: &points,
+            top,
+            step,
+            label: &label,
+            range,
+            limits: &limits,
+        },
+    );
+}
+
+/// The range buttons in the title row, the one shown pressed. `origin` is
+/// the screen's top left.
+pub fn range_buttons(draw: &mut dyn mod_api::DrawContext, origin: [f32; 2], range: usize) {
+    let [x, y] = origin;
+    for (i, (bx, w)) in BUTTONS.iter().enumerate() {
+        let (bx, by) = (x + bx, y + BUTTON_Y);
+        let on = i == range;
+        draw.fill([bx, by, *w, BUTTON_H], 0xFF8B_8B8B);
+        draw.fill(
+            [bx + 1.0, by + 1.0, w - 2.0, BUTTON_H - 2.0],
+            if on { 0xFF60_6060 } else { 0xFFC6_C6C6 },
+        );
+        let text = format!("{}m", RANGES[i].0);
+        let tw = draw.text_width(&text);
+        let color = if on { 0xFFFF_FFFF } else { GREY };
+        draw.text(&text, [bx + (w - tw) / 2.0, by + 2.0], color, false);
+    }
+}
+
+/// A history chart to draw.
+pub struct Chart<'a> {
+    /// Left, top, width and height of the chart with its scale labels
+    /// (the time labels go below it).
+    pub area: [f32; 4],
+    /// The samples, oldest first, with their place (see `Ring::ordered`).
+    pub points: &'a [(usize, i32)],
+    /// The scale's top and step, fixed point.
+    pub top: i32,
+    pub step: i32,
+    /// A scale label for a fixed point value.
+    pub label: &'a dyn Fn(i32) -> String,
+    /// The range shown (for the upright lines and the time labels).
+    pub range: usize,
+    /// Level lines drawn over the samples (fixed point, colour); 0 or less
+    /// draws none.
+    pub limits: &'a [(i32, u32)],
+}
+
+/// Draw a history chart: a labelled scale, faint time lines, the samples
+/// as a 1-pixel line over a translucent area, the limits, and the time.
+pub fn chart(draw: &mut dyn mod_api::DrawContext, host: &dyn ClientHost, c: &Chart<'_>) {
+    let [ax, ay, aw, ah] = c.area;
+    let (top, step) = (c.top.max(1), c.step.max(1));
+    let range = c.range.min(RANGES.len() - 1);
     let ticks: Vec<i32> = (0..=top / step).map(|i| i * step).collect();
     let gutter = ticks
         .iter()
-        .map(|t| draw.text_width(&label(*t)))
+        .map(|t| draw.text_width(&(c.label)(*t)))
         .fold(0.0f32, f32::max)
         + 4.0;
-    let (cx, cy, cw, ch) = (x + 8.0 + gutter, y + 32.0, 160.0 - gutter, 72.0);
+    let (cx, cy, cw, ch) = (ax + gutter, ay, aw - gutter, ah);
     draw.fill([cx - 1.0, cy - 1.0, cw + 2.0, ch + 2.0], 0xFF8B_8B8B);
     draw.fill([cx, cy, cw, ch], 0xFF20_2020);
     let at = |v: i32| cy + ch - (v.abs() as f32 / top as f32).clamp(0.0, 1.0) * ch;
@@ -331,20 +407,22 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         if *t > 0 && *t < top {
             draw.fill([cx, gy, cw, 1.0], 0xFF38_3838);
         }
-        let text = label(*t);
+        let text = (c.label)(*t);
         let w = draw.text_width(&text);
         draw.text(&text, [cx - 3.0 - w, gy - 3.5], GREY, false);
     }
     // The samples: one column per pixel, the area under the line shaded
     // translucent and a 1-pixel line on top, inside the frame.
     let mut at_sample: Vec<Option<i32>> = vec![None; SAMPLES];
-    for (i, v) in &points {
-        at_sample[*i] = Some(*v);
+    for (i, v) in c.points {
+        if let Some(slot) = at_sample.get_mut(*i) {
+            *slot = Some(*v);
+        }
     }
     let columns = cw.floor().max(2.0) as usize;
     let mut last: Option<f32> = None;
-    for c in 0..columns {
-        let t = c as f32 * (SAMPLES - 1) as f32 / (columns - 1) as f32;
+    for col in 0..columns {
+        let t = col as f32 * (SAMPLES - 1) as f32 / (columns - 1) as f32;
         let (i0, i1) = (t.floor() as usize, (t.ceil() as usize).min(SAMPLES - 1));
         let (Some(a), Some(b)) = (at_sample[i0], at_sample[i1]) else {
             last = None;
@@ -352,7 +430,7 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         };
         let f = t - i0 as f32;
         let py = (at(a) * (1.0 - f) + at(b) * f).round().min(cy + ch - 1.0);
-        let px = cx + c as f32;
+        let px = cx + col as f32;
         draw.fill([px, py + 1.0, 1.0, (cy + ch - py - 1.0).max(0.0)], SHADE);
         let (lo, hi) = match last {
             Some(ly) => (ly.min(py), ly.max(py)),
@@ -361,13 +439,9 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         draw.fill([px, lo, 1.0, hi - lo + 1.0], LINE);
         last = Some(py);
     }
-    // Limits over the samples, so they stay visible.
-    if kind != Readout::Level {
-        if red > 0 && red <= top {
-            draw.fill([cx, at(red), cw, 1.0], RED);
-        }
-        if kind == Readout::Speed && extra > 0 && extra <= top {
-            draw.fill([cx, at(extra), cw, 1.0], YELLOW);
+    for (v, color) in c.limits {
+        if *v > 0 && *v <= top {
+            draw.fill([cx, at(*v).min(cy + ch - 1.0), cw, 1.0], *color);
         }
     }
     // Time.
@@ -382,7 +456,7 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
 /// A chart scale for values up to `v` (fixed point): a round step (1, 2 or
 /// 5 times a power of ten) giving at most 5 steps, and the top, a whole
 /// number of steps.
-fn axis(v: f64) -> (i32, i32) {
+pub fn axis(v: f64) -> (i32, i32) {
     let v = v.max(1.0);
     let raw = v / 5.0;
     let p = 10f64.powf(raw.log10().floor());

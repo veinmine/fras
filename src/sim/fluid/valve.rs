@@ -54,6 +54,20 @@ pub fn next_set(set: f64) -> f64 {
     }
 }
 
+/// Its screen's fine step, bar.
+pub const FINE_STEP: f64 = 0.1;
+
+/// The set pressure moved by `delta` bar on its screen: kept to tenths and
+/// within the range.
+pub fn adjust(set: f64, delta: f64) -> f64 {
+    tenths(set + delta)
+}
+
+/// A set pressure rounded to tenths, within the range.
+pub fn tenths(v: f64) -> f64 {
+    ((v / FINE_STEP).round() * FINE_STEP).clamp(SET_MIN, SET_MAX)
+}
+
 fn snap(v: f64) -> f64 {
     ((v / SET_STEP).round() * SET_STEP).clamp(SET_MIN, SET_MAX)
 }
@@ -61,6 +75,14 @@ fn snap(v: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_screen_sets_the_emergency_valve_in_tenths() {
+        assert!((adjust(3.5, 0.1) - 3.6).abs() < 1e-9);
+        assert!((adjust(3.6, -1.0) - 2.6).abs() < 1e-9);
+        assert_eq!(adjust(8.0, 0.1), SET_MAX);
+        assert_eq!(adjust(1.0, -1.0), SET_MIN);
+    }
 
     #[test]
     fn the_manual_valve_moves_in_tenths() {
