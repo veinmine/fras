@@ -216,23 +216,61 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
         let color = if kind == Readout::Level { RED } else { GREY };
         draw.text(&note, [x + 168.0 - w, y + 18.0], color, false);
     }
-    // The chart: the last minute, scaled to what it holds and the red line.
-    let (cx, cy, cw, ch) = (x + 8.0, y + 32.0, 160.0, 72.0);
+    // The chart: the last minute, scaled to round numbers that hold the
+    // samples and the red line, with a labelled line at each step.
+    let most = points.iter().map(|(_, v)| v.abs()).max().unwrap_or(0);
+    let (top, step) = if kind == Readout::Level {
+        (1000, 250)
+    } else {
+        let want = most.max(red).max(value.abs()).max(kind.least_top()) as f64 * 1.1;
+        axis(want)
+    };
+    let label = |v: i32| match kind {
+        Readout::Level => format!("{}", v / 10),
+        _ => super::num(v as f64 / kind.scale()),
+    };
+    let ticks: Vec<i32> = (0..=top / step).map(|i| i * step).collect();
+    let gutter = ticks
+        .iter()
+        .map(|t| draw.text_width(&label(*t)))
+        .fold(0.0f32, f32::max)
+        + 4.0;
+    let (cx, cy, cw, ch) = (x + 8.0 + gutter, y + 32.0, 160.0 - gutter, 72.0);
     draw.fill([cx - 1.0, cy - 1.0, cw + 2.0, ch + 2.0], 0xFF8B_8B8B);
     draw.fill([cx, cy, cw, ch], 0xFF20_2020);
-    let most = points.iter().map(|(_, v)| v.abs()).max().unwrap_or(0);
-    let top = if kind == Readout::Level {
-        kind.least_top()
-    } else {
-        let want = most.max(red).max(value.abs()).max(kind.least_top()) as f64 * 1.15;
-        nice(want)
-    };
     let at = |v: i32| cy + ch - (v.abs() as f32 / top as f32).clamp(0.0, 1.0) * ch;
-    // Quarter lines.
+    // Every 15 s, a faint upright line.
     for q in 1..4 {
-        let gy = cy + ch * q as f32 / 4.0;
-        draw.fill([cx, gy, cw, 1.0], 0xFF30_3030);
+        let gx = cx + (cw * q as f32 / 4.0).round();
+        draw.fill([gx, cy, 1.0, ch], 0xFF2C_2C2C);
     }
+    for t in &ticks {
+        let gy = at(*t).min(cy + ch - 1.0);
+        if *t > 0 && *t < top {
+            draw.fill([cx, gy, cw, 1.0], 0xFF38_3838);
+        }
+        let text = label(*t);
+        let w = draw.text_width(&text);
+        draw.text(&text, [cx - 3.0 - w, gy - 3.5], GREY, false);
+    }
+    // The samples: a 2-pixel line with the area under it shaded, kept
+    // inside the frame.
+    let width = 2.0f32;
+    let step_x = (cw - width) / (SAMPLES - 1) as f32;
+    let mut last: Option<f32> = None;
+    for (i, v) in &points {
+        let px = cx + *i as f32 * step_x;
+        let py = at(*v).min(cy + ch - width);
+        let w = (step_x + 0.5).max(width).min(cx + cw - px);
+        draw.fill([px, py, w, cy + ch - py], 0xFF24_4A2A);
+        let (lo, hi) = match last {
+            Some(ly) => (ly.min(py), ly.max(py)),
+            None => (py, py),
+        };
+        draw.fill([px, lo, w, hi - lo + width], LINE);
+        last = Some(py);
+    }
+    // Limits over the samples, so they stay visible.
     if kind != Readout::Level {
         if red > 0 && red <= top {
             draw.fill([cx, at(red), cw, 1.0], RED);
@@ -241,50 +279,37 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
             draw.fill([cx, at(extra), cw, 1.0], YELLOW);
         }
     }
-    let step = cw / (SAMPLES - 1) as f32;
-    let mut last: Option<f32> = None;
-    for (i, v) in &points {
-        let px = cx + *i as f32 * step;
-        let py = at(*v);
-        let (lo, hi) = match last {
-            Some(ly) => (ly.min(py), ly.max(py)),
-            None => (py, py),
-        };
-        draw.fill(
-            [
-                px,
-                lo.min(cy + ch - 1.0),
-                step.max(1.0) + 0.5,
-                (hi - lo).max(1.0),
-            ],
-            LINE,
-        );
-        last = Some(py);
-    }
-    // Scale and time.
-    let top_text = kind.show(top);
-    draw.text(&top_text, [cx + 2.0, cy + 2.0], 0xFFA0_A0A0, false);
+    // Time.
+    let below = cy + ch + 3.0;
     draw.text(
         &tr(host, "fras.readout.minute_ago", &[]),
-        [cx, cy + ch + 3.0],
+        [cx, below],
         GREY,
         false,
     );
+    let half = tr(host, "fras.readout.half_minute_ago", &[]);
+    let w = draw.text_width(&half);
+    draw.text(&half, [cx + cw / 2.0 - w / 2.0, below], GREY, false);
     let now = tr(host, "fras.readout.now", &[]);
     let w = draw.text_width(&now);
-    draw.text(&now, [cx + cw - w, cy + ch + 3.0], GREY, false);
+    draw.text(&now, [cx + cw - w, below], GREY, false);
 }
 
-/// A round scale top at or above `v`: 1, 2 or 5 times a power of ten.
-fn nice(v: f64) -> i32 {
+/// A chart scale for values up to `v` (fixed point): a round step (1, 2 or
+/// 5 times a power of ten) giving at most 5 steps, and the top, a whole
+/// number of steps.
+fn axis(v: f64) -> (i32, i32) {
     let v = v.max(1.0);
-    let p = 10f64.powf(v.log10().floor());
-    let top = [1.0, 2.0, 5.0, 10.0]
+    let raw = v / 5.0;
+    let p = 10f64.powf(raw.log10().floor());
+    let step = [1.0, 2.0, 5.0, 10.0]
         .into_iter()
         .map(|m| m * p)
-        .find(|t| *t >= v)
-        .unwrap_or(10.0 * p);
-    top.min(32767.0) as i32
+        .find(|t| *t >= raw - 1e-9)
+        .unwrap_or(10.0 * p)
+        .max(1.0);
+    let top = (v / step).ceil() * step;
+    (top.min(32767.0) as i32, step as i32)
 }
 
 #[cfg(test)]
@@ -309,9 +334,16 @@ mod tests {
 
     #[test]
     fn scales_are_round() {
-        assert_eq!(nice(1.0), 1);
-        assert_eq!(nice(130.0), 200);
-        assert_eq!(nice(1100.0), 2000);
-        assert_eq!(nice(480.0), 500);
+        // 85 RPM under a 192 RPM red line: 0 to 250 RPM in 50s.
+        assert_eq!(axis(1920.0 * 1.1), (2500, 500));
+        // 4 bar: 0 to 5 in 1s.
+        assert_eq!(axis(440.0), (500, 100));
+        // The least scale (16 RPM): steps of 5.
+        assert_eq!(axis(176.0), (200, 50));
+        for v in [37.0, 999.0, 1234.0, 30000.0] {
+            let (top, step) = axis(v);
+            assert!(top as f64 >= v.min(32767.0) && top % step == 0);
+            assert!((2..=5).contains(&(top / step)), "{v}: {top} {step}");
+        }
     }
 }

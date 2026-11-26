@@ -332,45 +332,46 @@ pub fn screen_draw(block: Block, host: &dyn ClientHost, event: &mut ScreenDrawEv
             draw.text(label, [x + bx + 3.5, ry + 2.0], grey, false);
         }
     }
+    // What it is doing now: one value per line, the label on the left and
+    // the value right-aligned, so a changing number never moves the others.
     let (s0, s1) = (d(2), d(3));
-    let status = match block {
-        Block::CreativeEngine => {
-            let rpm = s0 as f64 / 10.0;
-            tr(
-                host,
-                "fras.creative.engine_status",
-                &[super::num(rpm), s1.to_string(), power(s1 as f64, rpm)],
-            )
-        }
-        Block::LoadBank => {
-            let rpm = s0 as f64 / 10.0;
-            tr(
-                host,
-                "fras.creative.load_status",
-                &[super::num(rpm), power(d(0) as f64, rpm)],
-            )
-        }
-        Block::CreativeSteam => tr(
-            host,
-            "fras.creative.steam_status",
-            &[s0.to_string(), super::num(s1 as f64 / 100.0)],
-        ),
-        Block::CreativeWater => tr(host, "fras.creative.water_status", &[s0.to_string()]),
-        Block::CreativeDrain if s0 > 0 => tr(
-            host,
-            "fras.creative.drain_status",
-            &[s0.to_string(), tr(host, content_key(s1), &[])],
-        ),
-        Block::CreativeDrain => tr(host, "fras.inspect.drain_idle", &[]),
-        Block::CreativeFirebox => tr(
-            host,
-            "fras.creative.fire_status",
-            &[s0.to_string(), s1.to_string()],
-        ),
-        _ => String::new(),
+    let rpm = s0 as f64 / 10.0;
+    let speed = format!("{} RPM", super::num(rpm));
+    let lines: Vec<(&str, String)> = match block {
+        Block::CreativeEngine => vec![
+            ("fras.creative.now.speed", speed),
+            ("fras.creative.now.torque", format!("{s1} Nm")),
+            ("fras.creative.now.power", power(s1 as f64, rpm)),
+        ],
+        Block::LoadBank => vec![
+            ("fras.creative.now.speed", speed),
+            ("fras.creative.now.power", power(d(0) as f64, rpm)),
+        ],
+        Block::CreativeSteam => vec![
+            ("fras.creative.now.giving", format!("{s0} mB/s")),
+            (
+                "fras.creative.now.network",
+                format!("{} bar", super::num(s1 as f64 / 100.0)),
+            ),
+        ],
+        Block::CreativeWater => vec![("fras.creative.now.giving", format!("{s0} mB/s"))],
+        Block::CreativeDrain => vec![
+            ("fras.creative.now.taking", format!("{s0} mB/s")),
+            ("fras.creative.now.fluid", tr(host, content_key(s1), &[])),
+        ],
+        Block::CreativeFirebox => vec![
+            ("fras.creative.now.heat", format!("{s0} kW")),
+            ("fras.creative.now.boilers", s1.to_string()),
+        ],
+        _ => Vec::new(),
     };
     let top = y + row_y(rows.len()) + 6.0;
-    super::text_in(draw, &status, [x + 8.0, top], 160.0, grey);
+    for (i, (label, value)) in lines.iter().enumerate() {
+        let ly = top + i as f32 * 11.0;
+        draw.text(&tr(host, label, &[]), [x + 8.0, ly], grey, false);
+        let w = draw.text_width(value);
+        draw.text(value, [x + 168.0 - w, ly], grey, false);
+    }
 }
 
 pub fn screen_click(
