@@ -450,8 +450,8 @@ Each item states what this spec assumes. Reply by number; anything skipped stays
    hammer. *Alternative:* rivets from iron nuggets on the hammer (1 each), so the hammer alone makes them.
 5. **M5. The machines bite:** the saw 1 damage per half second on touch, the hammer 2 per strike under its head (5.4,
    7.3). *Alternative:* no hazards in tier 1 beyond steam.
-6. **M6. Marcin (2026-11-26): the lathe needs a pulley ratio.** Proposed: 128 to 224 RPM, reached through a 2:1 step-up on
-   new iron pulleys (max 192); wooden pulleys stay at 96 (6.3, `specs/progression.md` 4.4).
+6. **M6. Decided (Marcin, 2026-11-26): the lathe runs at 128 to 224 RPM**, reached through a 2:1 step-up on new iron
+   pulleys (max 192); wooden pulleys stay at 96 (6.3, `specs/progression.md` 4.4).
 7. **M7. The trommel sorts by tags into three outlets** (8.3). Fines are only what a furnace takes (sand, dusts, crushed
    ore), so redstone and bone meal count as medium; raw ores count as medium so they can loop back to the grinder. *Alternative:* a sieve with recipes (gravel → flint, sand → clay) instead of a sorter.
 8. **M8. Sawmill recipes are per wood kind**, modded logs only through datapacks (7.2).
