@@ -82,10 +82,7 @@ fn yields_match_the_spec() {
     assert!((dust - 4.0 / 3.0).abs() < 0.02, "{dust}");
     let red = average(&w, "fras:crushed_iron", "minecraft:redstone", 30_000);
     assert!((red - 0.1).abs() < 0.01, "{red}");
-    assert_eq!(
-        average(&w, "fras:crushed_gold", "minecraft:copper_nugget", 1).min(1.0) >= 0.0,
-        true
-    );
+    assert!(average(&w, "fras:crushed_gold", "minecraft:copper_nugget", 1).min(1.0) >= 0.0);
     assert_eq!(
         average(&hammering(), "fras:iron_rod", "fras:rivet", 10),
         8.0

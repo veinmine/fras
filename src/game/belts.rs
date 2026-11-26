@@ -675,7 +675,7 @@ fn step(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, belts: &mut Belts)
         host: &*host,
         level,
     };
-    let check_pause = belts.ticks % 10 == 0;
+    let check_pause = belts.ticks.is_multiple_of(10);
     // Speeds, stops and loads from the network.
     for ls in belts.lines.iter_mut().flatten() {
         let (stop, v, jam_all) = with_level(dim, |l| line_speed(l, ls));
@@ -698,6 +698,15 @@ fn step(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, belts: &mut Belts)
             }
         } else if ls.stop == Some(Stop::Paused) {
             stop = Some(Stop::Paused);
+        }
+        if stop != ls.stop && matches!(stop, Some(Stop::Jammed | Stop::UnderDriven)) {
+            let t = level.game_time(&*host).unwrap_or(0);
+            let kind = if stop == Some(Stop::Jammed) {
+                "line_jam"
+            } else {
+                "under_driven"
+            };
+            super::debug::event(dim, t, kind, ls.line.blocks[0], String::new());
         }
         ls.stop = stop;
         ls.v = if stop.is_some() { 0.0 } else { v };
@@ -758,11 +767,24 @@ fn step(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, belts: &mut Belts)
                 speed: ls.v.abs(),
                 end: EndState::Idle,
                 crossed_items: 0,
+                dropped: Vec::new(),
             };
             let out = ls.line.step(ls.v, &stations, &mut world);
             let end = std::mem::take(&mut world.end);
+            let dropped = std::mem::take(&mut world.dropped);
             if end != EndState::Idle || ls.line.entries.is_empty() {
+                let blocked =
+                    |e: &EndState| matches!(e, EndState::BlockedFull | EndState::BlockedSolid);
+                if blocked(&end) && !blocked(&ls.end) {
+                    let t = level.game_time(&*host).unwrap_or(0);
+                    let at = *ls.line.blocks.last().unwrap_or(&ls.line.blocks[0]);
+                    super::debug::event(dim, t, "backup", at, format!("{end:?}"));
+                }
                 ls.end = end;
+            }
+            for (at, id) in dropped {
+                let t = level.game_time(&*host).unwrap_or(0);
+                super::debug::event(dim, t, "drop", at, id);
             }
             for i in &out.crossed {
                 let pos = ls.line.blocks[*i];
@@ -925,6 +947,8 @@ struct World<'a> {
     speed: f64,
     end: EndState,
     crossed_items: u64,
+    /// Items that fell off the end this step, for the event log.
+    dropped: Vec<(Pos, String)>,
 }
 
 impl Stations<ItemStack> for World<'_> {
@@ -1006,6 +1030,8 @@ impl Stations<ItemStack> for World<'_> {
             Delivery::Fell => {
                 self.end = EndState::Open;
                 self.belts.stats.dropped += 1;
+                self.dropped
+                    .push((target, item.item().id(&*self.host).to_string()));
                 true
             }
             Delivery::Solid => {

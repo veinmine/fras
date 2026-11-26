@@ -280,6 +280,27 @@ impl Hooks for Fras {
     }
 
     /// After each level's tick: run its networks.
+    /// The debug tools' commands (`/fras ...`, operators).
+    fn register_commands(
+        &self,
+        _: &mut dyn ServerHost,
+        event: &mut mod_api::RegisterCommandsEvent<'_>,
+    ) {
+        event.commands.extend(game::debug::commands());
+    }
+
+    fn run_mod_command(
+        &self,
+        host: &mut dyn ServerHost,
+        event: &mut mod_api::RunModCommandEvent<'_>,
+    ) -> Flow {
+        if game::debug::run(host, event.source, event.command) {
+            Flow::Cancel
+        } else {
+            Flow::Continue
+        }
+    }
+
     /// Belt items are written to their blocks when the level saves
     /// (logistics 10.2).
     fn level_save(&self, host: &mut dyn ServerHost, event: &mut mod_api::LevelSaveEvent<'_>) {

@@ -192,7 +192,7 @@ pub struct BeltJob {
     /// Recipes finished, for the debug report.
     pub completed: u64,
     /// Server tick the machine last refreshed it.
-    pub seen: u64,
+    pub seen: i64,
 }
 
 /// Work hooks queue for the machines' ticks.
@@ -257,11 +257,10 @@ pub fn takes_from(host: &dyn Host, level: LevelRef, pos: Pos, b: Block, face: Di
 /// An item reached the centre of the belt block under the machine at
 /// `pos`: whether the machine holds it to work on.
 pub fn belt_arrive(host: &dyn Host, level: LevelRef, dim: Dim, pos: Pos, item: &ItemStack) -> bool {
-    let _ = level;
     let Some(job) = with_level(dim, |l| l.belt_jobs.get(&pos).cloned()) else {
         return false;
     };
-    let now = server::with(|s| s.ticks);
+    let now = level.game_time(host).unwrap_or(0);
     if job.seen + 2 < now || job.held.is_some() {
         return false;
     }
@@ -285,7 +284,10 @@ pub fn belt_poll(host: &dyn Host, dim: Dim, pos: Pos, item: &mut ItemStack) -> b
     let Some(mut job) = with_level(dim, |l| l.belt_jobs.remove(&pos)) else {
         return false;
     };
-    let now = server::with(|s| s.ticks);
+    let now = host
+        .level(dim)
+        .and_then(|level| level.game_time(host))
+        .unwrap_or(0);
     if job.seen + 2 < now {
         // The machine left belt mode or was broken.
         job.held = None;
@@ -519,6 +521,7 @@ pub fn tick(b: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTickEven
     let pos = Pos::from_array(event.pos);
     let (rpm, paused, jammed) = rot_state(dim, pos, &event.entity.nbt);
     let now = server::with(|s| s.ticks);
+    let game_now = level.game_time(&*host).unwrap_or(0);
     let before = event.entity.items.clone();
     if event.entity.items.len() < SLOTS {
         event.entity.items.resize(SLOTS, None);
@@ -565,7 +568,7 @@ pub fn tick(b: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTickEven
                 water_used: 0.0,
                 held: None,
                 completed: 0,
-                seen: now,
+                seen: game_now,
             });
             job.machine = m;
             // The line polls after this tick: a held item not polled since
@@ -577,7 +580,7 @@ pub fn tick(b: Block, host: &mut dyn ServerHost, event: &mut BlockEntityTickEven
             let mut st = state.clone();
             st.water = water.map(|w| (w - job.water_used).max(0.0));
             job.state = st;
-            job.seen = now;
+            job.seen = game_now;
             let used = std::mem::take(&mut job.water_used);
             (job.clone(), used)
         });

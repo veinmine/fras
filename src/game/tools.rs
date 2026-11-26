@@ -990,54 +990,6 @@ impl ItemPart for Tooltip {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn belts_link_parallel_pulleys_in_one_plane() {
-        let a = Pos::new(0, 0, 0);
-        assert_eq!(belt_check(a, Axis::X, Pos::new(0, -4, 0), Axis::X), Ok(1));
-        assert_eq!(belt_check(a, Axis::X, Pos::new(0, -5, 3), Axis::X), Ok(2));
-        assert_eq!(
-            belt_check(a, Axis::X, Pos::new(1, -4, 0), Axis::X),
-            Err("fras.belt.not_in_plane")
-        );
-        assert_eq!(
-            belt_check(a, Axis::X, Pos::new(0, -4, 0), Axis::Z),
-            Err("fras.belt.not_parallel")
-        );
-        assert_eq!(
-            belt_check(a, Axis::Y, Pos::new(17, 0, 0), Axis::Y),
-            Err("fras.belt.too_far")
-        );
-        assert_eq!(belt_check(a, Axis::Y, Pos::new(16, 0, 0), Axis::Y), Ok(4));
-    }
-
-    #[test]
-    fn every_part_has_a_repair_cost() {
-        for b in Block::ALL {
-            let never_damaged = matches!(
-                b,
-                Block::Tachometer
-                    | Block::SteamDome
-                    | Block::Firebox
-                    | Block::PressureGauge
-                    | Block::SightGlass
-                    | Block::CopperRadiator
-                    | Block::IronRadiator
-                    | Block::CreativeEngine
-                    | Block::LoadBank
-                    | Block::CreativeSteam
-                    | Block::CreativeWater
-                    | Block::CreativeDrain
-                    | Block::CreativeFirebox
-            );
-            assert_eq!(repair_cost(b).is_empty(), never_damaged);
-        }
-    }
-}
-
 // ---- Belts and elevators ------------------------------------------------------
 
 /// The wrench on a belt, diverter or elevator: sneak for the overlay;
@@ -1256,4 +1208,52 @@ pub fn belt_inspect(
         ));
     }
     lines
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn belts_link_parallel_pulleys_in_one_plane() {
+        let a = Pos::new(0, 0, 0);
+        assert_eq!(belt_check(a, Axis::X, Pos::new(0, -4, 0), Axis::X), Ok(1));
+        assert_eq!(belt_check(a, Axis::X, Pos::new(0, -5, 3), Axis::X), Ok(2));
+        assert_eq!(
+            belt_check(a, Axis::X, Pos::new(1, -4, 0), Axis::X),
+            Err("fras.belt.not_in_plane")
+        );
+        assert_eq!(
+            belt_check(a, Axis::X, Pos::new(0, -4, 0), Axis::Z),
+            Err("fras.belt.not_parallel")
+        );
+        assert_eq!(
+            belt_check(a, Axis::Y, Pos::new(17, 0, 0), Axis::Y),
+            Err("fras.belt.too_far")
+        );
+        assert_eq!(belt_check(a, Axis::Y, Pos::new(16, 0, 0), Axis::Y), Ok(4));
+    }
+
+    #[test]
+    fn every_part_has_a_repair_cost() {
+        for b in Block::ALL {
+            let never_damaged = matches!(
+                b,
+                Block::Tachometer
+                    | Block::SteamDome
+                    | Block::Firebox
+                    | Block::PressureGauge
+                    | Block::SightGlass
+                    | Block::CopperRadiator
+                    | Block::IronRadiator
+                    | Block::CreativeEngine
+                    | Block::LoadBank
+                    | Block::CreativeSteam
+                    | Block::CreativeWater
+                    | Block::CreativeDrain
+                    | Block::CreativeFirebox
+            );
+            assert_eq!(repair_cost(b).is_empty(), never_damaged);
+        }
+    }
 }

@@ -425,6 +425,13 @@ impl Mechanics {
         self.parts.get(&pos)
     }
 
+    /// Every part's position (debug tools).
+    pub fn positions(&self) -> Vec<Pos> {
+        let mut v: Vec<Pos> = self.parts.keys().copied().collect();
+        v.sort();
+        v
+    }
+
     pub fn contains(&self, pos: Pos) -> bool {
         self.parts.contains_key(&pos)
     }

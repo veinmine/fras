@@ -141,7 +141,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 moving = true;
                 let t = draw.animation_time() as f32;
                 let turns = t * rpm.abs() as f32 / 1200.0 * 2.0;
-                (turns.fract() * 4.0 / 16.0) as f32
+                turns.fract() * 4.0 / 16.0
             } else {
                 2.0 / 16.0
             };
@@ -196,8 +196,8 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
             );
             draw.still();
         }
-        Block::Trommel => {
-            if get("part").as_deref() != Some("end") {
+        Block::Trommel if get("part").as_deref() != Some("end") => {
+            {
                 // The drum spans both blocks along the facing.
                 let axis = facing.axis();
                 let (lo, hi) = if facing.is_positive() {
