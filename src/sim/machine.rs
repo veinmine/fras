@@ -143,23 +143,12 @@ pub struct BeltWork {
     pub pending: Vec<String>,
 }
 
-/// Whether a belt machine takes an item arriving under it: a recipe with
-/// count 1, not jammed, turning, room for its byproducts (nothing pending),
-/// and water for it (logistics 7.1).
-pub fn belt_accepts(
-    item: &str,
-    work: &BeltWork,
-    state: &MachineState,
-    recipes: &[Recipe],
-    items: &dyn Items,
-) -> bool {
-    let Some(r) = find(recipes, item, items) else {
-        return false;
-    };
-    r.count == 1
-        && !state.jammed
-        && work.pending.is_empty()
-        && state.water.is_none_or(|w| w + 1e-9 >= r.water)
+/// Whether a belt machine holds an item arriving under it: it has a recipe
+/// with count 1 for it. A machine that can't work on it yet (jammed, too
+/// slow, out of water, byproducts still waiting) holds it all the same and
+/// the line backs up (logistics 7); only items with no recipe pass.
+pub fn belt_accepts(item: &str, recipes: &[Recipe], items: &dyn Items) -> bool {
+    find(recipes, item, items).is_some_and(|r| r.count == 1)
 }
 
 /// One tick of belt-mode work on the held item.

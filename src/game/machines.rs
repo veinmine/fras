@@ -266,7 +266,7 @@ pub fn belt_arrive(host: &dyn Host, level: LevelRef, dim: Dim, pos: Pos, item: &
     }
     let id = item.item().id(host);
     let takes = with_book(host, job.machine, |recipes, items| {
-        machine::belt_accepts(&id, &job.work, &job.state, recipes, items)
+        machine::belt_accepts(&id, recipes, items)
     });
     if takes {
         with_level(dim, |l| {
@@ -295,6 +295,12 @@ pub fn belt_poll(host: &dyn Host, dim: Dim, pos: Pos, item: &mut ItemStack) -> b
         return false;
     }
     let id = item.item().id(host);
+    if !job.pending.is_empty() {
+        // The last item's byproducts aren't on the belt yet: wait (7.3).
+        job.held = Some(id);
+        with_level(dim, |l| l.belt_jobs.insert(pos, job));
+        return true;
+    }
     let m = job.machine;
     let t = with_book(host, m, |recipes, items| {
         machine::belt_tick(&mut job.work, &id, &job.state, recipes, items, &mut random)

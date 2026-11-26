@@ -283,41 +283,46 @@ fn the_tank_takes_water_or_hot_water_never_mixed() {
 #[test]
 fn belt_mode_refuses_multi_item_recipes_and_unknown_items() {
     let recipes = hammering();
-    let work = BeltWork::default();
-    let s = state(Machine::TripHammer, 64.0);
-    assert!(belt_accepts(
-        "minecraft:iron_ingot",
-        &work,
-        &s,
+    assert!(belt_accepts("minecraft:iron_ingot", &recipes, &TestItems));
+    assert!(!belt_accepts("minecraft:sand", &recipes, &TestItems));
+    assert!(!belt_accepts("minecraft:dirt", &recipes, &TestItems));
+}
+
+/// A dry washer holds crushed ore without working on it (the line backs up)
+/// instead of letting it pass unwashed: seen in game, crushed copper reached
+/// the trommel's fines.
+#[test]
+fn a_dry_or_jammed_machine_holds_the_item_without_working() {
+    let recipes = builtin(Machine::Washer);
+    assert!(belt_accepts("fras:crushed_copper", &recipes, &TestItems));
+    let mut work = BeltWork::default();
+    let mut dry = state(Machine::Washer, 32.0);
+    dry.water = Some(10.0);
+    for _ in 0..200 {
+        let t = belt_tick(
+            &mut work,
+            "fras:crushed_copper",
+            &dry,
+            &recipes,
+            &TestItems,
+            &mut || 0.0,
+        );
+        assert_eq!(t.done, None);
+        assert_eq!(t.status, Status::NoWater);
+    }
+    assert!(work.recipe.is_some(), "still held");
+    let mut jammed = state(Machine::Washer, 32.0);
+    jammed.water = Some(1000.0);
+    jammed.jammed = true;
+    let t = belt_tick(
+        &mut work,
+        "fras:crushed_copper",
+        &jammed,
         &recipes,
-        &TestItems
-    ));
-    assert!(!belt_accepts(
-        "minecraft:sand",
-        &work,
-        &s,
-        &recipes,
-        &TestItems
-    ));
-    assert!(!belt_accepts(
-        "minecraft:dirt",
-        &work,
-        &s,
-        &recipes,
-        &TestItems
-    ));
-    // Byproducts still waiting: nothing new.
-    let busy = BeltWork {
-        pending: vec!["x".into()],
-        ..BeltWork::default()
-    };
-    assert!(!belt_accepts(
-        "minecraft:iron_ingot",
-        &busy,
-        &s,
-        &recipes,
-        &TestItems
-    ));
+        &TestItems,
+        &mut || 0.0,
+    );
+    assert_eq!(t.done, None);
 }
 
 #[test]
