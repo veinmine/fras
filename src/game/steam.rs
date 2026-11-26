@@ -67,6 +67,9 @@ pub struct Steam {
     pub scalding: HashSet<Pos>,
     /// Fireboxes whose banked state changed.
     pub banked: BTreeMap<Pos, bool>,
+    /// Rusting parts' counts (rust spec 5.1), written to their blocks now
+    /// and then.
+    pub rust_counts: HashMap<Pos, u32>,
     /// Each firebox's banked state as last set on its block.
     pub banked_known: HashMap<Pos, bool>,
     /// Each firebox's fractional burn time owed (a damped fire burns slower).
@@ -1181,6 +1184,7 @@ pub fn forget(dim: Dim, pos: Pos) {
         // A grinder placed here next starts uncooled: tell the network again.
         l.steam.cooled.remove(&pos);
         l.steam.banked_known.remove(&pos);
+        l.steam.rust_counts.remove(&pos);
     });
 }
 

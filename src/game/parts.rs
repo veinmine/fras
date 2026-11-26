@@ -291,6 +291,7 @@ impl BlockPart for BlockHooks {
             } else if !same_block {
                 // Broken or replaced.
                 l.mech.remove(pos);
+                l.steam.rust_counts.remove(&pos);
                 l.cranks.remove(&pos);
                 l.wheel_torque.remove(&pos);
                 l.tachometers.remove(&pos);
