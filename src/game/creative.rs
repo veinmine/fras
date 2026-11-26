@@ -405,9 +405,9 @@ pub fn screen_click(
         if ay < ry || ay >= ry + BUTTON {
             return None;
         }
-        let up = if ax >= MINUS_X && ax < MINUS_X + BUTTON {
+        let up = if (MINUS_X..MINUS_X + BUTTON).contains(&ax) {
             false
-        } else if ax >= PLUS_X && ax < PLUS_X + BUTTON {
+        } else if (PLUS_X..PLUS_X + BUTTON).contains(&ax) {
             true
         } else {
             return None;

@@ -943,6 +943,12 @@ mod tests {
                     | Block::SightGlass
                     | Block::CopperRadiator
                     | Block::IronRadiator
+                    | Block::CreativeEngine
+                    | Block::LoadBank
+                    | Block::CreativeSteam
+                    | Block::CreativeWater
+                    | Block::CreativeDrain
+                    | Block::CreativeFirebox
             );
             assert_eq!(repair_cost(b).is_empty(), never_damaged);
         }

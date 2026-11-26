@@ -17,6 +17,14 @@ cargo horizon-mod build                                  # the package: target/h
 CI (`.github/workflows/ci.yml`) runs `cargo fmt --check`, clippy with `-D warnings` and the tests against
 the pinned SDK. The Horizon watch is described in [watch.md](watch.md).
 
+SDK downloads come from GitHub's horizon-rust releases unless `HORIZON_SDK_BASE` names another base;
+`horizon-launcher`, `cargo horizon-mod` and CI all read it and check Horizon's release signature the same
+way wherever the files come from. While GitHub has the horizon-rust org flagged (since 2026-11-25), CI sets
+it to the mirror `https://horizon-mirror.nikitagrimm.de` (one line at the top of `ci.yml`, to delete once
+the org is back), and locally `HORIZON_SDK_BASE=https://horizon-mirror.nikitagrimm.de cargo horizon-mod …`
+does the same. The Horizon watch can't run meanwhile: it builds `cargo horizon-mod` from Horizon's source on
+GitHub, which no mirror carries.
+
 ## Layout
 
 - `src/sim/`: the physics, free of the game, with the unit tests.

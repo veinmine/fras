@@ -13,21 +13,50 @@ on:
 permissions:
   contents: read
 
+env:
+  # Where SDK releases are read from (`<base>/sdk-<build>/<file>`), the same
+  # variable horizon-launcher and `cargo horizon-mod` read. Temporary: GitHub
+  # has flagged the horizon-rust org and its release downloads 404, so this is
+  # the mirror Horizon's team named. The signature check below makes the host
+  # untrusted either way. Delete this line once GitHub clears the org.
+  HORIZON_SDK_BASE: https://horizon-mirror.nikitagrimm.de
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       # The mod API's source for the build horizon-mod.toml pins (what
-      # `cargo horizon-mod` puts in .horizon/sdk/api), checked against the
-      # SDK release's sdk.json, which also names the Rust the launcher builds
-      # that build's mods with.
+      # `cargo horizon-mod` puts in .horizon/sdk/api), checked the way
+      # `cargo horizon-mod` checks it: the release's SHA256SUMS must carry
+      # Horizon's release signature for the tag sdk-<build>, sdk.json must be
+      # the file those sums list, and the API source must match sdk.json.
+      # sdk.json also names the Rust the launcher builds that build's mods with.
       - name: Fetch the pinned SDK's API
+        env:
+          # Horizon's release key, from crates/horizon-release-sign/release-keys.txt.
+          RELEASE_KEY: MU4oiIQcCxkZvbwSjjXs7SySCuM6ywRQ3nGaJYZG0gw=
         run: |
           build=$(sed -n 's/^horizon = "\([0-9a-f]\{40\}\)"$/\1/p' horizon-mod.toml)
-          base="https://github.com/horizon-rust/horizon/releases/download/sdk-$build"
-          curl -sSfL -o sdk.json "$base/sdk.json"
-          curl -sSfL -o api-source.tar.xz "$base/api-source.tar.xz"
+          tag="sdk-$build"
+          base="${HORIZON_SDK_BASE:-https://github.com/horizon-rust/horizon/releases/download}/$tag"
+          echo "SDK from $base"
+          for f in SHA256SUMS SHA256SUMS.sig sdk.json api-source.tar.xz; do
+            curl -sSfL -o "$f" "$base/$f"
+          done
+          # The signature covers "horizon release <tag>\n" followed by SHA256SUMS,
+          # one base64 Ed25519 signature per line; any line may match the key.
+          { printf 'horizon release %s\n' "$tag"; cat SHA256SUMS; } > signed.bin
+          { printf '\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00'; echo "$RELEASE_KEY" | base64 -d; } > release-key.der
+          ok=
+          while read -r line; do
+            [ -n "$line" ] || continue
+            echo "$line" | base64 -d > sig.bin 2>/dev/null || continue
+            if openssl pkeyutl -verify -pubin -keyform DER -inkey release-key.der \
+                 -rawin -in signed.bin -sigfile sig.bin >/dev/null 2>&1; then ok=1; break; fi
+          done < SHA256SUMS.sig
+          [ -n "$ok" ] || { echo "::error::$tag: SHA256SUMS is not signed with Horizon's release key"; exit 1; }
+          grep -E '^[0-9a-f]{64} [ *]?sdk\.json$' SHA256SUMS | sha256sum -c -
           want=$(python3 -c 'import json; print(json.load(open("sdk.json"))["assets"]["api-source.tar.xz"]["sha256"])')
           echo "$want  api-source.tar.xz" | sha256sum -c -
           mkdir -p .horizon/sdk/api
