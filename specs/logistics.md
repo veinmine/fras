@@ -8,7 +8,7 @@ elevator) and what 0.1 to 0.3 shipped (`docs/development.md`). Written together 
 `specs/progression.md`, which cover the rest of 0.4, and `specs/copper-golem.md`, the optional prototype. Where
 this spec is more precise than the design doc, this spec wins; section 14 lists what changes in the design doc.
 
-**Not yet reviewed.** Written in one go without an interview, like the 0.2 and 0.3 specs. Section 15 lists the
+**Reviewed by Marcin on 2026-11-26** (decisions in the last section). Written in one go without an interview, like the 0.2 and 0.3 specs. Section 15 lists the
 open questions with the assumption this spec makes for each.
 
 Numbers marked *(tune)* are starting values for balancing, not commitments. Section 13 collects them, with the
@@ -137,7 +137,7 @@ Overlay: "Jammed: overspeed" or "Jammed: belt overloaded" (shear). Repair with t
 
 ### 4.3 Getting off
 
-- **At the leading end** (section 5).
+- **At the leading end** (section 5), including falling off an end that faces air.
 - **By hand:** right-click an empty-handed belt takes the item nearest the cursor.
 - **At a diverter** (section 9).
 - **Breaking** a belt block drops the items on it as item entities; the line splits.
@@ -164,11 +164,14 @@ in front of the top):
   and their sided rules): inserted if accepted.
 - **Another belt line** (section 5.2): handed over if it has room.
 - **A bucket elevator's boot** (section 8): loaded.
-- **Air or anything else:** the item **waits** at the end and the line backs up. Nothing is dropped into the world
-  (question L3), consistent with machines (grinder spec 5.1).
+- **Air** (any block with no collision: air, water, tall grass, a ladder...): the item **falls off** the end as an item
+  entity, thrown forward at the belt's speed (L3, decided). A belt can feed a pit, a water stream, a mob farm's
+  collection, or simply dump. Items leave at the line's rate, at most one per spacing.
+- **Anything else** (a solid block, a block entity that refuses the item): the item **waits** at the end and the line
+  backs up.
 
 A refused item waits and is offered again every 4 ticks *(tune)*; items behind it queue at the spacing. The wrench
-overlay says "End blocked: chest full" or "End open: nothing to deliver to".
+overlay says "End blocked: chest full", "End blocked by a solid block" or "End open: items fall off".
 
 ### 5.2 Line to line
 
@@ -245,7 +248,7 @@ recipes that consume **one** item can run on a belt (counts above 1 need the mac
 - **Direction:** an elevator lifts whichever way it is driven. A real one run backwards would lower its buckets
   instead; that isn't worth teaching (question L8).
 - **Delivery:** at the top the head offers the item to the block in front of its outlet, with the same rules as a
-  belt's end (5.1): inventory, belt (side-load or a line's start), another elevator's boot, otherwise it waits and
+  belt's end (5.1): inventory, belt (side-load or a line's start), another elevator's boot, air (the item falls out), otherwise it waits and
   the column backs up.
 - **Breaking** any block drops the items in the column at the broken block and splits it.
 
@@ -260,7 +263,8 @@ recipes that consume **one** item can run on a belt (counts above 1 need the mac
 - **Redstone:** while the diverter is **powered**, entries reaching its centre are pushed off sideways onto the
   block beside it: an inventory, the start or side of another line, or an elevator boot, with the 5.1 rules. While
   unpowered the flap lies flat and items pass straight.
-- **When the side can't take an item** (full, or nothing there) the item **passes straight on** instead of
+- **Air beside it:** the item is pushed off and falls as an item entity, as off a belt's end (5.1).
+- **When the side can't take an item** (a full inventory, a solid block) the item **passes straight on** instead of
   waiting. A diverter never stops a line (question L4).
 - Timing: the flap swings in 4 ticks (visible); it acts on the entry at its centre when powered at that moment.
 - **Comparator:** a diverter gives a signal of 15 for 2 ticks *(tune)* whenever an item passes its centre, either
@@ -391,7 +395,7 @@ Diverter: Zwrotnica.
 
 - 6.3: belt lines are straight in plan (corners are hand-offs onto another line's side); a line is at most 64 blocks
   and needs a drive per 16; belts hold their items (no item entities) at two per block; an end with nowhere to
-  deliver backs up rather than dropping; belts carry players and mobs.
+  deliver backs up, and an end facing air drops its items; belts carry players and mobs.
 - 6.3: the bucket elevator is a column of one block type, 2 to 32 high, driven at the head.
 - 6.3 / 7.1: the diverter pushes items off its side while powered, passes them straight when the side can't take
   them, and pulses a comparator for each item.
@@ -403,12 +407,15 @@ Diverter: Zwrotnica.
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
 
+**Reviewed by Marcin, 2026-11-26:** L1 and L3 decided as marked; everything else accepted as proposed.
+
 1. **L1. Decided (Marcin, 2026-11-26): belts hold their items** in a list per line (4.1), drawn by the line, with no item
    entities.
 2. **L2. Lines are straight; corners are side-loads** onto another line (3.1, 5.2). *Alternative:* curved belt blocks,
    which need curved rendering and a 2D path per line.
-3. **L3. An end with nowhere to deliver waits** and the line backs up (5.1), as machines never drop items.
-   *Alternative:* items fall off an open end as item entities, which some players use to feed a pit or a water stream.
+3. **L3. Decided (Marcin, 2026-11-26): items fall off an end facing air** as item entities (5.1), so belts can feed pits,
+   water streams and mob farms; an end against a solid block or a refusing inventory backs up. The diverter and the bucket
+   elevator's head follow the same rule.
 4. **L4. A diverter that can't push passes the item straight on** (9). *Alternative:* it holds the item until the side
    frees up, which makes it a gate as well.
 5. **L5. No extraction mid-line:** a hopper under a belt doesn't pull from it (4.3). *Alternative:* hoppers under a belt

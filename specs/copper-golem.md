@@ -4,7 +4,7 @@ An optional part of milestone 0.4. Version 1.0 (2026-11-26). Builds on `Fire, ru
 (section 3.6), `specs/rotational-network.md` (section 8.1, the crank) and `spike/FINDINGS.md` (the entity hooks
 row, risk 5).
 
-**Not yet reviewed.** Section 9 lists the open questions with the assumption this spec makes for each.
+**Reviewed by Marcin on 2026-11-26** (decisions in the last section). Section 9 lists the open questions with the assumption this spec makes for each.
 
 **This is a time-boxed prototype.** The design doc says: prototype the arm animation for a day; drop the golem if it
 needs a mixin. Section 7 says what "done" and "dropped" mean.
@@ -118,6 +118,8 @@ figure of its own with its block entity helpers. Only if that takes under half a
 ## 9. Open questions and assumptions
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
+
+**Reviewed by Marcin, 2026-11-26:** all accepted as proposed.
 
 1. **CG1. A golem gives half a player's crank** (8 Nm, 16 RPM, section 4). *Alternative:* the same as a player, or a quarter.
 2. **CG2. Oxidation is vanilla's,** not a FRAS rain rule (4). *Alternative:* golems also oxidise faster in rain, as the design

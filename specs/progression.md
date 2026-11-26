@@ -6,7 +6,7 @@ shipped (`data/fras/recipe/`, the recipe sections of the earlier specs), and the
 `specs/logistics.md` and `specs/machines.md`. Where this spec is more precise than the design doc, this spec wins;
 section 10 lists what changes in the design doc.
 
-**Not yet reviewed.** Written in one go without an interview. Section 11 lists the open questions with the
+**Reviewed by Marcin on 2026-11-26** (decisions in the last section). Written in one go without an interview. Section 11 lists the open questions with the
 assumption this spec makes for each.
 
 Numbers marked *(tune)* are starting values for balancing, not commitments. This spec also holds the **0.4 exit
@@ -199,7 +199,7 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 
 1. **The reference ore line** (machines spec 10), on one governed steam engine with a damper: a chest of 256 raw iron and a
    chest of coal feeding the furnaces by hopper. Left alone for 20 game minutes at a raised tick rate, every raw iron ends up
-   processed: the plate chest holds **between 380 and 460 iron plates** (expected 422 from 256 × 1.5 × 1.1), the medium chest
+   processed: the plate chest holds **between 470 and 555 iron plates** (expected 512 from 256 × 1.5 × 4/3), the medium chest
    about 38 redstone dust (10% of the crushed ore), nothing waits on a belt, and no item is lost (items in chests + on belts +
    in machines and furnaces account for every input). The main shaft stays within the governor's band around 64 RPM while
    the line runs; when the ore runs out the line idles, belts run empty and the damper banks the fire.
@@ -259,6 +259,8 @@ raised (or `/tick sprint`) while waiting, `/tp` between test sites, and `/give` 
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
 
+**Reviewed by Marcin, 2026-11-26:** P1 and P2 decided as marked; everything else accepted as proposed.
+
 1. **P1. Decided (Marcin, 2026-11-26): the gearbox needs lathe parts** (4.2); pulleys give ratios before it (5).
 2. **P2. Decided (Marcin, 2026-11-26): the hand recipe for iron shafts stays** at 4 per 2 ingots ("making them by hand is
    punishment enough"); rods give 4 per 2 rods, twice the yield per ingot (4.2).
@@ -269,5 +271,5 @@ Each item states what this spec assumes. Reply by number; anything skipped stays
    0.4's own machines and the gearbox, iron bevel gear, iron boiler and tank are gated; 0.3's blocks keep their recipes.
 5. **P5. Plumbing stays entry** (pipes, valves, gauges, radiators, 4.1), apart from the tachometer, which gets a gear.
 6. **P6. No copper rods or gears in tier 1** (3); copper plates go to the lathe for copper pipe.
-7. **P7. Exit criterion 1 runs 256 raw iron through the reference line** and expects 380 to 460 plates. Fine as the measure of
+7. **P7. Exit criterion 1 runs 256 raw iron through the reference line** and expects 470 to 555 plates. Fine as the measure of
    "a full ore line runs unattended"?

@@ -9,7 +9,7 @@ jams and machine rules), `specs/fluids-and-pipes.md` and `specs/cooling.md` (the
 belt, section 7 there) and `specs/progression.md` (what the machines make and what needs it). Where this spec is
 more precise than the design doc, this spec wins; section 14 lists what changes in the design doc.
 
-**Not yet reviewed.** Written in one go without an interview. Section 15 lists the open questions with the
+**Reviewed by Marcin on 2026-11-26** (decisions in the last section). Written in one go without an interview. Section 15 lists the open questions with the
 assumption this spec makes for each.
 
 Numbers marked *(tune)* are starting values for balancing, not commitments. Section 13 collects them, with the
@@ -112,15 +112,16 @@ Water-fed. Works on a belt or from its slot.
 
 | Input | Results | Revolutions | Water | Load |
 | --- | --- | --- | --- | --- |
-| Crushed iron | 1 iron dust, 10% a 2nd; 10% 1 redstone dust | 2.5 | 50 mB | 4 Nm |
-| Crushed copper | 1 copper dust, 10% a 2nd; 10% 1 gold nugget | 2.5 | 50 mB | 4 Nm |
-| Crushed gold | 1 gold dust, 10% a 2nd; 10% 1 copper nugget | 2.5 | 50 mB | 4 Nm |
+| Crushed iron | 1 iron dust, 1 in 3 a 2nd; 10% 1 redstone dust | 2.5 | 50 mB | 4 Nm |
+| Crushed copper | 1 copper dust, 1 in 3 a 2nd; 10% 1 gold nugget | 2.5 | 50 mB | 4 Nm |
+| Crushed gold | 1 gold dust, 1 in 3 a 2nd; 10% 1 copper nugget | 2.5 | 50 mB | 4 Nm |
 | Iron nugget | 1 rust flakes | 64 | 200 mB | 2 Nm |
 
 All values *(tune)*. Rationale:
 
-- **Washing pays a little:** 1.1 dust per crushed ore, so the grinder's 1.5× becomes **1.65×**, plus the byproduct.
-  Tier 2's stamp mill pushes toward 2 to 3× (design doc 6.1). Smelting crushed ore directly keeps working.
+- **Grinding and washing double the yield** (M1, decided): 4/3 dust per crushed ore (chance 0.3333 in the recipe file), so
+  the grinder's 1.5× becomes **2×**, plus the byproduct.
+  Tier 2's stamp mill pushes toward 3× (design doc 6.1). Smelting crushed ore directly keeps working.
 - **Dust smelts in half the time** (100 ticks in a furnace, 50 in a blast furnace) to one ingot, with the raw ore's
   XP. A furnace bank keeps up with a washer with fewer furnaces, which matters to an unattended line.
 - **Rust flakes without scraping** (design doc 5, paint supply): slow on purpose, one nugget every 64 revolutions
@@ -342,9 +343,9 @@ On one line shaft at **64 RPM** *(tune)*:
 | Machine | Per item | Rate at 64 RPM |
 | --- | --- | --- |
 | Grinder | 4 rev per raw ore → 1.5 crushed | 16 raw ore/min → 24 crushed/min |
-| Washer | 2.5 rev per crushed | 25.6/min (keeps up) → 26.4 dust/min |
-| Furnaces | 5 s per dust | 12/min each: **3 furnaces** keep up |
-| Trip hammer | 2 rev per plate | 32/min (keeps up) |
+| Washer | 2.5 rev per crushed | 25.6/min (keeps up) → 32 dust/min |
+| Furnaces | 5 s per dust | 12/min each: **3 furnaces** keep up (36/min) |
+| Trip hammer | 2 rev per plate | 32/min (just keeps up) |
 
 Load: grinder 6 + washer 4 + trommel ~3 + hammer 8 + belts ~6 (four 16-block lines) ≈ **27 Nm** plus friction. A single
 steam engine at 4 bar (stall 64 Nm, top 128 RPM) settles near **65 RPM** under it, a twin engine near 95 RPM. The governor
@@ -376,7 +377,7 @@ runs itself", end to end.
   rules, push cadence, status codes. `sim::grind` becomes the grinder's table of numbers on top of it.
 - **`sim::trommel`**: size classes, drum capacity, per-class outlet blocking.
 - **Belt mode** in `sim::belt` (logistics spec 12): hold points, in-place replacement, byproducts behind.
-- **Unit tests** at least for: each recipe's yield distribution over seeded runs (1.1 dust, 10% byproduct, 8 rivets, 6
+- **Unit tests** at least for: each recipe's yield distribution over seeded runs (4/3 dust, 10% byproduct, 8 rivets, 6
   planks); time per item at the bottom, middle and top of each range; no progress below the minimum with load still drawn;
   the washer stops without water and resumes when filled, and refuses a mixed tank; hot water washes like water; belt mode
   refuses `count` > 1 recipes and passes non-recipe items; byproducts wait inside when the belt behind is full and the next
@@ -427,7 +428,7 @@ dust: Pył żelaza / miedzi / złota. Strike: uderzenie. Belt mode: praca na prz
 
 ## 14. Changes to the design doc
 
-- 6.1: washing gives 1.1 dust per crushed ore plus a 10% byproduct; dust smelts in half the time; gold's byproduct is a
+- 6.1: washing gives 4/3 dust per crushed ore (grinding and washing together 2×) plus a 10% byproduct; dust smelts in half the time; gold's byproduct is a
   copper nugget.
 - 6.2: belt machines (washer, trip hammer) work on a belt when placed over one and from their own slot otherwise; the trip
   hammer also heads rods into rivets and compacts sand; the lathe makes rods, gears and copper pipes; the sawmill gives 6
@@ -441,8 +442,10 @@ dust: Pył żelaza / miedzi / złota. Strike: uderzenie. Belt mode: praca na prz
 
 Each item states what this spec assumes. Reply by number; anything skipped stays as proposed.
 
-1. **M1. Washing yields 1.1 dust per crushed ore** plus a 10% byproduct, and dust smelts twice as fast (4.2). *Alternative:*
-   1 dust, byproduct only, which makes the washer worth it only for the byproducts.
+**Reviewed by Marcin, 2026-11-26:** M1 and M6 decided as marked; everything else accepted as proposed.
+
+1. **M1. Decided (Marcin, 2026-11-26): grinding and washing double the yield** in total: 4/3 dust per crushed ore plus a
+   10% byproduct; dust smelts twice as fast (4.2).
 2. **M2. The washer takes hot water as well as water** (4.3), a use for a closed loop's surplus.
 3. **M3. Belt machines switch mode by what is under them** (2.3): over a belt they only work on the belt.
    *Alternative:* they always have a slot as well and work on both, which is more flexible but harder to read.
