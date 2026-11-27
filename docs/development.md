@@ -133,7 +133,11 @@ are there to make that quick.
 
 | Spec | 0.4 | Why |
 | --- | --- | --- |
-| Copper golem (`specs/copper-golem.md`) | Not built | The spec makes it a time-boxed prototype that needs in-game work on the vanilla golem's behaviour; left for its own branch. |
+| Copper golem (`specs/copper-golem.md`) | Prototype on its own branch (`src/game/golem.rs`, `src/sim/golem.rs`) | Not merged into 0.4 until Marcin decides to keep it. See the rows below. |
+| Golem: the lead goes into a hitch you punch to unassign | The lead goes into the crank; a lead used on the crank takes the golem back; breaking the crank drops the lead | No knot entity without a fence; the crank itself is the hitch. |
+| Golem: a brain behaviour holds it at the crank | The brain behaviour walks it there; at the spot it is snapped into place and its AI paused (`set_ai_paused`, saved by Horizon) | Paused AI also stops its errands and its looking about, so its head doesn't move while it works. |
+| Golem: right arm rotates about the shoulder | It also stretches (0.6 to 1.5 times its length) | The vanilla arm has no elbow and the grip's distance from the shoulder changes through the turn. |
+| Golem: a scraped statue carries on | The revived golem (a new UUID, vanilla) standing in the spot is taken back by the crank | Vanilla makes a new entity from the statue. |
 | A line machine holds 2 items | Its built-in belt holds 2; a hopper can also fill its one hidden inbox slot with a stack | A `ModContainer` slot takes a whole stack. Belt ends wait until the inbox is empty, so lines back up as they should. |
 | Placing a machine where it can't go does nothing | Refused, but the client shows the block for a moment | The refusal is server-side (`state_for_placement`); the client predicts the placement first. |
 | Sneak-right-click puts the whole stack on a belt | Puts up to two (one block's worth) | Room appears only as the line moves; the rest stays in hand. |

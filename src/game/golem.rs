@@ -326,6 +326,21 @@ pub fn release(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, pos: Pos, d
     super::debug::event(dim, time, "golem", pos, "released".into());
 }
 
+/// A copper golem standing free in `spot` that no crank holds: the golem a
+/// scraped statue turned back into.
+fn revived(host: &mut dyn ServerHost, level: LevelRef, dim: Dim, spot: Pos) -> Option<u128> {
+    let lo = [spot.x as f64, spot.y as f64, spot.z as f64];
+    let hi = [lo[0] + 1.0, lo[1] + 1.0, lo[2] + 1.0];
+    let found = level.entities_in(&*host, lo, hi)?.into_iter().find(|e| {
+        is_golem(&*host, *e)
+            && e.leash_holder(&*host)
+                .is_none_or(|h| h == LeashHolder::Unleashed)
+    })?;
+    let uuid = found.uuid(host)?;
+    let taken = with_level(dim, |l| l.golems.values().any(|g| g.uuid == uuid));
+    (!taken).then_some(uuid)
+}
+
 /// Ticks a golem may be missing with its crank loaded before the crank lets
 /// it go (killed, or carried off by something).
 const MISSING_TICKS: u32 = 200;
@@ -376,6 +391,16 @@ pub fn tick(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
                     super::debug::event(dim, time, "golem", pos, "statue".into());
                 }
                 link.statue = statue;
+                // A statue scraped back with an axe comes back as a new golem
+                // with a new UUID (vanilla): the crank takes it back.
+                if !statue && let Some(uuid) = revived(host, level, dim, spot) {
+                    link.uuid = uuid;
+                    link.missing = 0;
+                    let mut fields = Compound::new();
+                    blocks::put_str(&mut fields, "golem", &uuid_str(uuid));
+                    server::merge(host, level, pos, fields);
+                    super::debug::event(dim, time, "golem", pos, "revived".into());
+                }
                 if !statue && link.missing > MISSING_TICKS {
                     release(host, level, dim, pos, false);
                     continue;

@@ -21,15 +21,15 @@ pub const GOLEM_TOP: f64 = 16.0;
 /// How far an assigned golem may be from where it stands at the crank
 /// (blocks, horizontally) and still count as there: closer than this it is
 /// snapped into place and starts turning.
-pub const ARRIVE: f64 = 0.75;
+pub const ARRIVE: f64 = 1.1;
 /// Farther than this from its crank the golem is let go (its lead would snap).
 pub const LEASH_RANGE: f64 = 10.0;
 
 /// Where the golem's feet stand off the working spot's centre: towards the
-/// crank (so its front nearly touches the crank's face) and to its left (so
+/// crank (close, but its head clear of the grip at the top of the turn) and to its left (so
 /// its right arm lines up with the crank's axle). Both keep its 0.49-wide box
 /// inside the spot's block.
-pub const FORWARD: f64 = 0.25;
+pub const FORWARD: f64 = 0.12;
 pub const LEFT: f64 = 0.24;
 
 /// The crank's grip (draw.rs): 5.5 texels off the axle, its middle 1.5
