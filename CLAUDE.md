@@ -19,6 +19,7 @@ horizon-launcher native-build . --trust-native-code  # build into the selected g
 cargo horizon-mod build                              # package: target/horizon-mod/fras.hmod
 python3 tools/gen_content.py                         # regenerate data/fras and assets/fras JSON
 python3 tools/gen_textures.py                        # regenerate placeholder item textures
+python3 tools/vanilla_recipes.py                     # refresh vanilla recipes for the clash test (after a game update)
 ```
 
 `Cargo.toml` depends on `horizon-mod-api` by path into `.horizon/sdk/` (gitignored), so nothing compiles

@@ -786,10 +786,12 @@ def steam_recipes():
         # Multiblocks spec 8.
         "copper_boiler": shaped(["CCC", "C C", "CCC"], {"C": c}, f"{NS}:copper_boiler"),
         "iron_boiler": shaped(["PPP", "P P", "PPP"], {"P": p}, f"{NS}:iron_boiler"),
-        "steam_dome": shaped(["CCC", "C C"], {"C": c}, f"{NS}:steam_dome"),
+        # The pipe keeps it off the copper helmet's grid.
+        "steam_dome": shaped(["CCC", "CPC"], {"C": c, "P": f"{NS}:copper_pipe"}, f"{NS}:steam_dome"),
         "storage_tank": shaped(["PIP", "I I", "PIP"], {"P": p, "I": i}, f"{NS}:storage_tank", 2),
         "steam_cylinder": shaped(["PPP", "K S", "PPP"], {"P": p, "K": "minecraft:piston", "S": f"{NS}:iron_shaft"}, f"{NS}:steam_cylinder"),
-        "flywheel": shaped(["III", "ISI", "III"], {"I": i, "S": f"{NS}:iron_shaft"}, f"{NS}:flywheel"),
+        # The iron blocks keep it off the large iron pulley's grid.
+        "flywheel": shaped(["IBI", "ISI", "IBI"], {"I": i, "B": "minecraft:iron_block", "S": f"{NS}:iron_shaft"}, f"{NS}:flywheel"),
         # Fluids spec 13.1.
         "copper_pipe": shaped(["CCC"], {"C": c}, f"{NS}:copper_pipe", 6),
         "iron_pipe": shaped(["PPP"], {"P": p}, f"{NS}:iron_pipe", 6),

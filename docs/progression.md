@@ -33,6 +33,8 @@ Tags: `fras:plates/iron`, `fras:plates/copper`, `fras:rods/iron`, `fras:gears/ir
 | Storage tank ×2 | 4 iron plates, 2 rivets, 2 iron ingots |
 | Heat exchanger | 4 iron plates, 2 rivets, 2 copper pipes |
 | Tachometer | 4 iron nuggets, a glass pane, an iron gear, redstone dust |
+| Steam dome | 5 copper ingots around a copper pipe (`CCC` / `CPC`): the old grid was vanilla's copper helmet |
+| Flywheel | 2 iron blocks replace the top and bottom ingots (`IBI` / `ISI` / `IBI`): the old grid was the large iron pulley's |
 
 The changed recipes keep their ids, so a recipe book that knew the old ones shows the new ones.
 

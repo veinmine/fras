@@ -3,10 +3,11 @@
   "category": "misc",
   "pattern": [
     "CCC",
-    "C C"
+    "CPC"
   ],
   "key": {
-    "C": "minecraft:copper_ingot"
+    "C": "minecraft:copper_ingot",
+    "P": "fras:copper_pipe"
   },
   "result": {
     "id": "fras:steam_dome",
