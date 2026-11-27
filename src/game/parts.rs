@@ -459,11 +459,12 @@ impl BlockPart for BlockHooks {
             Block::ShaftWood | Block::ShaftIron if item == Some(keys.bearing) => {
                 super::tools::swap_bearing(host, event.click)
             }
-            Block::Crank if item == Some(keys.lead) => {
-                super::golem::lead_on_crank(host, event.click)
-                    .or_else(|| Some(crank(host, event.click)))
-            }
-            Block::Crank => Some(crank(host, event.click)),
+            Block::Crank => super::golem::use_on_crank(
+                host,
+                event.click,
+                item.is_none() || item == Some(keys.lead),
+            )
+            .or_else(|| Some(crank(host, event.click))),
             b if b.is_belt() || b == Block::BucketElevator => {
                 super::belts::use_on(host, event.click)
             }
@@ -492,7 +493,8 @@ impl BlockPart for BlockHooks {
         event: &mut UseWithoutItemEvent<'_>,
     ) -> Option<InteractionResult> {
         match self.0 {
-            Block::Crank => Some(crank(host, event.click)),
+            Block::Crank => super::golem::use_on_crank(host, event.click, true)
+                .or_else(|| Some(crank(host, event.click))),
             b if b.is_belt() || b == Block::BucketElevator => {
                 super::belts::use_on(host, event.click)
             }

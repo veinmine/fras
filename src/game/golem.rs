@@ -1,10 +1,12 @@
 //! The copper golem crank (`specs/copper-golem.md`), a time-boxed prototype.
 //!
-//! - **Assigning** (spec 3): a player leading a copper golem uses the lead on
-//!   a crank; the lead goes into the crank (it holds the golem now) and the
-//!   golem walks to the working spot on the crank's handle side. A lead used
-//!   on a crank that holds a golem takes the golem back on the lead. Breaking
-//!   the crank lets it go, with its lead dropped.
+//! - **Assigning** (spec 3, changed): a player leading a copper golem uses a
+//!   crank, with an empty hand or anything in it (leading the golem used the
+//!   player's only lead); the lead goes into the crank (it holds the golem
+//!   now) and the golem walks to the working spot on the crank's handle side.
+//!   An empty hand or a lead used on a crank that holds a golem takes the
+//!   golem back on the player's lead, no lead item needed. Breaking the crank
+//!   lets it go, with its lead dropped.
 //! - **Holding** (spec 3, 6): a brain behaviour on `minecraft:copper_golem`
 //!   walks an assigned golem to its spot. At the spot the golem is snapped
 //!   into place, turned to the crank, and its AI paused, which also stops its
@@ -102,6 +104,27 @@ fn set_spot(id: u32, at: Option<[f64; 3]>) {
 
 pub fn clear() {
     *SPOTS.lock().unwrap_or_else(|e| e.into_inner()) = None;
+    *LAST_USE.lock().unwrap_or_else(|e| e.into_inner()) = None;
+}
+
+/// When each player last hitched or took back a golem, or tried to while
+/// still holding the button (game time), so holding it doesn't flip the
+/// golem on and off: a held use repeats every 4 ticks.
+static LAST_USE: Mutex<Option<HashMap<u128, i64>>> = Mutex::new(None);
+/// Ticks after a golem use in which the same player's next one is the same
+/// press held, not a new click.
+const HOLD_TICKS: i64 = 8;
+
+/// Whether this use is the button still held since the player's last golem
+/// use; either way it counts as the latest.
+fn held_down(player: u128, now: i64) -> bool {
+    let mut guard = LAST_USE.lock().unwrap_or_else(|e| e.into_inner());
+    let map = guard.get_or_insert_with(HashMap::new);
+    let held = map
+        .get(&player)
+        .is_some_and(|t| (0..HOLD_TICKS).contains(&(now - *t)));
+    map.insert(player, now);
+    held
 }
 
 /// The copper golem's part: one brain behaviour.
@@ -210,19 +233,33 @@ fn socket(host: &dyn Host, level: LevelRef, pos: Pos) -> Option<Dir> {
         .and_then(Dir::from_name)
 }
 
-/// A lead used on a crank (spec 3): hitch the golem the player leads to it,
-/// or take the crank's golem back on the lead. None leaves the use to the
-/// crank (no golem either way).
-pub fn lead_on_crank(
+/// A player using a crank (spec 3): hitch the golem the player leads to it,
+/// whatever is in hand, or, with `take_back` (an empty hand or a lead), take
+/// the crank's golem back on the player's lead. None leaves the use to the
+/// crank: no golem to hitch or take back, so the player turns it.
+pub fn use_on_crank(
     host: &mut dyn ServerHost,
     click: &mod_api::BlockClick<'_>,
+    take_back: bool,
 ) -> Option<InteractionResult> {
+    // The main hand's use only: an empty hand's click also arrives for the
+    // off hand, which would undo what the main hand just did.
+    if click.hand != mod_api::Hand::Main {
+        return None;
+    }
     let player = host.player(click.player)?;
     let level = player.level(&*host)?;
     let dim = server::dim_of(&*host, level)?;
     let pos = Pos::from_array(click.pos);
+    let now = level.game_time(&*host).unwrap_or(0);
     let held = with_level(dim, |l| l.golems.get(&pos).cloned());
     if let Some(link) = held {
+        if !take_back {
+            return None;
+        }
+        if held_down(click.player, now) {
+            return Some(InteractionResult::Success);
+        }
         // Take it back on the lead.
         if let Some(e) = host.entity_by_uuid(EntityUuid(link.uuid)) {
             release(host, level, dim, pos, false);
@@ -248,6 +285,9 @@ pub fn lead_on_crank(
     let golem = near.into_iter().find(|e| {
         is_golem(&*host, *e) && e.leash_holder(&*host) == Some(LeashHolder::Entity(me))
     })?;
+    if held_down(click.player, now) {
+        return Some(InteractionResult::Success);
+    }
     let Some(sock) = socket(&*host, level, pos) else {
         return Some(InteractionResult::Pass);
     };
