@@ -459,7 +459,12 @@ impl BlockPart for BlockHooks {
             Block::ShaftWood | Block::ShaftIron if item == Some(keys.bearing) => {
                 super::tools::swap_bearing(host, event.click)
             }
-            Block::Crank => Some(crank(host, event.click)),
+            Block::Crank => super::golem::use_on_crank(
+                host,
+                event.click,
+                item.is_none() || item == Some(keys.lead),
+            )
+            .or_else(|| Some(crank(host, event.click))),
             b if b.is_belt() || b == Block::BucketElevator => {
                 super::belts::use_on(host, event.click)
             }
@@ -488,7 +493,8 @@ impl BlockPart for BlockHooks {
         event: &mut UseWithoutItemEvent<'_>,
     ) -> Option<InteractionResult> {
         match self.0 {
-            Block::Crank => Some(crank(host, event.click)),
+            Block::Crank => super::golem::use_on_crank(host, event.click, true)
+                .or_else(|| Some(crank(host, event.click))),
             b if b.is_belt() || b == Block::BucketElevator => {
                 super::belts::use_on(host, event.click)
             }
@@ -696,6 +702,10 @@ impl BlockEntityPart for EntityHooks {
         if self.0.is_plant() {
             super::steam::queue(dim, Pos::from_array(pos), false);
         }
+        if self.0 == Block::Crank {
+            let nbt = event.entity.data(&*host).unwrap_or_default();
+            super::golem::loaded(dim, Pos::from_array(pos), &nbt);
+        }
         if self.0.is_belt() || self.0 == Block::BucketElevator {
             let nbt = event.entity.data(&*host).unwrap_or_default();
             let saved = super::belts::saved_items(&*host, &nbt);
@@ -728,6 +738,7 @@ impl BlockEntityPart for EntityHooks {
                 .filter(|(_, l)| {
                     l.mech.contains(pos)
                         || l.cranks.contains_key(&pos)
+                        || l.golems.contains_key(&pos)
                         || l.steam.works.contains(pos)
                 })
                 .map(|(d, _)| *d)
@@ -738,6 +749,7 @@ impl BlockEntityPart for EntityHooks {
                 .level(dim)
                 .is_none_or(|level| !level.is_loaded(&*host, pos.to_array()));
             if gone || levels_len() == 1 {
+                super::golem::unloaded(dim, pos);
                 with_level(dim, |l| {
                     l.mech.unload(pos);
                     l.cranks.remove(&pos);

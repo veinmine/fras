@@ -10,6 +10,7 @@ pub mod debug;
 pub mod draw;
 pub mod effects;
 pub mod firebox;
+pub mod golem;
 pub mod governor;
 pub mod grinder;
 pub mod machines;
@@ -52,6 +53,7 @@ pub struct Keys {
     pub copper_nugget: ItemKey,
     pub iron_plate: ItemKey,
     pub leather: ItemKey,
+    pub lead: ItemKey,
     pub paint: ItemKey,
     /// The pre-painted items (rust spec 7.2).
     pub painted: Vec<ItemKey>,

@@ -4,6 +4,7 @@
 pub mod belt;
 pub mod fluid;
 pub mod geom;
+pub mod golem;
 pub mod grind;
 pub mod machine;
 pub mod multi;

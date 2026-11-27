@@ -106,6 +106,8 @@ impl Hooks for Fras {
         }
         // The recipe files' `type` is the serializer; it publishes them, JSON
         // intact, under the recipe type of the same id.
+        // The copper golem crank (specs/copper-golem.md).
+        r.entity_part(game::golem::KIND, game::golem::GolemPart);
         r.menu_part("fras:grinder", game::grinder::InputSlot);
         r.menu_part("fras:firebox", game::firebox::FuelSlot);
         r.register_recipe_type("fras:grinding");
@@ -187,6 +189,7 @@ impl Hooks for Fras {
             copper_nugget: r.item_key("minecraft:copper_nugget"),
             iron_plate: r.item_key("fras:iron_plate"),
             leather: r.item_key("minecraft:leather"),
+            lead: r.item_key("minecraft:lead"),
             paint,
             painted,
             rust_flakes: r.item_key("fras:rust_flakes"),
@@ -204,6 +207,7 @@ impl Hooks for Fras {
         game::grinder::clear();
         game::machines::clear();
         game::firebox::clear();
+        game::golem::clear();
     }
 
     fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
@@ -211,6 +215,7 @@ impl Hooks for Fras {
         game::grinder::clear();
         game::machines::clear();
         game::firebox::clear();
+        game::golem::clear();
     }
 
     /// The boiler and tank shells' model loader (multiblocks spec 6.1).
@@ -318,6 +323,16 @@ impl Hooks for Fras {
         {
             game::belts::save(host, level, dim);
         }
+    }
+
+    /// A copper golem turning a crank draws its arm on the handle.
+    fn render_living_pre(
+        &self,
+        host: &dyn mod_api::ClientHost,
+        event: &mut mod_api::RenderLivingPreEvent<'_>,
+    ) -> Flow {
+        game::golem::render(host, event);
+        Flow::Continue
     }
 
     fn level_tick_post(&self, host: HostSide, event: &mut LevelTickPostEvent) {

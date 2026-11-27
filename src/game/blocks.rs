@@ -822,6 +822,10 @@ pub fn regulation_fields(s: &PlantSaved) -> Compound {
 /// The keys clients get (`block_entity_update_tag`).
 pub const CLIENT_KEYS: &[&str] = &[
     "rpm",
+    // The copper golem crank
+    "golem_id",
+    "golem_stage",
+    "golem_on",
     "jam",
     "warn",
     "sag",
