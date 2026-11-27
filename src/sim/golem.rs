@@ -209,9 +209,9 @@ pub fn stage(name: &str) -> u8 {
 /// The vanilla texture of a copper golem at weathering `stage`.
 pub fn texture(stage: u8) -> &'static str {
     match stage {
-        1 => "entity/copper_golem/exposed_copper_golem",
-        2 => "entity/copper_golem/weathered_copper_golem",
-        3 => "entity/copper_golem/oxidized_copper_golem",
+        1 => "entity/copper_golem/copper_golem_exposed",
+        2 => "entity/copper_golem/copper_golem_weathered",
+        3 => "entity/copper_golem/copper_golem_oxidized",
         _ => "entity/copper_golem/copper_golem",
     }
 }
