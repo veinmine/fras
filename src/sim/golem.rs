@@ -13,10 +13,31 @@
 
 use super::geom::{Axis, Dir, Pos};
 
-/// An assigned golem's crank: stall torque (Nm) and top speed (RPM), half a
-/// player's (spec 4, question CG1).
-pub const GOLEM_STALL: f64 = 8.0;
-pub const GOLEM_TOP: f64 = 16.0;
+/// An assigned golem turns its crank at a steady speed, the grinder's
+/// minimum, as long as the load stays within what it can push: up to
+/// `GOLEM_TORQUE` Nm, beyond which it slows (Marcin, 2026-11-27, replacing
+/// spec 4's 8 Nm / 16 RPM curve, which sagged to 3 RPM under a grinder).
+pub const GOLEM_RPM: f64 = 12.0;
+pub const GOLEM_TORQUE: f64 = 12.0;
+/// How stiffly it holds its speed (Nm per unit of the drive line), as the
+/// creative engine does.
+const STIFF: f64 = 100_000.0;
+
+/// The golem's drive at the crank's speed `w` (RPM, forward positive): the
+/// stall and top speed of the straight line the network takes for this
+/// tick. Its top is set a hair above `GOLEM_RPM` so the speed is exactly
+/// `GOLEM_RPM` at full torque and only above it under less (a grinder needs
+/// at least 12, not 11.999); below that speed the stall is lowered so the
+/// torque stays `GOLEM_TORQUE`.
+pub fn drive(w: f64) -> (f64, f64) {
+    let top = GOLEM_RPM / (1.0 - GOLEM_TORQUE / STIFF);
+    let w = w.max(0.0);
+    if w >= top {
+        return (STIFF, top);
+    }
+    let stall = (GOLEM_TORQUE / (1.0 - w / top)).min(STIFF);
+    (stall, top)
+}
 
 /// How far an assigned golem may be from where it stands at the crank
 /// (blocks, horizontally) and still count as there: closer than this it is
@@ -293,6 +314,30 @@ mod tests {
         assert_eq!(pose.x_rot, 0.0);
         assert_eq!(pose.z_rot, 0.0);
         assert_eq!(pose.stretch, 1.0);
+    }
+
+    /// The torque the drive gives at `w`, as the network's straight line does.
+    fn torque(w: f64) -> f64 {
+        let (stall, top) = drive(w);
+        (stall * (1.0 - w / top)).clamp(-stall, stall)
+    }
+
+    #[test]
+    fn holds_twelve_rpm_up_to_its_torque() {
+        // Pushes no more than its torque however slow it turns.
+        for w in [0.0, 3.0, 6.0, 11.0, 11.99] {
+            assert!((torque(w) - GOLEM_TORQUE).abs() < 1e-6, "{w}");
+        }
+        // Settles where the line meets the load: at 12 RPM or a hair above
+        // for any load it can carry (a grinder's 6 Nm and friction).
+        for load in [0.5, 3.0, 6.6, 12.0] {
+            let (stall, top) = drive(GOLEM_RPM);
+            let settled = top * (1.0 - load / stall);
+            assert!(settled >= GOLEM_RPM - 1e-9, "{load} {settled}");
+            assert!(settled < GOLEM_RPM + 0.01, "{load} {settled}");
+        }
+        // Past it, it slows instead of pushing harder.
+        assert!(torque(12.5) < 0.0);
     }
 
     #[test]

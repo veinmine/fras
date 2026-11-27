@@ -9,8 +9,8 @@
 //!   walks an assigned golem to its spot. At the spot the golem is snapped
 //!   into place, turned to the crank, and its AI paused, which also stops its
 //!   own errands (sorting items into chests).
-//! - **Turning** (spec 4): a golem at its spot drives the crank with 8 Nm and
-//!   16 RPM. When vanilla's weathering turns it into a statue the entity is
+//! - **Turning** (spec 4, changed): a golem at its spot holds the crank at
+//!   12 RPM, the grinder's minimum, with up to 12 Nm. When vanilla's weathering turns it into a statue the entity is
 //!   gone and the crank stops.
 //! - **Drawing** (spec 5): the crank's update tag names the golem; on the
 //!   client `render_living_pre` hides its right arm and draws a copy of it
@@ -32,7 +32,7 @@ use mod_api::{
 use super::blocks::{self, Block};
 use super::server::{self, Dim, with, with_level};
 use crate::sim::geom::{Dir, Pos};
-use crate::sim::golem::{self as rules, ARRIVE, GOLEM_STALL, GOLEM_TOP, LEASH_RANGE};
+use crate::sim::golem::{self as rules, ARRIVE, LEASH_RANGE};
 use crate::sim::rot::Drive;
 
 pub const KIND: &str = "minecraft:copper_golem";
@@ -494,11 +494,13 @@ pub fn tick(host: &mut dyn ServerHost, level: LevelRef, dim: Dim) {
 pub fn drives(l: &mut server::Level) {
     for (pos, g) in &l.golems {
         if g.working && !l.cranks.contains_key(pos) {
+            let w = l.mech.speed(*pos).map_or(0.0, |s| s.0);
+            let (stall, top) = rules::drive(w);
             l.mech.set_drive(
                 *pos,
                 Drive {
-                    stall: GOLEM_STALL,
-                    top: GOLEM_TOP,
+                    stall,
+                    top,
                     dir: 1.0,
                 },
             );

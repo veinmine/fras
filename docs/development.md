@@ -134,6 +134,7 @@ are there to make that quick.
 | Spec | 0.4 | Why |
 | --- | --- | --- |
 | Copper golem (`specs/copper-golem.md`) | Prototype on its own branch (`src/game/golem.rs`, `src/sim/golem.rs`) | Not merged into 0.4 until Marcin decides to keep it. See the rows below. |
+| Golem: 8 Nm stall, 16 RPM top (CG1) | Holds the crank at 12 RPM (the grinder's minimum) with up to 12 Nm; slows beyond that | Marcin, 2026-11-27: the 8/16 curve sagged to 3 RPM under a grinder grinding ore. |
 | Golem: the lead goes into a hitch you punch to unassign | The lead goes into the crank; a lead used on the crank takes the golem back; breaking the crank drops the lead | No knot entity without a fence; the crank itself is the hitch. |
 | Golem: a brain behaviour holds it at the crank | The brain behaviour walks it there; at the spot it is snapped into place and its AI paused (`set_ai_paused`, saved by Horizon) | Paused AI also stops its errands and its looking about, so its head doesn't move while it works. |
 | Golem: right arm rotates about the shoulder | It also stretches (0.6 to 1.5 times its length) | The vanilla arm has no elbow and the grip's distance from the shoulder changes through the turn. |
