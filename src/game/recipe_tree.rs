@@ -314,3 +314,210 @@ fn the_trommel_tags_match_the_built_in_classes() {
         crate::sim::machine::trommel_medium()
     );
 }
+
+/// A crafting recipe as the clash test sees it: a grid of slots (`None` is
+/// empty) or a bag of slots, each slot the set of items that fit it.
+enum Grid {
+    Shaped(Vec<Vec<Option<BTreeSet<String>>>>),
+    Shapeless(Vec<BTreeSet<String>>),
+}
+
+/// Every item an ingredient (an item, a tag or a list of them) takes, with
+/// tags looked up in `tags` (FRAS's own and vanilla's, already expanded).
+fn slot(v: &Value, tags: &BTreeMap<String, BTreeSet<String>>) -> BTreeSet<String> {
+    let one = |s: &str| -> BTreeSet<String> {
+        match s.strip_prefix('#') {
+            Some(_) => tags
+                .get(s)
+                .unwrap_or_else(|| panic!("unknown tag {s}"))
+                .clone(),
+            None => [s.to_owned()].into(),
+        }
+    };
+    match v {
+        Value::Array(a) => a.iter().flat_map(|x| slot(x, tags)).collect(),
+        _ => ingredient(v).iter().flat_map(|s| one(s)).collect(),
+    }
+}
+
+fn grid(j: &Value, tags: &BTreeMap<String, BTreeSet<String>>) -> Option<Grid> {
+    match j["type"].as_str() {
+        // Vanilla's file has no type; it has a pattern or ingredients.
+        Some("minecraft:crafting_shaped") | None if j.get("pattern").is_some() => {
+            let key = j["key"].as_object().unwrap();
+            let rows: Vec<&str> = j["pattern"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|r| r.as_str().unwrap())
+                .collect();
+            let width = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+            Some(Grid::Shaped(
+                rows.iter()
+                    .map(|r| {
+                        (0..width)
+                            .map(|x| match r.as_bytes().get(x) {
+                                None | Some(b' ') => None,
+                                Some(&c) => Some(slot(&key[&(c as char).to_string()], tags)),
+                            })
+                            .collect()
+                    })
+                    .collect(),
+            ))
+        }
+        Some("minecraft:crafting_shapeless") | None => Some(Grid::Shapeless(
+            j["ingredients"]
+                .as_array()?
+                .iter()
+                .map(|v| slot(v, tags))
+                .collect(),
+        )),
+        _ => None,
+    }
+}
+
+/// Whether every slot of `a` can take a different slot of `b` (a perfect
+/// matching, by augmenting paths).
+fn bags_overlap(a: &[&BTreeSet<String>], b: &[&BTreeSet<String>]) -> bool {
+    fn place(
+        i: usize,
+        a: &[&BTreeSet<String>],
+        b: &[&BTreeSet<String>],
+        seen: &mut [bool],
+        owner: &mut [Option<usize>],
+    ) -> bool {
+        for j in 0..b.len() {
+            if !seen[j] && !a[i].is_disjoint(b[j]) {
+                seen[j] = true;
+                if owner[j].is_none_or(|k| place(k, a, b, seen, owner)) {
+                    owner[j] = Some(i);
+                    return true;
+                }
+            }
+        }
+        false
+    }
+    let mut owner = vec![None; b.len()];
+    a.len() == b.len()
+        && (0..a.len()).all(|i| place(i, a, b, &mut vec![false; b.len()], &mut owner))
+}
+
+/// Whether some filled crafting grid matches both recipes. A shaped recipe
+/// also matches mirrored, as in vanilla.
+fn clash(a: &Grid, b: &Grid) -> bool {
+    let cells = |g: &Grid| -> Vec<BTreeSet<String>> {
+        match g {
+            Grid::Shaped(rows) => rows.iter().flatten().flatten().cloned().collect(),
+            Grid::Shapeless(slots) => slots.clone(),
+        }
+    };
+    match (a, b) {
+        (Grid::Shaped(a), Grid::Shaped(b)) => {
+            if a.len() != b.len() || a[0].len() != b[0].len() {
+                return false;
+            }
+            let fits = |mirror: bool| {
+                a.iter().zip(b).all(|(ra, rb)| {
+                    let rb: Vec<_> = if mirror {
+                        rb.iter().rev().collect()
+                    } else {
+                        rb.iter().collect()
+                    };
+                    ra.iter().zip(rb).all(|(x, y)| match (x, y) {
+                        (None, None) => true,
+                        (Some(x), Some(y)) => !x.is_disjoint(y),
+                        _ => false,
+                    })
+                })
+            };
+            fits(false) || fits(true)
+        }
+        _ => {
+            let (ca, cb) = (cells(a), cells(b));
+            bags_overlap(
+                &ca.iter().collect::<Vec<_>>(),
+                &cb.iter().collect::<Vec<_>>(),
+            )
+        }
+    }
+}
+
+/// Named crafting recipes.
+type Grids = Vec<(String, Grid)>;
+
+/// FRAS's crafting recipes and vanilla's (tools/data/vanilla-crafting.json,
+/// written by tools/vanilla_recipes.py), with all tags expanded.
+fn crafting_grids() -> (Grids, Grids) {
+    let vanilla = read_json(&std::path::Path::new(ROOT).join("tools/data/vanilla-crafting.json"));
+    let mut all: BTreeMap<String, BTreeSet<String>> = vanilla["tags"]
+        .as_object()
+        .unwrap()
+        .iter()
+        .map(|(k, v)| {
+            let items = v
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|i| i.as_str().unwrap().to_owned());
+            (format!("#{k}"), items.collect())
+        })
+        .collect();
+    // FRAS's tags may name vanilla tags and each other: expand until stable.
+    let fras = tags();
+    loop {
+        let mut changed = false;
+        for (name, values) in &fras {
+            let mut items = BTreeSet::new();
+            for v in values {
+                match v.strip_prefix('#') {
+                    Some(_) => items.extend(all.get(v).cloned().unwrap_or_default()),
+                    None => {
+                        items.insert(v.clone());
+                    }
+                }
+            }
+            if all.get(name) != Some(&items) {
+                all.insert(name.clone(), items);
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    let mut files = Vec::new();
+    walk(
+        &std::path::Path::new(ROOT).join("data/fras/recipe"),
+        &mut files,
+    );
+    files.sort();
+    let ours = files
+        .iter()
+        .filter_map(|f| {
+            let name = f.file_stem().unwrap().to_str().unwrap();
+            grid(&read_json(f), &all).map(|g| (format!("fras:{name}"), g))
+        })
+        .collect();
+    let theirs = vanilla["recipes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|r| grid(r, &all).map(|g| (r["id"].as_str().unwrap().to_owned(), g)))
+        .collect();
+    (ours, theirs)
+}
+
+#[test]
+fn no_crafting_recipe_clashes_with_vanilla_or_another() {
+    let (ours, theirs) = crafting_grids();
+    assert!(theirs.len() > 1000, "vanilla's recipes didn't load");
+    let mut clashes = Vec::new();
+    for (i, (a, ga)) in ours.iter().enumerate() {
+        for (b, gb) in ours[i + 1..].iter().chain(&theirs) {
+            if clash(ga, gb) {
+                clashes.push(format!("{a} / {b}"));
+            }
+        }
+    }
+    assert!(clashes.is_empty(), "same grid: {clashes:?}");
+}
