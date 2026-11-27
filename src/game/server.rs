@@ -72,6 +72,8 @@ pub struct Level {
     pub belts: super::belts::Belts,
     /// Work queued for the 0.4 machines.
     pub machines: super::machines::Queue,
+    /// Cranks with a copper golem assigned (specs/copper-golem.md).
+    pub golems: HashMap<Pos, super::golem::Link>,
 }
 
 #[derive(Default)]
@@ -222,6 +224,7 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
         });
     }
     super::steam::before_rot(dim);
+    super::golem::tick(host, level, dim);
 
     let (events, sync) = {
         let view = GameView {
@@ -249,6 +252,7 @@ pub fn level_tick(host: &mut dyn ServerHost, level: LevelRef) {
             for pos in stopped {
                 l.mech.set_drive(pos, Drive::default());
             }
+            super::golem::drives(l);
             for (pos, torque) in l.wheel_torque.iter() {
                 let drive = if torque.abs() > 1e-9 {
                     Drive {

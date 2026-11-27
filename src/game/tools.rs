@@ -618,6 +618,11 @@ pub fn inspect(
     if let Some(line) = super::rust::line(host, level, dim, pos, block) {
         lines.push(line);
     }
+    if block == Block::Crank
+        && let Some(line) = super::golem::line(dim, pos)
+    {
+        lines.push(line);
+    }
     let (part, reading, wheel, slipping) = with_level(dim, |l| {
         (
             l.mech.part(pos).cloned(),

@@ -344,6 +344,7 @@ pub fn submit(block: Block, host: &dyn ClientHost, event: &mut BlockEntitySubmit
                 return;
             };
             let p = face.is_positive();
+            super::golem::note(pos, face, nbt);
             spin(draw, pos, 0, axis, CENTER, rpm, 0.0);
             axle(
                 draw,
